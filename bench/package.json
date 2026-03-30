@@ -1,0 +1,8 @@
+{
+  "name": "@tsgo-rs/tsgo-rs-bench",
+  "private": true,
+  "dependencies": {
+    "@tsgo-rs/tsgo-rs-node": "workspace:*",
+    "typescript-oxlint": "workspace:*"
+  }
+}

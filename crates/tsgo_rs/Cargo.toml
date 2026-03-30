@@ -1,0 +1,31 @@
+[package]
+name = "tsgo-rs"
+version = "0.1.0"
+edition = "2024"
+license.workspace = true
+
+[lib]
+name = "tsgo_rs"
+path = "src/lib.rs"
+
+[[bin]]
+name = "mock_tsgo"
+path = "src/bin/mock_tsgo/main.rs"
+
+[[bin]]
+name = "bench_real_tsgo"
+path = "src/bin/bench_real_tsgo/main.rs"
+
+[dependencies]
+base64 = "0.22"
+lsp-types = "0.97"
+serde_json = "1"
+tsgo-rs-client = { path = "../tsgo_rs_client" }
+tsgo-rs-core = { path = "../tsgo_rs_core" }
+tsgo-rs-jsonrpc = { path = "../tsgo_rs_jsonrpc" }
+tsgo-rs-lsp = { path = "../tsgo_rs_lsp" }
+tsgo-rs-orchestrator = { path = "../tsgo_rs_orchestrator" }
+tsgo-rs-runtime = { path = "../tsgo_rs_runtime" }
+
+[dev-dependencies]
+tempfile = "3"

@@ -1,0 +1,105 @@
+import { definePlugin } from "../plugin";
+
+import { awaitThenableRule } from "./await_thenable";
+import { noArrayDeleteRule } from "./no_array_delete";
+import { noFloatingPromisesRule } from "./no_floating_promises";
+import { noForInArrayRule } from "./no_for_in_array";
+import { noImpliedEvalRule } from "./no_implied_eval";
+import { noMixedEnumsRule } from "./no_mixed_enums";
+import { noUnsafeUnaryMinusRule } from "./no_unsafe_unary_minus";
+import { onlyThrowErrorRule } from "./only_throw_error";
+import { preferFindRule } from "./prefer_find";
+import { preferIncludesRule } from "./prefer_includes";
+import { preferPromiseRejectErrorsRule } from "./prefer_promise_reject_errors";
+import { preferRegexpExecRule } from "./prefer_regexp_exec";
+import { requireArraySortCompareRule } from "./require_array_sort_compare";
+import { restrictPlusOperandsRule } from "./restrict_plus_operands";
+import { useUnknownInCatchCallbackVariableRule } from "./use_unknown_in_catch_callback_variable";
+
+export const implementedNativeRuleNames = [
+  "await-thenable",
+  "no-array-delete",
+  "no-floating-promises",
+  "no-for-in-array",
+  "no-implied-eval",
+  "no-mixed-enums",
+  "no-unsafe-unary-minus",
+  "only-throw-error",
+  "prefer-find",
+  "prefer-includes",
+  "prefer-promise-reject-errors",
+  "prefer-regexp-exec",
+  "require-array-sort-compare",
+  "restrict-plus-operands",
+  "use-unknown-in-catch-callback-variable",
+] as const;
+
+export const pendingNativeRuleNames = [
+  "consistent-return",
+  "consistent-type-exports",
+  "dot-notation",
+  "no-base-to-string",
+  "no-confusing-void-expression",
+  "no-deprecated",
+  "no-duplicate-type-constituents",
+  "no-meaningless-void-operator",
+  "no-misused-promises",
+  "no-misused-spread",
+  "no-redundant-type-constituents",
+  "no-unnecessary-boolean-literal-compare",
+  "no-unnecessary-condition",
+  "no-unnecessary-qualifier",
+  "no-unnecessary-template-expression",
+  "no-unnecessary-type-arguments",
+  "no-unnecessary-type-assertion",
+  "no-unnecessary-type-conversion",
+  "no-unnecessary-type-parameters",
+  "no-unsafe-argument",
+  "no-unsafe-assignment",
+  "no-unsafe-call",
+  "no-unsafe-enum-comparison",
+  "no-unsafe-member-access",
+  "no-unsafe-return",
+  "no-unsafe-type-assertion",
+  "no-useless-default-assignment",
+  "non-nullable-type-assertion-style",
+  "prefer-nullish-coalescing",
+  "prefer-optional-chain",
+  "prefer-readonly",
+  "prefer-readonly-parameter-types",
+  "prefer-reduce-type-parameter",
+  "prefer-return-this-type",
+  "prefer-string-starts-ends-with",
+  "promise-function-async",
+  "related-getter-setter-pairs",
+  "require-await",
+  "restrict-template-expressions",
+  "return-await",
+  "strict-boolean-expressions",
+  "strict-void-return",
+  "switch-exhaustiveness-check",
+  "unbound-method",
+] as const;
+
+export const typescriptOxlintRules = Object.freeze({
+  "await-thenable": awaitThenableRule,
+  "no-array-delete": noArrayDeleteRule,
+  "no-floating-promises": noFloatingPromisesRule,
+  "no-for-in-array": noForInArrayRule,
+  "no-implied-eval": noImpliedEvalRule,
+  "no-mixed-enums": noMixedEnumsRule,
+  "no-unsafe-unary-minus": noUnsafeUnaryMinusRule,
+  "only-throw-error": onlyThrowErrorRule,
+  "prefer-find": preferFindRule,
+  "prefer-includes": preferIncludesRule,
+  "prefer-promise-reject-errors": preferPromiseRejectErrorsRule,
+  "prefer-regexp-exec": preferRegexpExecRule,
+  "require-array-sort-compare": requireArraySortCompareRule,
+  "restrict-plus-operands": restrictPlusOperandsRule,
+  "use-unknown-in-catch-callback-variable": useUnknownInCatchCallbackVariableRule,
+});
+
+export const typescriptOxlintPlugin = definePlugin({
+  meta: { name: "typescript-oxlint" },
+  rules: typescriptOxlintRules,
+});

@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "es2022",
+    "strict": true
+  },
+  "files": ["./index.ts"]
+}

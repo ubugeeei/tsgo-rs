@@ -1,0 +1,19 @@
+[package]
+name = "tsgo-rs-node"
+version = "0.1.0"
+edition = "2024"
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+lsp-types = "0.97"
+napi = { version = "2", default-features = false, features = ["napi4"] }
+napi-derive = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tsgo-rs = { path = "../../crates/tsgo_rs" }
+
+[build-dependencies]
+napi-build = "2"

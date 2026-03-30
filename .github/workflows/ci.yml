@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  quality:
+    name: Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Restore Cargo cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: lts
+          cache: true
+          run-install: true
+
+      - name: Check JS and TS
+        run: vp check
+
+      - name: Check Rust formatting
+        run: vp run -w fmt_check_rust
+
+      - name: Lint Rust
+        run: vp run -w lint_rust
+
+      - name: Build
+        run: vp run -w build
+
+      - name: Test
+        run: vp run -w test
+
+  tsgo-ref:
+    name: tsgo Ref
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Restore Cargo cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: lts
+          cache: true
+          run-install: true
+
+      - name: Sync pinned tsgo checkout
+        run: vp run -w sync_ref
+
+      - name: Verify pinned tsgo checkout
+        run: vp run -w verify_ref
+
+      - name: Build pinned tsgo binary
+        run: vp run -w build_tsgo
+
+      - name: Real tsgo regression tests
+        run: cargo test -p tsgo-rs --test real_tsgo_baseline --test real_tsgo_regression
+
+      - name: Benchmark guards
+        run: vp run -w bench_verify

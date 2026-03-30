@@ -1,0 +1,153 @@
+use crate::Result;
+use serde_json::{Value, json};
+use std::io::{BufReader, BufWriter, Read, Write};
+
+const MSG_REQUEST: u8 = 1;
+const MSG_CALL_RESPONSE: u8 = 2;
+const MSG_RESPONSE: u8 = 4;
+
+pub fn run(cwd: String, callbacks: Vec<String>) -> Result<()> {
+    let stdin = std::io::stdin();
+    let stdout = std::io::stdout();
+    let mut reader = BufReader::new(stdin.lock());
+    let mut writer = BufWriter::new(stdout.lock());
+    loop {
+        let (kind, method, payload) = read_tuple(&mut reader)?;
+        if kind != MSG_REQUEST {
+            return Err(format!("unexpected message type {kind}").into());
+        }
+        let method = String::from_utf8(method)?;
+        let params: Value = serde_json::from_slice(&payload)?;
+        let response = match method.as_str() {
+            "initialize" => json!({
+                "useCaseSensitiveFileNames": true,
+                "currentDirectory": cwd,
+            }),
+            "parseConfigFile" => parse_config(&mut reader, &mut writer, &callbacks, params)?,
+            "updateSnapshot" => crate::common::snapshot("/workspace/tsconfig.json"),
+            "getSourceFile" => {
+                write_tuple(&mut writer, MSG_RESPONSE, method.as_bytes(), b"source-file")?;
+                continue;
+            }
+            "typeToTypeNode" => {
+                write_tuple(&mut writer, MSG_RESPONSE, method.as_bytes(), b"type-node")?;
+                continue;
+            }
+            "printNode" => json!("print:type-node"),
+            "ping" => json!("pong"),
+            "echo" => {
+                write_tuple(&mut writer, MSG_RESPONSE, method.as_bytes(), &payload)?;
+                continue;
+            }
+            _ => json!(null),
+        };
+        write_tuple(
+            &mut writer,
+            MSG_RESPONSE,
+            method.as_bytes(),
+            &serde_json::to_vec(&response)?,
+        )?;
+    }
+}
+
+fn parse_config<R: Read, W: Write>(
+    reader: &mut R,
+    writer: &mut W,
+    callbacks: &[String],
+    params: Value,
+) -> Result<Value> {
+    let file = params
+        .get("file")
+        .and_then(Value::as_str)
+        .unwrap_or("/workspace/tsconfig.json");
+    if file.starts_with("/virtual/") && callbacks.iter().any(|name| name == "readFile") {
+        write_tuple(
+            writer,
+            6,
+            b"readFile",
+            serde_json::to_string(file)?.as_bytes(),
+        )?;
+        let (kind, _, payload) = read_tuple(reader)?;
+        if kind != MSG_CALL_RESPONSE {
+            return Err("expected callback response".into());
+        }
+        let response: Value = serde_json::from_slice(&payload)?;
+        return Ok(json!({
+            "options": { "virtual": response.get("content").is_some() },
+            "fileNames": ["/workspace/src/index.ts"],
+        }));
+    }
+    Ok(json!({
+        "options": { "strict": true },
+        "fileNames": ["/workspace/src/index.ts"],
+    }))
+}
+
+fn read_tuple<R: Read>(reader: &mut R) -> Result<(u8, Vec<u8>, Vec<u8>)> {
+    let mut prefix = [0_u8; 2];
+    reader.read_exact(&mut prefix)?;
+    if prefix[0] != 0x93 {
+        return Err("invalid tuple marker".into());
+    }
+    let method = read_bin(reader)?;
+    let payload = read_bin(reader)?;
+    Ok((prefix[1], method, payload))
+}
+
+fn read_bin<R: Read>(reader: &mut R) -> Result<Vec<u8>> {
+    let mut tag = [0_u8; 1];
+    reader.read_exact(&mut tag)?;
+    let len = match tag[0] {
+        0xc4 => read_len(reader, 1)?,
+        0xc5 => read_len(reader, 2)?,
+        0xc6 => read_len(reader, 4)?,
+        _ => return Err("invalid bin tag".into()),
+    };
+    let mut payload = vec![0_u8; len];
+    reader.read_exact(&mut payload)?;
+    Ok(payload)
+}
+
+fn read_len<R: Read>(reader: &mut R, width: usize) -> Result<usize> {
+    Ok(match width {
+        1 => {
+            let mut buf = [0_u8; 1];
+            reader.read_exact(&mut buf)?;
+            buf[0] as usize
+        }
+        2 => {
+            let mut buf = [0_u8; 2];
+            reader.read_exact(&mut buf)?;
+            u16::from_be_bytes(buf) as usize
+        }
+        _ => {
+            let mut buf = [0_u8; 4];
+            reader.read_exact(&mut buf)?;
+            u32::from_be_bytes(buf) as usize
+        }
+    })
+}
+
+fn write_tuple<W: Write>(writer: &mut W, kind: u8, method: &[u8], payload: &[u8]) -> Result<()> {
+    writer.write_all(&[0x93, kind])?;
+    write_bin(writer, method)?;
+    write_bin(writer, payload)?;
+    writer.flush()?;
+    Ok(())
+}
+
+fn write_bin<W: Write>(writer: &mut W, payload: &[u8]) -> Result<()> {
+    match payload.len() {
+        0..=255 => writer.write_all(&[0xc4, payload.len() as u8])?,
+        256..=65535 => {
+            writer.write_all(&[0xc5])?;
+            writer.write_all(&(payload.len() as u16).to_be_bytes())?;
+        }
+        _ => {
+            writer.write_all(&[0xc6])?;
+            writer.write_all(&(payload.len() as u32).to_be_bytes())?;
+        }
+    }
+    writer.write_all(payload)?;
+    Ok(())
+}

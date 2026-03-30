@@ -1,0 +1,32 @@
+{
+  "files": [
+    {
+      "groups": [
+        {
+          "fullName": "bench/src/api_client.bench.ts > TsgoApiClient msgpack",
+          "benchmarks": [
+            {
+              "name": "spawn+initialize",
+              "median": 5.12,
+              "mean": 5.21,
+              "sampleCount": 90,
+              "rme": 1.4
+            }
+          ]
+        },
+        {
+          "fullName": "bench/src/api_client.bench.ts > TsgoApiClient jsonrpc",
+          "benchmarks": [
+            {
+              "name": "spawn+initialize",
+              "median": 21.4,
+              "mean": 21.8,
+              "sampleCount": 24,
+              "rme": 1.7
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

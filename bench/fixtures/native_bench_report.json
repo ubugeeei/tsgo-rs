@@ -1,0 +1,20 @@
+{
+  "rows": [
+    {
+      "mode": "msgpack",
+      "dataset": "api",
+      "scenario": "spawn_initialize",
+      "medianMs": 5.4,
+      "meanMs": 5.5,
+      "p95Ms": 5.9
+    },
+    {
+      "mode": "jsonrpc",
+      "dataset": "api",
+      "scenario": "spawn_initialize",
+      "medianMs": 21.8,
+      "meanMs": 22.1,
+      "p95Ms": 23.0
+    }
+  ]
+}

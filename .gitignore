@@ -1,0 +1,13 @@
+target
+node_modules
+dist
+**/*.node
+/npm/*/index.js
+/npm/tsgo_rs_node/ts/*.d.ts
+/npm/tsgo_rs_node/ts/*.js
+/npm/tsgo_rs_node/ts/*.js.map
+
+/ref/tsgo-rs-upstream/
+/ref/typescript-go/
+.DS_Store
+.cache

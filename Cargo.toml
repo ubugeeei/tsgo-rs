@@ -1,0 +1,24 @@
+[workspace]
+members = [
+  "crates/tsgo_rs_core",
+  "crates/tsgo_rs_jsonrpc",
+  "crates/tsgo_rs_client",
+  "crates/tsgo_rs_lsp",
+  "crates/tsgo_rs_orchestrator",
+  "crates/tsgo_rs_runtime",
+  "crates/tsgo_rs_ref",
+  "crates/tsgo_rs",
+  "npm/tsgo_rs_node",
+]
+resolver = "2"
+
+[workspace.package]
+license = "MIT"
+
+[workspace.dependencies]
+bumpalo = { version = "3", features = ["collections"] }
+compact_str = { version = "0.8", features = ["serde"] }
+memchr = "2"
+phf = { version = "0.11", features = ["macros"] }
+rustc-hash = "2"
+smallvec = { version = "1", features = ["serde"] }

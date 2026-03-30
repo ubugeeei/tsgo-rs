@@ -1,0 +1,23 @@
+{
+  "name": "@tsgo-rs/tsgo-rs-node",
+  "version": "0.1.0",
+  "private": true,
+  "files": [
+    "dist",
+    "index.d.ts",
+    "index.js",
+    "*.node"
+  ],
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "napi": {
+    "name": "tsgo_rs_node"
+  }
+}

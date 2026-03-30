@@ -1,0 +1,17 @@
+[package]
+name = "tsgo-rs-lsp"
+version = "0.1.0"
+edition = "2024"
+license.workspace = true
+
+[lib]
+name = "tsgo_rs_lsp"
+path = "src/lib.rs"
+
+[dependencies]
+lsp-types = "0.97"
+parking_lot = "0.12"
+serde = { version = "1", features = ["derive"] }
+tsgo-rs-core = { path = "../tsgo_rs_core" }
+tsgo-rs-jsonrpc = { path = "../tsgo_rs_jsonrpc" }
+tsgo-rs-runtime = { path = "../tsgo_rs_runtime" }

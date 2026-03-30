@@ -1,0 +1,12 @@
+[package]
+name = "tsgo-rs-runtime"
+version = "0.1.0"
+edition = "2024"
+license.workspace = true
+
+[lib]
+name = "tsgo_rs_runtime"
+path = "src/lib.rs"
+
+[dependencies]
+smallvec = { workspace = true }

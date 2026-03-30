@@ -1,0 +1,14 @@
+{
+  "useCaseSensitiveFileNames": false,
+  "currentDirectory": ".",
+  "fileCount": 31,
+  "firstFile": "ref/typescript-go/_packages/api/src/fs.ts",
+  "lastFile": "ref/typescript-go/_packages/api/src/sync/types.ts",
+  "projectCount": 1,
+  "rootFiles": 31,
+  "configFileName": "ref/typescript-go/_packages/api/tsconfig.json",
+  "primaryFile": "ref/typescript-go/_packages/api/src/fs.ts",
+  "sourceBytes": 30309,
+  "stringTypeFlags": 32,
+  "rendered": "string"
+}

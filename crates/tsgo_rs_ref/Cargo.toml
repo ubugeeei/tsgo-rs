@@ -1,0 +1,21 @@
+[package]
+name = "tsgo-rs-ref"
+version = "0.1.0"
+edition = "2024"
+license.workspace = true
+
+[lib]
+name = "tsgo_rs_ref"
+path = "src/lib.rs"
+
+[[bin]]
+name = "tsgo_ref"
+path = "src/main.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+tsgo-rs-core = { path = "../tsgo_rs_core" }
+
+[dev-dependencies]
+tempfile = "3"

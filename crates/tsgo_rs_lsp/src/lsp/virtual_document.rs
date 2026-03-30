@@ -1,0 +1,262 @@
+use crate::{Result, TsgoError};
+use lsp_types::{
+    Position, Range, TextDocumentContentChangeEvent, TextDocumentIdentifier, TextDocumentItem, Uri,
+    VersionedTextDocumentIdentifier,
+};
+use serde::{Deserialize, Serialize};
+use std::str::FromStr;
+use tsgo_rs_core::fast::{CompactString, SmallVec, compact_format};
+
+/// Incremental virtual-document edit expressed in LSP coordinates.
+///
+/// # Examples
+///
+/// ```
+/// use lsp_types::{Position, Range};
+/// use tsgo_rs_lsp::VirtualChange;
+///
+/// let change = VirtualChange::splice(
+///     Range::new(Position::new(0, 0), Position::new(0, 5)),
+///     "hello",
+/// );
+/// assert_eq!(change.text, "hello");
+/// ```
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct VirtualChange {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub range: Option<Range>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub range_length: Option<u32>,
+    pub text: CompactString,
+}
+
+/// Virtual text document mirrored over LSP notifications.
+///
+/// # Examples
+///
+/// ```
+/// use tsgo_rs_lsp::{VirtualChange, VirtualDocument};
+///
+/// let mut document = VirtualDocument::untitled("/virtual/demo.ts", "typescript", "const n = 1;")?;
+/// document.apply_changes(&[VirtualChange::replace("const n = 2;")])?;
+/// assert_eq!(document.text, "const n = 2;");
+/// assert_eq!(document.version, 2);
+/// # Ok::<(), tsgo_rs_lsp::TsgoError>(())
+/// ```
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct VirtualDocument {
+    pub uri: Uri,
+    pub language_id: CompactString,
+    pub version: i32,
+    pub text: CompactString,
+}
+
+impl VirtualChange {
+    /// Replaces the entire document contents.
+    pub fn replace(text: impl Into<CompactString>) -> Self {
+        Self {
+            range: None,
+            range_length: None,
+            text: text.into(),
+        }
+    }
+
+    /// Replaces a UTF-16 range with new text.
+    pub fn splice(range: Range, text: impl Into<CompactString>) -> Self {
+        Self {
+            range: Some(range),
+            range_length: None,
+            text: text.into(),
+        }
+    }
+
+    /// Converts the change into an LSP content change event.
+    pub fn into_event(self) -> TextDocumentContentChangeEvent {
+        TextDocumentContentChangeEvent {
+            range: self.range,
+            range_length: self.range_length,
+            text: self.text.into(),
+        }
+    }
+}
+
+impl From<TextDocumentContentChangeEvent> for VirtualChange {
+    fn from(value: TextDocumentContentChangeEvent) -> Self {
+        Self {
+            range: value.range,
+            range_length: value.range_length,
+            text: value.text.into(),
+        }
+    }
+}
+
+impl VirtualDocument {
+    /// Creates a virtual document from an arbitrary URI.
+    pub fn new(
+        uri: Uri,
+        language_id: impl Into<CompactString>,
+        text: impl Into<CompactString>,
+    ) -> Self {
+        Self {
+            uri,
+            language_id: language_id.into(),
+            version: 1,
+            text: text.into(),
+        }
+    }
+
+    /// Converts an LSP `TextDocumentItem` into a virtual document.
+    pub fn from_item(item: TextDocumentItem) -> Self {
+        Self {
+            uri: item.uri,
+            language_id: item.language_id.into(),
+            version: item.version,
+            text: item.text.into(),
+        }
+    }
+
+    /// Creates an `untitled:` virtual document.
+    pub fn untitled(
+        path: impl AsRef<str>,
+        language_id: impl Into<CompactString>,
+        text: impl Into<CompactString>,
+    ) -> Result<Self> {
+        Self::parse_uri(
+            compact_format(format_args!(
+                "untitled:{}",
+                normalize_virtual_path(path.as_ref())
+            )),
+            language_id,
+            text,
+        )
+    }
+
+    /// Creates an in-memory `tsgo://` virtual document.
+    pub fn in_memory(
+        authority: impl AsRef<str>,
+        path: impl AsRef<str>,
+        language_id: impl Into<CompactString>,
+        text: impl Into<CompactString>,
+    ) -> Result<Self> {
+        let mut raw = CompactString::from("tsgo://");
+        raw.push_str(authority.as_ref());
+        raw.push_str(normalize_virtual_path(path.as_ref()).as_str());
+        Self::parse_uri(raw, language_id, text)
+    }
+
+    /// Returns the stable map key used by overlays and replicated state.
+    pub fn key(&self) -> CompactString {
+        CompactString::from(self.uri.as_str())
+    }
+
+    /// Returns the unversioned LSP identifier for this document.
+    pub fn identifier(&self) -> TextDocumentIdentifier {
+        TextDocumentIdentifier::new(self.uri.clone())
+    }
+
+    /// Returns the versioned LSP identifier for this document.
+    pub fn versioned_identifier(&self) -> VersionedTextDocumentIdentifier {
+        VersionedTextDocumentIdentifier::new(self.uri.clone(), self.version)
+    }
+
+    /// Builds a `TextDocumentItem` payload suitable for `didOpen`.
+    pub fn text_document_item(&self) -> TextDocumentItem {
+        TextDocumentItem::new(
+            self.uri.clone(),
+            self.language_id.clone().into(),
+            self.version,
+            self.text.clone().into(),
+        )
+    }
+
+    /// Applies a batch of changes and returns the LSP payloads that were emitted.
+    pub fn apply_changes(
+        &mut self,
+        changes: &[VirtualChange],
+    ) -> Result<SmallVec<[TextDocumentContentChangeEvent; 4]>> {
+        if changes.is_empty() {
+            return Ok(SmallVec::new());
+        }
+        let events = changes
+            .iter()
+            .cloned()
+            .map(VirtualChange::into_event)
+            .collect::<SmallVec<[TextDocumentContentChangeEvent; 4]>>();
+        for change in changes {
+            apply_change(&mut self.text, change)?;
+        }
+        self.version += 1;
+        Ok(events)
+    }
+
+    fn parse_uri(
+        raw: CompactString,
+        language_id: impl Into<CompactString>,
+        text: impl Into<CompactString>,
+    ) -> Result<Self> {
+        let uri = Uri::from_str(&raw).map_err(|err| {
+            TsgoError::Protocol(compact_format(format_args!("invalid virtual uri: {err}")))
+        })?;
+        Ok(Self::new(uri, language_id, text))
+    }
+}
+
+fn normalize_virtual_path(path: &str) -> CompactString {
+    if path.starts_with('/') {
+        CompactString::from(path)
+    } else {
+        compact_format(format_args!("/{path}"))
+    }
+}
+
+fn apply_change(text: &mut CompactString, change: &VirtualChange) -> Result<()> {
+    if let Some(range) = &change.range {
+        let start = byte_offset(text, range.start)?;
+        let end = byte_offset(text, range.end)?;
+        if start > end {
+            return Err(TsgoError::Protocol(
+                "virtual edit has an inverted range".into(),
+            ));
+        }
+        text.replace_range(start..end, change.text.as_str());
+        return Ok(());
+    }
+    *text = change.text.clone();
+    Ok(())
+}
+
+fn byte_offset(text: &str, position: Position) -> Result<usize> {
+    let mut line = 0_u32;
+    let mut column = 0_u32;
+    for (index, ch) in text.char_indices() {
+        if line == position.line && column == position.character {
+            return Ok(index);
+        }
+        if ch == '\n' {
+            if line == position.line {
+                return position
+                    .character
+                    .eq(&column)
+                    .then_some(index)
+                    .ok_or_else(|| TsgoError::Protocol("virtual edit is out of bounds".into()));
+            }
+            line += 1;
+            column = 0;
+            continue;
+        }
+        if line == position.line {
+            column += ch.len_utf16() as u32;
+            if column > position.character {
+                return Err(TsgoError::Protocol(
+                    "virtual edit splits a code point".into(),
+                ));
+            }
+        }
+    }
+    if line == position.line && column == position.character {
+        return Ok(text.len());
+    }
+    Err(TsgoError::Protocol("virtual edit is out of bounds".into()))
+}

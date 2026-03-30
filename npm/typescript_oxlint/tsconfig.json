@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./ts",
+    "outDir": "./dist",
+    "noEmit": false,
+    "paths": {
+      "@tsgo-rs/tsgo-rs-node": ["../tsgo_rs_node/dist/index.d.mts"]
+    }
+  },
+  "include": ["ts/**/*.ts"]
+}
