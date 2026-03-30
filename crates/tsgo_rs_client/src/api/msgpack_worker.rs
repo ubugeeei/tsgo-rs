@@ -1,3 +1,10 @@
+//! Dedicated worker thread for the sync msgpack transport.
+//!
+//! The msgpack protocol is synchronous over stdio: a request is written, and
+//! the next relevant tuple on stdout is treated as the response. This module
+//! wraps that blocking interaction in a worker thread so the public API can stay
+//! async-friendly without pulling in a full async runtime.
+
 use crate::{Result, TsgoError};
 use parking_lot::Mutex;
 use std::{
@@ -16,15 +23,21 @@ use super::{
     },
 };
 
+/// Thread-backed msgpack transport worker.
+///
+/// Requests are serialized through a single worker thread because the
+/// underlying stdio protocol is strictly ordered.
 pub(crate) struct MsgpackWorker {
     tx: mpsc::Sender<WorkerCommand>,
     join: Mutex<Option<thread::JoinHandle<()>>>,
 }
 
+/// Successful response returned from the worker thread.
 pub(crate) struct WorkerResponse {
     pub bytes: Vec<u8>,
 }
 
+/// Commands sent to the worker thread.
 enum WorkerCommand {
     Request {
         method: CompactString,
@@ -58,6 +71,9 @@ impl MsgpackWorker {
                         payload,
                         reply,
                     } => {
+                        // The wire protocol expects method names as raw bytes in
+                        // the tuple header, so keep the encoded form around for
+                        // both the outbound request and response matching.
                         let method = method.as_bytes().to_vec();
                         let result = write_tuple(&mut writer, MSG_REQUEST, &method, &payload)
                             .and_then(|_| {
@@ -82,6 +98,8 @@ impl MsgpackWorker {
     }
 
     pub(crate) async fn request(&self, method: &str, payload: Vec<u8>) -> Result<Vec<u8>> {
+        // A sync channel keeps request/response pairing simple: the caller
+        // blocks until the worker thread has seen the matching response tuple.
         let (reply_tx, reply_rx) = mpsc::sync_channel(1);
         self.tx
             .send(WorkerCommand::Request {
@@ -106,6 +124,10 @@ impl MsgpackWorker {
     }
 }
 
+/// Reads tuples until the matching response for `method` arrives.
+///
+/// Callback tuples are handled inline and may emit additional tuples on the
+/// same stdio stream before the real response is observed.
 fn read_response(
     reader: &mut BufReader<std::process::ChildStdout>,
     writer: &mut BufWriter<std::process::ChildStdin>,
@@ -121,6 +143,9 @@ fn read_response(
                     String::from_utf8_lossy(&message.payload).into(),
                 ));
             }
+            // `tsgo` can interleave filesystem callbacks while it computes the
+            // request. Those callbacks must be answered before the final
+            // response tuple can arrive.
             MSG_CALL => handle_callback(writer, filesystem, message)?,
             other => {
                 return Err(TsgoError::UnexpectedMessage(compact_format(format_args!(
@@ -131,6 +156,7 @@ fn read_response(
     }
 }
 
+/// Executes a filesystem callback received over the msgpack transport.
 fn handle_callback(
     writer: &mut BufWriter<std::process::ChildStdin>,
     filesystem: Option<&dyn ApiFileSystem>,
@@ -158,6 +184,8 @@ fn handle_callback(
             );
         }
     };
+    // Callback results are encoded as JSON and then wrapped back into the
+    // msgpack tuple protocol expected by `tsgo`.
     match serde_json::to_vec(&value) {
         Ok(bytes) => write_tuple(writer, MSG_CALL_RESPONSE, method.as_bytes(), &bytes),
         Err(error) => write_tuple(

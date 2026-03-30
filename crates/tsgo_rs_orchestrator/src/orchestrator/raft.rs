@@ -8,13 +8,23 @@ use tsgo_rs_core::fast::{CompactString, FastMap, SmallVec, compact_format};
 mod raft_core;
 use raft_core::{append_to_follower, apply_commits, grant_vote, log_signature, quorum_size};
 
+/// Role of a node inside the in-process Raft cluster.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum RaftRole {
+    /// Node currently allowed to append commands.
     Leader,
+    /// Passive replica following the leader.
     Follower,
+    /// Node currently requesting votes for a new term.
     Candidate,
 }
 
+/// Minimal in-process Raft cluster used by the distributed orchestrator.
+///
+/// This implementation intentionally models only the pieces the workspace needs
+/// today: campaigning for a leader, appending replicated commands, and applying
+/// committed entries to a deterministic state machine. It is not intended to be
+/// a production-grade Raft implementation.
 #[derive(Clone)]
 pub struct RaftCluster {
     nodes: Arc<RwLock<FastMap<CompactString, RaftNode>>>,
@@ -39,6 +49,7 @@ pub(super) struct RaftNode {
 }
 
 impl RaftCluster {
+    /// Creates a cluster containing the provided node identifiers.
     pub fn new<I, S>(node_ids: I) -> Self
     where
         I: IntoIterator<Item = S>,
@@ -68,6 +79,7 @@ impl RaftCluster {
         }
     }
 
+    /// Returns the current leader identifier, if one has been elected.
     pub fn leader_id(&self) -> Option<CompactString> {
         self.nodes
             .read()
@@ -76,6 +88,10 @@ impl RaftCluster {
             .map(|node| node.id.clone())
     }
 
+    /// Starts an election for `candidate_id` and returns the new term.
+    ///
+    /// Elections succeed only when the candidate reaches quorum and its log is
+    /// at least as up to date as the followers' logs.
     pub fn campaign(&self, candidate_id: &str) -> Result<u64> {
         let mut nodes = self.nodes.write();
         let (last_len, last_term) = log_signature(nodes.get(candidate_id).ok_or_else(|| {
@@ -121,6 +137,9 @@ impl RaftCluster {
         Ok(next_term)
     }
 
+    /// Appends a command through the current leader and commits it on quorum.
+    ///
+    /// On success, returns the new committed log length as a 1-based index.
     pub fn append(&self, leader_id: &str, command: ReplicatedCommand) -> Result<u64> {
         let mut nodes = self.nodes.write();
         let (leader_term, prev_len, prev_term) = {
@@ -167,6 +186,7 @@ impl RaftCluster {
         Ok(commit_len as u64)
     }
 
+    /// Returns the leader state, or the first node state when no leader exists.
     pub fn state(&self) -> Option<ReplicatedState> {
         let nodes = self.nodes.read();
         nodes
@@ -176,6 +196,7 @@ impl RaftCluster {
             .map(|node| node.state.clone())
     }
 
+    /// Returns the replicated state stored on a specific node.
     pub fn node_state(&self, node_id: &str) -> Option<ReplicatedState> {
         self.nodes
             .read()

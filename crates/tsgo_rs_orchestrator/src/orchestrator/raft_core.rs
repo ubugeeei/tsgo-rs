@@ -1,6 +1,12 @@
+//! Small helper functions for the in-process Raft model.
+//!
+//! Keeping these helpers in a separate module makes the state transitions easier
+//! to test and to read beside the higher-level cluster orchestration code.
+
 use super::{LogEntry, RaftNode, RaftRole};
 use crate::Result;
 
+/// Returns the current log length and final term for a node.
 pub(super) fn log_signature(node: &RaftNode) -> (usize, u64) {
     (
         node.log.len(),
@@ -8,10 +14,15 @@ pub(super) fn log_signature(node: &RaftNode) -> (usize, u64) {
     )
 }
 
+/// Returns the majority threshold for `nodes` participants.
 pub(super) fn quorum_size(nodes: usize) -> usize {
     (nodes / 2) + 1
 }
 
+/// Attempts to grant a vote to a candidate.
+///
+/// The candidate must be in at least the follower's current term and must have
+/// a log that is at least as up to date as the follower's log.
 pub(super) fn grant_vote(
     node: &mut RaftNode,
     candidate_term: u64,
@@ -44,6 +55,10 @@ pub(super) fn grant_vote(
     true
 }
 
+/// Attempts to append a new entry from the leader to a follower.
+///
+/// The append is accepted only when the follower agrees about the previous log
+/// position and term.
 pub(super) fn append_to_follower(
     node: &mut RaftNode,
     leader_term: u64,
@@ -66,9 +81,12 @@ pub(super) fn append_to_follower(
     true
 }
 
+/// Applies newly committed log entries to the follower's replicated state.
 pub(super) fn apply_commits(node: &mut RaftNode) -> Result<()> {
     while node.applied_len < node.commit_len {
         let entry = node.log[node.applied_len].clone();
+        // The replicated state is deterministic, so replaying commands in log
+        // order is enough to rebuild it.
         node.state.apply(&entry.command)?;
         node.applied_len += 1;
     }

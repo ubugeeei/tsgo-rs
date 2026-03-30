@@ -1,3 +1,8 @@
+//! Relationship-oriented `ApiClient` methods.
+//!
+//! This group answers questions about how types, signatures, and symbols relate
+//! to each other after the checker has already identified them.
+
 use super::{
     ApiClient, IndexInfo, ProjectHandle, SignatureHandle, SnapshotHandle, TypeHandle,
     TypePredicateResponse, TypeResponse,
@@ -6,6 +11,7 @@ use super::{
 use crate::Result;
 
 impl ApiClient {
+    /// Returns the symbol attached to a type, if one exists.
     pub async fn get_symbol_of_type(
         &self,
         snapshot: SnapshotHandle,
@@ -15,6 +21,7 @@ impl ApiClient {
             .await
     }
 
+    /// Returns the return type of a signature.
     pub async fn get_return_type_of_signature(
         &self,
         snapshot: SnapshotHandle,
@@ -32,6 +39,7 @@ impl ApiClient {
         .await
     }
 
+    /// Returns the rest type of a signature, if any.
     pub async fn get_rest_type_of_signature(
         &self,
         snapshot: SnapshotHandle,
@@ -49,6 +57,7 @@ impl ApiClient {
         .await
     }
 
+    /// Returns the type predicate declared on a signature, if any.
     pub async fn get_type_predicate_of_signature(
         &self,
         snapshot: SnapshotHandle,
@@ -66,6 +75,9 @@ impl ApiClient {
         .await
     }
 
+    /// Returns the immediate base types of a type.
+    ///
+    /// Missing server data is normalized to an empty vector.
     pub async fn get_base_types(
         &self,
         snapshot: SnapshotHandle,
@@ -84,6 +96,9 @@ impl ApiClient {
         .map(|items| items.unwrap_or_default())
     }
 
+    /// Returns the properties exposed by a type.
+    ///
+    /// Missing server data is normalized to an empty vector.
     pub async fn get_properties_of_type(
         &self,
         snapshot: SnapshotHandle,
@@ -102,6 +117,9 @@ impl ApiClient {
         .map(|items| items.unwrap_or_default())
     }
 
+    /// Returns index signature information for a type.
+    ///
+    /// Missing server data is normalized to an empty vector.
     pub async fn get_index_infos_of_type(
         &self,
         snapshot: SnapshotHandle,
@@ -120,6 +138,7 @@ impl ApiClient {
         .map(|items| items.unwrap_or_default())
     }
 
+    /// Returns the constraint of a type parameter, if one exists.
     pub async fn get_constraint_of_type_parameter(
         &self,
         snapshot: SnapshotHandle,
@@ -137,6 +156,9 @@ impl ApiClient {
         .await
     }
 
+    /// Returns the type arguments of an instantiated type.
+    ///
+    /// Missing server data is normalized to an empty vector.
     pub async fn get_type_arguments(
         &self,
         snapshot: SnapshotHandle,
@@ -155,6 +177,7 @@ impl ApiClient {
         .map(|items| items.unwrap_or_default())
     }
 
+    /// Returns the target type underlying an instantiated or mapped type.
     pub async fn get_target_of_type(
         &self,
         snapshot: SnapshotHandle,
@@ -164,6 +187,9 @@ impl ApiClient {
             .await
     }
 
+    /// Returns nested or constituent types associated with a type.
+    ///
+    /// Missing server data is normalized to an empty vector.
     pub async fn get_types_of_type(
         &self,
         snapshot: SnapshotHandle,
@@ -177,6 +203,9 @@ impl ApiClient {
         .map(|items| items.unwrap_or_default())
     }
 
+    /// Returns the direct type parameters declared on a type.
+    ///
+    /// Missing server data is normalized to an empty vector.
     pub async fn get_type_parameters_of_type(
         &self,
         snapshot: SnapshotHandle,
@@ -190,6 +219,9 @@ impl ApiClient {
         .map(|items| items.unwrap_or_default())
     }
 
+    /// Returns outer type parameters captured by a type.
+    ///
+    /// Missing server data is normalized to an empty vector.
     pub async fn get_outer_type_parameters_of_type(
         &self,
         snapshot: SnapshotHandle,
@@ -203,6 +235,9 @@ impl ApiClient {
         .map(|items| items.unwrap_or_default())
     }
 
+    /// Returns local type parameters introduced while resolving a type.
+    ///
+    /// Missing server data is normalized to an empty vector.
     pub async fn get_local_type_parameters_of_type(
         &self,
         snapshot: SnapshotHandle,
@@ -216,6 +251,7 @@ impl ApiClient {
         .map(|items| items.unwrap_or_default())
     }
 
+    /// Returns the object side of a wrapper type, if one exists.
     pub async fn get_object_type_of_type(
         &self,
         snapshot: SnapshotHandle,
@@ -225,6 +261,7 @@ impl ApiClient {
             .await
     }
 
+    /// Returns the index side of a wrapper type, if one exists.
     pub async fn get_index_type_of_type(
         &self,
         snapshot: SnapshotHandle,
@@ -234,6 +271,7 @@ impl ApiClient {
             .await
     }
 
+    /// Returns the check side of a wrapper or conditional type, if one exists.
     pub async fn get_check_type_of_type(
         &self,
         snapshot: SnapshotHandle,
@@ -243,6 +281,7 @@ impl ApiClient {
             .await
     }
 
+    /// Returns the `extends` side of a conditional type, if one exists.
     pub async fn get_extends_type_of_type(
         &self,
         snapshot: SnapshotHandle,
@@ -252,6 +291,7 @@ impl ApiClient {
             .await
     }
 
+    /// Returns the base type recorded directly on a type, if one exists.
     pub async fn get_base_type_of_type(
         &self,
         snapshot: SnapshotHandle,
@@ -261,6 +301,7 @@ impl ApiClient {
             .await
     }
 
+    /// Returns the constraint recorded directly on a type, if one exists.
     pub async fn get_constraint_of_type(
         &self,
         snapshot: SnapshotHandle,

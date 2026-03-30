@@ -1,3 +1,10 @@
+//! Content-Length framing helpers for stdio JSON-RPC.
+//!
+//! `typescript-go` uses the same header-based framing style as LSP: an ASCII
+//! header block terminated by `\r\n\r\n`, followed by an exact number of body
+//! bytes. The helpers in this module focus on that framing layer only; they do
+//! not parse or validate the JSON payload itself.
+
 use crate::{Result, TsgoError};
 use std::io::{BufRead, Write};
 use tsgo_rs_core::fast::{SmallVec, memchr, memmem};
@@ -7,6 +14,15 @@ const CONTENT_LENGTH: &[u8] = b"content-length";
 const MAX_HEADER_BYTES: usize = 16 * 1024;
 
 /// Reads a single stdio JSON-RPC frame.
+///
+/// The reader is consumed only as far as the end of the current frame, so it
+/// can be reused for subsequent calls.
+///
+/// # Errors
+///
+/// Returns [`TsgoError::Protocol`] when the header is malformed or exceeds the
+/// maximum allowed size, and [`TsgoError::Closed`] when EOF is reached before a
+/// complete header can be read.
 ///
 /// # Examples
 ///
@@ -31,6 +47,14 @@ where
 }
 
 /// Writes a single stdio JSON-RPC frame.
+///
+/// The function always flushes the writer before returning so request/response
+/// protocols do not remain buffered indefinitely.
+///
+/// # Errors
+///
+/// Returns any I/O error encountered while writing the header, payload, or
+/// flush operation.
 ///
 /// # Examples
 ///
@@ -68,6 +92,8 @@ where
             return Err(TsgoError::Closed("jsonrpc reader"));
         }
         if let Some(index) = memmem::find(chunk, HEADER_END) {
+            // Copy only the current frame's header bytes so downstream parsing
+            // sees a contiguous header even when the reader buffer is chunked.
             header.extend_from_slice(&chunk[..index + HEADER_END.len()]);
             reader.consume(index + HEADER_END.len());
             return parse_content_length(&header);
@@ -81,6 +107,7 @@ where
     }
 }
 
+/// Extracts the `Content-Length` header from a raw header block.
 fn parse_content_length(header: &[u8]) -> Result<usize> {
     for line in header.split(|byte| *byte == b'\n') {
         let line = trim_ascii(trim_eol(line));
@@ -99,10 +126,12 @@ fn parse_content_length(header: &[u8]) -> Result<usize> {
     Err(TsgoError::Protocol("missing Content-Length".into()))
 }
 
+/// Removes a trailing carriage return left over from splitting on `\n`.
 fn trim_eol(bytes: &[u8]) -> &[u8] {
     bytes.strip_suffix(b"\r").unwrap_or(bytes)
 }
 
+/// Trims leading and trailing ASCII whitespace.
 fn trim_ascii(bytes: &[u8]) -> &[u8] {
     let mut start = 0;
     let mut end = bytes.len();
@@ -115,6 +144,7 @@ fn trim_ascii(bytes: &[u8]) -> &[u8] {
     &bytes[start..end]
 }
 
+/// Parses a non-empty ASCII decimal integer into `usize`.
 fn parse_ascii_usize(bytes: &[u8]) -> Result<usize> {
     if bytes.is_empty() {
         return Err(TsgoError::Protocol("empty Content-Length".into()));
@@ -132,6 +162,9 @@ fn parse_ascii_usize(bytes: &[u8]) -> Result<usize> {
     Ok(value)
 }
 
+/// Appends the ASCII decimal representation of `value` to `buffer`.
+///
+/// This avoids allocating a temporary `String` on the hot write path.
 fn append_usize(buffer: &mut SmallVec<[u8; 32]>, mut value: usize) {
     if value == 0 {
         buffer.push(b'0');

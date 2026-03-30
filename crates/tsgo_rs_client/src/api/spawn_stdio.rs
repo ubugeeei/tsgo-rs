@@ -1,3 +1,10 @@
+//! Process-spawning helpers for the stdio API transports.
+//!
+//! The public API exposes higher-level configuration types such as
+//! [`crate::ApiSpawnConfig`]. This module is responsible for translating those
+//! settings into the exact command-line arguments and transport objects used by
+//! the JSON-RPC and msgpack clients.
+
 use super::{
     callbacks::{callback_flag, jsonrpc_handlers},
     driver::ClientDriver,
@@ -17,6 +24,9 @@ pub(super) async fn spawn_jsonrpc_stdio(
     command: &TsgoCommand,
     filesystem: Option<Arc<dyn super::ApiFileSystem>>,
 ) -> Result<ClientDriver> {
+    // JSON-RPC mode is used for callback-capable, async request/response
+    // flows. The worker process is wrapped in `AsyncChildGuard` so shutdown
+    // always reaps the child.
     let args = stdio_args(command, filesystem.as_deref(), true);
     let mut child = command.spawn_async(args.iter().map(CompactString::as_str))?;
     let stdin = child.stdin.take().ok_or(TsgoError::Closed("api stdin"))?;
@@ -33,6 +43,8 @@ pub(super) fn spawn_msgpack_stdio(
     command: &TsgoCommand,
     filesystem: Option<Arc<dyn super::ApiFileSystem>>,
 ) -> Result<ClientDriver> {
+    // Msgpack mode keeps a dedicated worker thread around the blocking stdio
+    // pipes. This avoids async framing overhead on the hot path.
     let args = stdio_args(command, filesystem.as_deref(), false);
     let child = command.spawn_blocking(args.iter().map(CompactString::as_str))?;
     let worker = super::msgpack_worker::MsgpackWorker::spawn(child, filesystem)?;
@@ -51,6 +63,8 @@ fn stdio_args(
     if async_mode {
         args.push(CompactString::from("--async"));
     }
+    // Pass the resolved working directory explicitly so downstream tools and
+    // diagnostics see the same root the Rust side expects.
     args.push(CompactString::from("--cwd"));
     args.push(CompactString::from(command.cwd().display().to_string()));
     if let Some(filesystem) = filesystem.and_then(callback_flag) {

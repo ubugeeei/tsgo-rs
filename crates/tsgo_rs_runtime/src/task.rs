@@ -2,11 +2,17 @@ use crate::block_on;
 use std::{future::Future, thread};
 
 /// Join handle returned by [`spawn`].
+///
+/// Unlike async task handles from full runtimes, this always represents a
+/// dedicated OS thread.
 pub struct JoinHandle<T> {
     inner: thread::JoinHandle<T>,
 }
 
 /// Spawns a future onto a dedicated worker thread.
+///
+/// The spawned thread immediately runs [`crate::block_on`] on the provided
+/// future and exits when the future resolves.
 ///
 /// # Examples
 ///
@@ -28,6 +34,9 @@ where
 
 impl<T> JoinHandle<T> {
     /// Waits for the worker thread to finish and returns its output.
+    ///
+    /// Panics from the worker thread are reported through the standard
+    /// [`thread::Result`] error payload.
     pub fn join(self) -> thread::Result<T> {
         self.inner.join()
     }

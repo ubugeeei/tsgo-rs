@@ -1,3 +1,10 @@
+//! Tiny single-threaded executor used by the workspace.
+//!
+//! The goal here is not to compete with full async runtimes. Instead, this
+//! module provides the minimum machinery needed to poll a future to completion
+//! from synchronous code and from dedicated worker threads created by
+//! [`crate::spawn`].
+
 use std::{
     future::Future,
     pin::Pin,
@@ -6,6 +13,16 @@ use std::{
 };
 
 /// Runs a future to completion on the current thread.
+///
+/// The future is polled in a simple park/wake loop backed by a condition
+/// variable. This works well for the workspace's usage patterns, where futures
+/// are usually short-lived control flows rather than large, highly concurrent
+/// task graphs.
+///
+/// # Panics
+///
+/// Panics if writing wake-up state into the internal synchronization primitives
+/// panics, which in practice only happens if a mutex is poisoned.
 ///
 /// # Examples
 ///
@@ -20,18 +37,26 @@ where
     F: Future,
 {
     let parker = Arc::new(Parker::default());
+    // The raw waker stores the `Arc<Parker>` pointer and reconstructs it in the
+    // vtable callbacks. Every callback follows the usual `Arc::from_raw` /
+    // `Arc::into_raw` ownership discipline so the strong count stays balanced.
     let waker = unsafe { Waker::from_raw(raw_waker(Arc::into_raw(parker.clone()) as *const ())) };
     let mut future = Pin::from(Box::new(future));
     let mut context = Context::from_waker(&waker);
     loop {
+        // Clear the notification bit before polling so any wake emitted by the
+        // future after this poll will be observed by `park`.
         parker.clear();
         if let Poll::Ready(value) = future.as_mut().poll(&mut context) {
             return value;
         }
+        // Wait until one of the wake callbacks flips the bit and notifies the
+        // condition variable.
         parker.park();
     }
 }
 
+/// Small parking primitive paired with the custom waker.
 #[derive(Default)]
 struct Parker {
     notified: Mutex<bool>,
@@ -57,10 +82,15 @@ impl Parker {
     }
 }
 
+// SAFETY: `pointer` must originate from `Arc<Parker>::into_raw`. The returned
+// `RawWaker` delegates clone/wake/drop to functions that maintain the `Arc`
+// reference count correctly.
 unsafe fn raw_waker(pointer: *const ()) -> RawWaker {
     RawWaker::new(pointer, &VTABLE)
 }
 
+// SAFETY: `pointer` comes from `Arc<Parker>::into_raw`. Incrementing the strong
+// count creates the additional ownership required by `RawWaker::clone`.
 unsafe fn clone_waker(pointer: *const ()) -> RawWaker {
     unsafe {
         std::sync::Arc::<Parker>::increment_strong_count(pointer.cast::<Parker>());
@@ -68,17 +98,25 @@ unsafe fn clone_waker(pointer: *const ()) -> RawWaker {
     }
 }
 
+// SAFETY: `pointer` comes from `Arc<Parker>::into_raw`. Reconstructing the
+// `Arc` transfers ownership of the raw pointer into this function, and dropping
+// it at the end matches the semantics of `RawWaker::wake`.
 unsafe fn wake_waker(pointer: *const ()) {
     let parker = unsafe { Arc::from_raw(pointer.cast::<Parker>()) };
     parker.wake();
 }
 
+// SAFETY: `pointer` comes from `Arc<Parker>::into_raw`. `wake_by_ref` must not
+// consume ownership, so the `Arc` is converted back into a raw pointer after
+// the wake-up signal is sent.
 unsafe fn wake_by_ref_waker(pointer: *const ()) {
     let parker = unsafe { Arc::from_raw(pointer.cast::<Parker>()) };
     parker.wake();
     let _ = Arc::into_raw(parker);
 }
 
+// SAFETY: `pointer` comes from `Arc<Parker>::into_raw`, and `drop` is the final
+// consumer for the corresponding raw reference.
 unsafe fn drop_waker(pointer: *const ()) {
     drop(unsafe { Arc::from_raw(pointer.cast::<Parker>()) });
 }

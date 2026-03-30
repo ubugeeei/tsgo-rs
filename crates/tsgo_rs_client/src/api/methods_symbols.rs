@@ -1,3 +1,9 @@
+//! Symbol-oriented `ApiClient` methods.
+//!
+//! These helpers cover name resolution and symbol lookup entry points from the
+//! `tsgo` API. Most methods mirror upstream endpoint names closely so it is easy
+//! to correlate source code, wire traces, and TypeScript checker concepts.
+
 use serde_json::json;
 
 use super::{
@@ -14,6 +20,9 @@ use super::{
 use crate::Result;
 
 impl ApiClient {
+    /// Returns the symbol visible at a specific UTF-16 position in a file.
+    ///
+    /// Returns `Ok(None)` when the position does not resolve to a symbol.
     pub async fn get_symbol_at_position(
         &self,
         snapshot: SnapshotHandle,
@@ -33,6 +42,9 @@ impl ApiClient {
         .await
     }
 
+    /// Resolves symbols for multiple positions in a single file.
+    ///
+    /// The output order matches the input `positions` order.
     pub async fn get_symbols_at_positions(
         &self,
         snapshot: SnapshotHandle,
@@ -52,6 +64,9 @@ impl ApiClient {
         .await
     }
 
+    /// Returns the symbol associated with a specific syntax node.
+    ///
+    /// Returns `Ok(None)` when the node has no symbol binding.
     pub async fn get_symbol_at_location(
         &self,
         snapshot: SnapshotHandle,
@@ -69,6 +84,9 @@ impl ApiClient {
         .await
     }
 
+    /// Resolves symbols for multiple syntax nodes.
+    ///
+    /// The output order matches the input `locations` order.
     pub async fn get_symbols_at_locations(
         &self,
         snapshot: SnapshotHandle,
@@ -86,6 +104,9 @@ impl ApiClient {
         .await
     }
 
+    /// Returns the apparent checker type of a symbol.
+    ///
+    /// Returns `Ok(None)` when `tsgo` cannot associate a type with the symbol.
     pub async fn get_type_of_symbol(
         &self,
         snapshot: SnapshotHandle,
@@ -99,6 +120,9 @@ impl ApiClient {
         .await
     }
 
+    /// Returns the apparent checker types for multiple symbols.
+    ///
+    /// The output order matches the input `symbols` order.
     pub async fn get_types_of_symbols(
         &self,
         snapshot: SnapshotHandle,
@@ -116,6 +140,10 @@ impl ApiClient {
         .await
     }
 
+    /// Returns the declared type of a symbol, if any.
+    ///
+    /// This differs from [`Self::get_type_of_symbol`] when inference or
+    /// contextual typing changes the apparent type.
     pub async fn get_declared_type_of_symbol(
         &self,
         snapshot: SnapshotHandle,
@@ -130,6 +158,10 @@ impl ApiClient {
     }
 
     #[allow(clippy::too_many_arguments)]
+    /// Resolves a name through the checker using TypeScript's meaning flags.
+    ///
+    /// Callers can provide either a node `location` or a `(file, position)`
+    /// pair, depending on which information they already have on hand.
     pub async fn resolve_name(
         &self,
         snapshot: SnapshotHandle,
@@ -157,6 +189,7 @@ impl ApiClient {
         .await
     }
 
+    /// Convenience wrapper around [`Self::resolve_name`] for file positions.
     pub async fn resolve_name_at_position(
         &self,
         snapshot: SnapshotHandle,
@@ -179,6 +212,9 @@ impl ApiClient {
         .await
     }
 
+    /// Returns the value symbol referenced by a shorthand assignment node.
+    ///
+    /// For example, in `{ foo }`, this resolves the symbol bound to `foo`.
     pub async fn get_shorthand_assignment_value_symbol(
         &self,
         snapshot: SnapshotHandle,
@@ -196,6 +232,10 @@ impl ApiClient {
         .await
     }
 
+    /// Returns the type of `symbol` as seen from a particular node location.
+    ///
+    /// This is useful when the same symbol has different contextual views at
+    /// different use sites.
     pub async fn get_type_of_symbol_at_location(
         &self,
         snapshot: SnapshotHandle,
@@ -215,6 +255,7 @@ impl ApiClient {
         .await
     }
 
+    /// Returns the parent symbol of `symbol`, if any.
     pub async fn get_parent_of_symbol(
         &self,
         snapshot: SnapshotHandle,
@@ -224,6 +265,9 @@ impl ApiClient {
             .await
     }
 
+    /// Returns member symbols directly attached to `symbol`.
+    ///
+    /// Missing server data is normalized to an empty vector.
     pub async fn get_members_of_symbol(
         &self,
         snapshot: SnapshotHandle,
@@ -237,6 +281,9 @@ impl ApiClient {
         .map(|items| items.unwrap_or_default())
     }
 
+    /// Returns exported symbols directly attached to `symbol`.
+    ///
+    /// Missing server data is normalized to an empty vector.
     pub async fn get_exports_of_symbol(
         &self,
         snapshot: SnapshotHandle,
@@ -250,6 +297,10 @@ impl ApiClient {
         .map(|items| items.unwrap_or_default())
     }
 
+    /// Returns the export-facing symbol associated with `symbol`.
+    ///
+    /// Unlike many other helpers in this group, this endpoint is expected to
+    /// succeed with a concrete symbol response.
     pub async fn get_export_symbol_of_symbol(
         &self,
         snapshot: SnapshotHandle,

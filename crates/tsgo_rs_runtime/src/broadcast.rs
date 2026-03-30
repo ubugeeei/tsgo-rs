@@ -1,3 +1,15 @@
+//! Small broadcast channel used for fan-out notifications inside the workspace.
+//!
+//! This implementation intentionally optimizes for simplicity over perfect
+//! fairness or backpressure support:
+//!
+//! - each subscriber gets its own `std::sync::mpsc` queue
+//! - sending clones the payload once per live subscriber
+//! - dropped receivers are pruned lazily on the next send
+//!
+//! That trade-off is a good fit for low-volume control-plane messages such as
+//! JSON-RPC inbound events.
+
 use smallvec::SmallVec;
 use std::{
     sync::{Arc, Mutex, mpsc},
@@ -5,12 +17,17 @@ use std::{
 };
 
 /// Broadcast sender that clones each message for all active subscribers.
+///
+/// Cloning the sender keeps all subscribers attached to the same shared list.
 #[derive(Clone)]
 pub struct Sender<T> {
     inner: Arc<Mutex<SmallVec<[mpsc::Sender<T>; 4]>>>,
 }
 
 /// Receiving side of a broadcast channel.
+///
+/// Each receiver owns a dedicated queue and therefore observes every message
+/// independently of other receivers.
 pub struct Receiver<T> {
     inner: mpsc::Receiver<T>,
 }
@@ -39,6 +56,8 @@ pub fn channel<T>() -> (Sender<T>, Receiver<T>) {
 
 impl<T> Sender<T> {
     /// Creates a new receiver subscribed to future messages.
+    ///
+    /// Previously sent values are not replayed.
     pub fn subscribe(&self) -> Receiver<T> {
         let (tx, rx) = mpsc::channel();
         self.inner.lock().unwrap().push(tx);
@@ -51,6 +70,9 @@ where
     T: Clone,
 {
     /// Sends a value to all active subscribers and returns the delivery count.
+    ///
+    /// Receivers that have been dropped are removed from the subscriber list as
+    /// part of this send operation.
     pub fn send(&self, value: T) -> usize {
         let mut subscribers = self.inner.lock().unwrap();
         let mut delivered = 0;
@@ -67,11 +89,17 @@ where
 
 impl<T> Receiver<T> {
     /// Blocks until the next value arrives.
+    ///
+    /// Returns [`mpsc::RecvError`] after all senders have been dropped and the
+    /// queue has been drained.
     pub fn recv(&self) -> Result<T, mpsc::RecvError> {
         self.inner.recv()
     }
 
     /// Blocks until the next value arrives or the timeout expires.
+    ///
+    /// This is primarily useful in tests and in integration code that must
+    /// avoid waiting forever for control-plane events.
     pub fn recv_timeout(&self, timeout: Duration) -> Result<T, mpsc::RecvTimeoutError> {
         self.inner.recv_timeout(timeout)
     }
