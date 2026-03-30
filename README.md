@@ -67,6 +67,8 @@ Pinned upstream at the time of writing:
 - `npm/typescript_oxlint`: `typescript-eslint`-style compatibility layer for type-aware Oxlint JS plugins
 - `bench`: Vitest benchmark project for the Node binding
 
+For a detailed architecture walkthrough, design strategy, and implementation tips, see [docs/project_guide.md](./docs/project_guide.md).
+
 ## Quick Start
 
 Sync and verify the pinned upstream checkout:
