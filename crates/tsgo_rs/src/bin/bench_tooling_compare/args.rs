@@ -1,42 +1,51 @@
 use std::{env, path::PathBuf};
 
-use tsgo_rs::{
-    api::ApiMode,
-    fast::{CompactString, SmallVec},
-};
+use tsgo_rs::fast::{CompactString, SmallVec};
 
 const HELP: &str = "\
-usage: cargo run -p tsgo-rs --bin bench_real_tsgo -- [options]
+usage: cargo run -p tsgo-rs --bin bench_tooling_compare -- [options]
 
 options:
-  --tsgo PATH              tsgo executable (default: .cache/tsgo)
-  --dataset PATH           tsconfig path to benchmark (repeatable)
-  --json-output PATH       write machine-readable benchmark JSON
-  --mode MODE              jsonrpc | msgpack | both (default: both)
-  --cold-iterations N      cold benchmark iterations (default: 5)
-  --warm-iterations N      warm benchmark iterations (default: 20)
-  --help                   show this message
+  --tsgo PATH                tsgo executable (default: .cache/tsgo)
+  --node CMD                 node executable or command name (default: node)
+  --dataset PATH             tsconfig path to benchmark (repeatable)
+  --json-output PATH         write machine-readable benchmark JSON
+  --suite SUITE              project-check | workflow | both (default: both)
+  --iterations N             timed iterations per row (default: 10)
+  --warmup-iterations N      untimed warmup iterations (default: 2)
+  --timeout-ms N             per-process timeout in milliseconds (default: 60000)
+  --help                     show this message
 ";
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Suite {
+    ProjectCheck,
+    Workflow,
+}
 
 #[derive(Clone, Debug)]
 pub struct Cli {
     pub root_dir: PathBuf,
     pub tsgo_path: PathBuf,
+    pub node_command: CompactString,
     pub dataset_paths: SmallVec<[PathBuf; 4]>,
     pub json_output_path: Option<PathBuf>,
-    pub modes: SmallVec<[ApiMode; 2]>,
-    pub cold_iterations: usize,
-    pub warm_iterations: usize,
+    pub suites: SmallVec<[Suite; 2]>,
+    pub iterations: usize,
+    pub warmup_iterations: usize,
+    pub timeout_ms: u64,
 }
 
 pub fn parse() -> Result<Option<Cli>, CompactString> {
     let root_dir = env::current_dir().map_err(|error| CompactString::from(error.to_string()))?;
     let mut tsgo_path = default_tsgo_path(&root_dir);
+    let mut node_command = CompactString::from("node");
     let mut dataset_paths = SmallVec::<[PathBuf; 4]>::new();
     let mut json_output_path = None;
-    let mut modes = both_modes();
-    let mut cold_iterations = 5_usize;
-    let mut warm_iterations = 20_usize;
+    let mut suites = both_suites();
+    let mut iterations = 10_usize;
+    let mut warmup_iterations = 2_usize;
+    let mut timeout_ms = 60_000_u64;
     let mut args = env::args_os().skip(1);
     while let Some(argument) = args.next() {
         let argument = CompactString::from(argument.to_string_lossy().as_ref());
@@ -48,24 +57,28 @@ pub fn parse() -> Result<Option<Cli>, CompactString> {
             "--tsgo" => {
                 tsgo_path = read_path(&mut args, &argument, &root_dir)?;
             }
+            "--node" => {
+                node_command = read_value(&mut args, &argument)?;
+            }
             "--dataset" => {
                 dataset_paths.push(read_path(&mut args, &argument, &root_dir)?);
             }
             "--json-output" => {
                 json_output_path = Some(read_path(&mut args, &argument, &root_dir)?);
             }
-            "--mode" => {
-                modes = parse_mode(read_value(&mut args, &argument)?)?;
+            "--suite" => {
+                suites = parse_suite(read_value(&mut args, &argument)?)?;
             }
-            "--cold-iterations" => {
-                cold_iterations = parse_usize(read_value(&mut args, &argument)?, &argument)?;
+            "--iterations" => {
+                iterations = parse_usize(read_value(&mut args, &argument)?, &argument)?;
             }
-            "--warm-iterations" => {
-                warm_iterations = parse_usize(read_value(&mut args, &argument)?, &argument)?;
+            "--warmup-iterations" => {
+                warmup_iterations = parse_usize(read_value(&mut args, &argument)?, &argument)?;
             }
-            _ => {
-                return Err(argument);
+            "--timeout-ms" => {
+                timeout_ms = parse_u64(read_value(&mut args, &argument)?, &argument)?;
             }
+            _ => return Err(argument),
         }
     }
     if dataset_paths.is_empty() {
@@ -76,25 +89,30 @@ pub fn parse() -> Result<Option<Cli>, CompactString> {
             "no datasets found; pass --dataset PATH explicitly",
         ));
     }
+    if iterations == 0 {
+        return Err(CompactString::from("--iterations must be > 0"));
+    }
     if !tsgo_path.exists() {
         return Err(CompactString::from(tsgo_path.display().to_string()));
     }
     Ok(Some(Cli {
         root_dir,
         tsgo_path,
+        node_command,
         dataset_paths,
         json_output_path,
-        modes,
-        cold_iterations,
-        warm_iterations,
+        suites,
+        iterations,
+        warmup_iterations,
+        timeout_ms,
     }))
 }
 
-fn both_modes() -> SmallVec<[ApiMode; 2]> {
-    let mut modes = SmallVec::<[ApiMode; 2]>::new();
-    modes.push(ApiMode::AsyncJsonRpcStdio);
-    modes.push(ApiMode::SyncMsgpackStdio);
-    modes
+fn both_suites() -> SmallVec<[Suite; 2]> {
+    let mut suites = SmallVec::<[Suite; 2]>::new();
+    suites.push(Suite::ProjectCheck);
+    suites.push(Suite::Workflow);
+    suites
 }
 
 fn default_tsgo_path(root_dir: &std::path::Path) -> PathBuf {
@@ -150,19 +168,19 @@ fn read_value(
     Ok(CompactString::from(value.to_string_lossy().as_ref()))
 }
 
-fn parse_mode(value: CompactString) -> Result<SmallVec<[ApiMode; 2]>, CompactString> {
+fn parse_suite(value: CompactString) -> Result<SmallVec<[Suite; 2]>, CompactString> {
     match value.as_str() {
-        "jsonrpc" => {
-            let mut modes = SmallVec::<[ApiMode; 2]>::new();
-            modes.push(ApiMode::AsyncJsonRpcStdio);
-            Ok(modes)
+        "project-check" => {
+            let mut suites = SmallVec::<[Suite; 2]>::new();
+            suites.push(Suite::ProjectCheck);
+            Ok(suites)
         }
-        "msgpack" => {
-            let mut modes = SmallVec::<[ApiMode; 2]>::new();
-            modes.push(ApiMode::SyncMsgpackStdio);
-            Ok(modes)
+        "workflow" => {
+            let mut suites = SmallVec::<[Suite; 2]>::new();
+            suites.push(Suite::Workflow);
+            Ok(suites)
         }
-        "both" => Ok(both_modes()),
+        "both" => Ok(both_suites()),
         _ => Err(value),
     }
 }
@@ -173,27 +191,37 @@ fn parse_usize(value: CompactString, _flag: &CompactString) -> Result<usize, Com
         .map_err(|_| CompactString::from(value.as_str()))
 }
 
+fn parse_u64(value: CompactString, _flag: &CompactString) -> Result<u64, CompactString> {
+    value
+        .parse::<u64>()
+        .map_err(|_| CompactString::from(value.as_str()))
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{both_modes, parse_mode, parse_usize};
-    use tsgo_rs::api::ApiMode;
+    use super::{Suite, both_suites, parse_suite, parse_u64, parse_usize};
 
     #[test]
-    fn parse_mode_supports_both_variants() {
-        assert_eq!(parse_mode("both".into()).unwrap(), both_modes());
+    fn parse_suite_supports_all_variants() {
+        assert_eq!(parse_suite("both".into()).unwrap(), both_suites());
         assert_eq!(
-            parse_mode("jsonrpc".into()).unwrap().as_slice(),
-            &[ApiMode::AsyncJsonRpcStdio]
+            parse_suite("project-check".into()).unwrap().as_slice(),
+            &[Suite::ProjectCheck]
         );
         assert_eq!(
-            parse_mode("msgpack".into()).unwrap().as_slice(),
-            &[ApiMode::SyncMsgpackStdio]
+            parse_suite("workflow".into()).unwrap().as_slice(),
+            &[Suite::Workflow]
         );
     }
 
     #[test]
-    fn parse_usize_rejects_invalid_numbers() {
-        assert_eq!(parse_usize("42".into(), &"--n".into()).unwrap(), 42);
-        assert!(parse_usize("nope".into(), &"--n".into()).is_err());
+    fn numeric_parsers_reject_invalid_values() {
+        assert_eq!(
+            parse_usize("10".into(), &"--iterations".into()).unwrap(),
+            10
+        );
+        assert_eq!(parse_u64("20".into(), &"--timeout-ms".into()).unwrap(), 20);
+        assert!(parse_usize("nope".into(), &"--iterations".into()).is_err());
+        assert!(parse_u64("nope".into(), &"--timeout-ms".into()).is_err());
     }
 }

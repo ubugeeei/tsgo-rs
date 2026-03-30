@@ -130,18 +130,8 @@ impl AsyncChildGuard {
         let Some(mut child) = child.take() else {
             return Ok(());
         };
-        let deadline = Instant::now() + wait_for;
-        loop {
-            if child.try_wait()?.is_some() {
-                return Ok(());
-            }
-            if Instant::now() >= deadline {
-                child.kill()?;
-                child.wait()?;
-                return Ok(());
-            }
-            thread::sleep(Duration::from_millis(10));
-        }
+        wait_for_child_exit(&mut child, wait_for)?;
+        Ok(())
     }
 }
 
@@ -150,7 +140,81 @@ impl Drop for AsyncChildGuard {
         if let Ok(mut child) = self.child.try_lock()
             && let Some(child) = child.as_mut()
         {
-            let _ = child.kill();
+            let _ = terminate_child_process(child);
         }
+    }
+}
+
+/// Waits for a child process to exit and forcefully terminates it after a timeout.
+pub fn wait_for_child_exit(child: &mut Child, wait_for: Duration) -> std::io::Result<()> {
+    let deadline = Instant::now() + wait_for;
+    loop {
+        if child.try_wait()?.is_some() {
+            return Ok(());
+        }
+        if Instant::now() >= deadline {
+            return terminate_child_process(child);
+        }
+        thread::sleep(Duration::from_millis(10));
+    }
+}
+
+/// Terminates a child process if it is still running and always reaps it before returning.
+pub fn terminate_child_process(child: &mut Child) -> std::io::Result<()> {
+    if child.try_wait()?.is_some() {
+        return Ok(());
+    }
+    match child.kill() {
+        Ok(()) => {}
+        Err(error) => {
+            if child.try_wait()?.is_none() {
+                return Err(error);
+            }
+            return Ok(());
+        }
+    }
+    let _ = child.wait()?;
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{terminate_child_process, wait_for_child_exit};
+    use std::{process::Command, time::Duration};
+
+    #[cfg(unix)]
+    #[test]
+    fn terminate_child_process_reaps_running_child() {
+        let mut child = Command::new("sh")
+            .arg("-c")
+            .arg("sleep 30")
+            .spawn()
+            .expect("spawn sleeper");
+        terminate_child_process(&mut child).expect("terminate child");
+        assert!(child.try_wait().expect("try_wait").is_some());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn wait_for_child_exit_times_out_and_reaps() {
+        let mut child = Command::new("sh")
+            .arg("-c")
+            .arg("sleep 30")
+            .spawn()
+            .expect("spawn sleeper");
+        wait_for_child_exit(&mut child, Duration::from_millis(10)).expect("wait with timeout");
+        assert!(child.try_wait().expect("try_wait").is_some());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn terminate_child_process_is_ok_after_natural_exit() {
+        let mut child = Command::new("sh")
+            .arg("-c")
+            .arg("exit 0")
+            .spawn()
+            .expect("spawn exiting child");
+        let _ = child.wait().expect("wait");
+        terminate_child_process(&mut child).expect("terminate exited child");
     }
 }

@@ -138,6 +138,23 @@ export default defineConfig({
           "cargo run --release -p tsgo-rs --bin bench_real_tsgo -- --cold-iterations 10 --warm-iterations 80 --json-output .cache/bench_native_deep.json",
         dependsOn: ["build_tsgo"],
       },
+      bench_tooling_setup: {
+        command: noopCommand,
+        dependsOn: ["bench_tooling_setup_ref", "bench_tooling_setup_cli_compare"],
+      },
+      bench_tooling_setup_ref: {
+        command: "npm install --no-fund --no-audit",
+        cwd: "ref/typescript-go",
+      },
+      bench_tooling_setup_cli_compare: {
+        command: "npm install --no-fund --no-audit",
+        cwd: "bench/cli_compare",
+      },
+      bench_tooling_compare: {
+        command:
+          "cargo run --release -p tsgo-rs --bin bench_tooling_compare -- --iterations 10 --warmup-iterations 2 --json-output .cache/bench_tooling_compare.json",
+        dependsOn: ["build_tsgo", "bench_tooling_setup"],
+      },
       bench_ts: {
         command: "vp test bench --config ./vite.config.ts --outputJson .cache/bench_ts.json",
         dependsOn: ["build_tsgo", "build_node_release"],

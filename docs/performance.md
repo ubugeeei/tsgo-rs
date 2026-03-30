@@ -4,6 +4,7 @@
 
 - Native real-tsgo benchmark: `vp run -w bench_native`
 - Native deep benchmark: `vp run -w bench_native_deep`
+- Tooling + orchestration benchmark: `vp run -w bench_tooling_compare`
 - Node binding benchmark: `vp run -w bench_ts`
 - Combined benchmark + budget guard: `vp run -w bench_verify`
 
@@ -14,8 +15,36 @@ and `vp check`. Those go through Vite+'s `oxfmt` / `oxlint` toolchain. The
 The TS benchmark writes its report to `.cache/bench_ts.json`.
 The native benchmark writes its report to `.cache/bench_native.json`.
 The native deep benchmark writes its report to `.cache/bench_native_deep.json`.
+The tooling benchmark writes its report to `.cache/bench_tooling_compare.json`.
 
 The native runner is still the main source of truth for transport-level speed because it measures the Rust client directly against the pinned upstream worker.
+
+## Tooling Runner
+
+The tooling benchmark is the `bench_tooling_compare` binary. It tracks two workloads:
+
+- `project_check`: `tsc`, `tsgo`, and `typescript-eslint` on the same dataset
+- `editor_workflow`: `tsgo-rs` msgpack cold and warm orchestration over a representative multi-query API flow
+
+Before running it for the first time, install the comparison dependencies:
+
+```bash
+vp run -w bench_tooling_setup
+```
+
+Then run:
+
+```bash
+cargo run --release -p tsgo-rs --bin bench_tooling_compare -- \
+  --iterations 10 \
+  --warmup-iterations 2 \
+  --json-output .cache/bench_tooling_compare.json
+```
+
+`project_check` is the apples-to-apples CLI comparison.
+`editor_workflow` is intentionally a different workload: it asks whether session reuse and orchestration can beat rerunning a full `tsgo --noEmit` project check.
+
+The runner creates temporary overlay `tsconfig` files for CLI parity, enforces per-process timeouts, and always kills plus reaps spawned children before returning.
 
 ## Native Runner
 
@@ -62,6 +91,37 @@ Default native scenarios now cover both transport and type-query hot paths:
 | `ast`        |    29 | 630,429 | 14,653 | `ref/typescript-go/_packages/ast/tsconfig.json` |
 | `api`        |    31 | 278,806 |  7,097 | `ref/typescript-go/_packages/api/tsconfig.json` |
 | `_extension` |    13 |  78,255 |  2,022 | `ref/typescript-go/_extension/tsconfig.json`    |
+
+## 2026-03-31 Tooling Compare
+
+All numbers below are median milliseconds from:
+
+```bash
+vp run -w bench_tooling_compare
+```
+
+### Project Check
+
+| dataset      | `tsc` | `tsgo` | `typescript-eslint` |
+| ------------ | ----: | -----: | ------------------: |
+| `ast`        | 425.527 | 23.995 | 1690.141 |
+| `api`        | 440.209 | 35.783 | 1341.204 |
+| `_extension` | 612.055 | 58.801 | 1136.773 |
+
+### Editor Workflow
+
+These rows are intentionally not the same workload as a full compiler CLI check.
+They model a `tsgo-rs` session that opens a project once and then runs a representative query flow (`default project` + `source file` + `symbol` + `type` + `typeToString`).
+
+| dataset      | `tsgo` CLI project check | `tsgo-rs` cold workflow | `tsgo-rs` warm workflow |
+| ------------ | -----------------------: | ----------------------: | ----------------------: |
+| `ast`        | 23.995 | 19.666 | 0.376 |
+| `api`        | 35.783 | 30.049 | 0.181 |
+| `_extension` | 58.801 | 45.811 | 0.186 |
+
+The interesting part is not that `tsgo-rs` somehow beats the underlying engine on identical work.
+It does not.
+The interesting part is that orchestration plus session reuse can beat rerunning `tsgo --noEmit` when the workload is editor-like rather than a full project check.
 
 ## 2026-03-30 Native Bench
 

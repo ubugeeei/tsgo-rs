@@ -16,6 +16,10 @@ path = "src/bin/mock_tsgo/main.rs"
 name = "bench_real_tsgo"
 path = "src/bin/bench_real_tsgo/main.rs"
 
+[[bin]]
+name = "bench_tooling_compare"
+path = "src/bin/bench_tooling_compare/main.rs"
+
 [dependencies]
 base64 = "0.22"
 lsp-types = "0.97"

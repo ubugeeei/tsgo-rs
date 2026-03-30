@@ -6,6 +6,7 @@ use std::{
     thread,
 };
 use tsgo_rs_core::fast::{CompactString, compact_format};
+use tsgo_rs_core::terminate_child_process;
 
 use super::{
     callbacks::{ApiFileSystem, invoke_callback},
@@ -72,8 +73,7 @@ impl MsgpackWorker {
                     WorkerCommand::Shutdown => break,
                 }
             }
-            let _ = child.kill();
-            let _ = child.wait();
+            let _ = terminate_child_process(&mut child);
         });
         Ok(Self {
             tx,
