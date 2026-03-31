@@ -9,45 +9,45 @@ import { npmPackages, publishPackedTarball } from "./npm_release_utils.mjs";
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const crates = [
   {
-    name: "tsgo-rs-core",
+    name: "tsgo_rs_core",
     path: resolve(rootDir, "crates/tsgo_rs_core"),
     patches: [],
   },
   {
-    name: "tsgo-rs-runtime",
+    name: "tsgo_rs_runtime",
     path: resolve(rootDir, "crates/tsgo_rs_runtime"),
     patches: [],
   },
   {
-    name: "tsgo-rs-jsonrpc",
+    name: "tsgo_rs_jsonrpc",
     path: resolve(rootDir, "crates/tsgo_rs_jsonrpc"),
-    patches: ["tsgo-rs-core", "tsgo-rs-runtime"],
+    patches: ["tsgo_rs_core", "tsgo_rs_runtime"],
   },
   {
-    name: "tsgo-rs-client",
+    name: "tsgo_rs_client",
     path: resolve(rootDir, "crates/tsgo_rs_client"),
-    patches: ["tsgo-rs-core", "tsgo-rs-jsonrpc", "tsgo-rs-runtime"],
+    patches: ["tsgo_rs_core", "tsgo_rs_jsonrpc", "tsgo_rs_runtime"],
   },
   {
-    name: "tsgo-rs-lsp",
+    name: "tsgo_rs_lsp",
     path: resolve(rootDir, "crates/tsgo_rs_lsp"),
-    patches: ["tsgo-rs-core", "tsgo-rs-jsonrpc", "tsgo-rs-runtime"],
+    patches: ["tsgo_rs_core", "tsgo_rs_jsonrpc", "tsgo_rs_runtime"],
   },
   {
-    name: "tsgo-rs-orchestrator",
+    name: "tsgo_rs_orchestrator",
     path: resolve(rootDir, "crates/tsgo_rs_orchestrator"),
-    patches: ["tsgo-rs-client", "tsgo-rs-core", "tsgo-rs-lsp", "tsgo-rs-runtime"],
+    patches: ["tsgo_rs_client", "tsgo_rs_core", "tsgo_rs_lsp", "tsgo_rs_runtime"],
   },
   {
-    name: "tsgo-rs",
+    name: "tsgo_rs",
     path: resolve(rootDir, "crates/tsgo_rs"),
     patches: [
-      "tsgo-rs-client",
-      "tsgo-rs-core",
-      "tsgo-rs-jsonrpc",
-      "tsgo-rs-lsp",
-      "tsgo-rs-orchestrator",
-      "tsgo-rs-runtime",
+      "tsgo_rs_client",
+      "tsgo_rs_core",
+      "tsgo_rs_jsonrpc",
+      "tsgo_rs_lsp",
+      "tsgo_rs_orchestrator",
+      "tsgo_rs_runtime",
     ],
   },
 ];

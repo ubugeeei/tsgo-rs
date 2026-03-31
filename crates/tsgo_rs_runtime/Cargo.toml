@@ -1,5 +1,5 @@
 [package]
-name = "tsgo-rs-runtime"
+name = "tsgo_rs_runtime"
 version = "0.1.0"
 edition = "2024"
 description = "Small executor, task primitives, and broadcast channels for tsgo-rs"

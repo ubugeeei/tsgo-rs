@@ -6,18 +6,18 @@ This document is the operational release guide for `tsgo-rs`.
 
 Public Rust crates:
 
-- `tsgo-rs-core`
-- `tsgo-rs-runtime`
-- `tsgo-rs-jsonrpc`
-- `tsgo-rs-client`
-- `tsgo-rs-lsp`
-- `tsgo-rs-orchestrator`
-- `tsgo-rs`
+- `tsgo_rs_core`
+- `tsgo_rs_runtime`
+- `tsgo_rs_jsonrpc`
+- `tsgo_rs_client`
+- `tsgo_rs_lsp`
+- `tsgo_rs_orchestrator`
+- `tsgo_rs`
 
 Internal Rust crates:
 
-- `tsgo-rs-ref`
-- `tsgo-rs-node`
+- `tsgo_rs_ref`
+- `tsgo_rs_node`
 
 Public npm packages:
 
@@ -36,13 +36,13 @@ later without changing the release contract.
 
 Publish crates in dependency order:
 
-1. `tsgo-rs-core`
-2. `tsgo-rs-runtime`
-3. `tsgo-rs-jsonrpc`
-4. `tsgo-rs-client`
-5. `tsgo-rs-lsp`
-6. `tsgo-rs-orchestrator`
-7. `tsgo-rs`
+1. `tsgo_rs_core`
+2. `tsgo_rs_runtime`
+3. `tsgo_rs_jsonrpc`
+4. `tsgo_rs_client`
+5. `tsgo_rs_lsp`
+6. `tsgo_rs_orchestrator`
+7. `tsgo_rs`
 
 ## npm Publish Order
 

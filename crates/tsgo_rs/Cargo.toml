@@ -1,5 +1,5 @@
 [package]
-name = "tsgo-rs"
+name = "tsgo_rs"
 version = "0.1.0"
 edition = "2024"
 description = "Production-oriented Rust bindings, orchestration layers, and Node integration for typescript-go"
@@ -17,7 +17,7 @@ path = "src/lib.rs"
 
 [features]
 default = []
-experimental-distributed = ["tsgo-rs-orchestrator/experimental-distributed"]
+experimental-distributed = ["tsgo_rs_orchestrator/experimental-distributed"]
 
 [[bin]]
 name = "mock_tsgo"
@@ -35,12 +35,12 @@ path = "src/bin/bench_tooling_compare/main.rs"
 base64 = "0.22"
 lsp-types = "0.97"
 serde_json = "1"
-tsgo-rs-client = { version = "0.1.0", path = "../tsgo_rs_client" }
-tsgo-rs-core = { version = "0.1.0", path = "../tsgo_rs_core" }
-tsgo-rs-jsonrpc = { version = "0.1.0", path = "../tsgo_rs_jsonrpc" }
-tsgo-rs-lsp = { version = "0.1.0", path = "../tsgo_rs_lsp" }
-tsgo-rs-orchestrator = { version = "0.1.0", path = "../tsgo_rs_orchestrator" }
-tsgo-rs-runtime = { version = "0.1.0", path = "../tsgo_rs_runtime" }
+tsgo_rs_client = { version = "0.1.0", path = "../tsgo_rs_client" }
+tsgo_rs_core = { version = "0.1.0", path = "../tsgo_rs_core" }
+tsgo_rs_jsonrpc = { version = "0.1.0", path = "../tsgo_rs_jsonrpc" }
+tsgo_rs_lsp = { version = "0.1.0", path = "../tsgo_rs_lsp" }
+tsgo_rs_orchestrator = { version = "0.1.0", path = "../tsgo_rs_orchestrator" }
+tsgo_rs_runtime = { version = "0.1.0", path = "../tsgo_rs_runtime" }
 
 [dev-dependencies]
 tempfile = "3"

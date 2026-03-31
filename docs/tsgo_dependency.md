@@ -19,8 +19,8 @@ Rules:
 
 Workflow:
 
-1. `cargo run -p tsgo-rs-ref -- sync`
-2. `cargo run -p tsgo-rs-ref -- verify`
-3. When intentionally updating upstream, move `ref/typescript-go` to the new commit and run `cargo run -p tsgo-rs-ref -- pin-current`
+1. `cargo run -p tsgo_rs_ref -- sync`
+2. `cargo run -p tsgo_rs_ref -- verify`
+3. When intentionally updating upstream, move `ref/typescript-go` to the new commit and run `cargo run -p tsgo_rs_ref -- pin-current`
 
 This keeps reproduction commit-exact and leaves an auditable metadata trail for every upstream bump.

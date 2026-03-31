@@ -37,7 +37,7 @@ vp run -w bench_tooling_setup
 Then run:
 
 ```bash
-cargo run --release -p tsgo-rs --bin bench_tooling_compare -- \
+cargo run --release -p tsgo_rs --bin bench_tooling_compare -- \
   --iterations 10 \
   --warmup-iterations 2 \
   --json-output .cache/bench_tooling_compare.json
@@ -53,7 +53,7 @@ The runner creates temporary overlay `tsconfig` files for CLI parity, enforces p
 The native benchmark runner is the `bench_real_tsgo` binary:
 
 ```bash
-cargo run --release -p tsgo-rs --bin bench_real_tsgo -- \
+cargo run --release -p tsgo_rs --bin bench_real_tsgo -- \
   --cold-iterations 5 \
   --warm-iterations 20 \
   --json-output .cache/bench_native.json
@@ -62,7 +62,7 @@ cargo run --release -p tsgo-rs --bin bench_real_tsgo -- \
 For a heavier pass that is better suited to before/after comparisons, use:
 
 ```bash
-cargo run --release -p tsgo-rs --bin bench_real_tsgo -- \
+cargo run --release -p tsgo_rs --bin bench_real_tsgo -- \
   --cold-iterations 10 \
   --warm-iterations 80 \
   --json-output .cache/bench_native_deep.json

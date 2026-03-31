@@ -62,14 +62,14 @@ Pinned upstream at the time of writing:
 
 ## Workspace Layout
 
-- `tsgo-rs-core`: shared errors, process handles, and fast-path primitives
-- `tsgo-rs-jsonrpc`: stdio JSON-RPC framing and connection management
-- `tsgo-rs-client`: typed tsgo stdio client bindings for JSON-RPC and msgpack
-- `tsgo-rs-lsp`: LSP client support plus virtual-document overlays
-- `tsgo-rs-orchestrator`: local orchestration, caching, and experimental replicated state / Raft core
-- `tsgo-rs-runtime`: lightweight custom runtime and task primitives
-- `tsgo-rs-ref`: exact upstream pin, sync, and verification tooling
-- `tsgo-rs`: top-level facade crate, mock server, and native benchmark binaries
+- `tsgo_rs_core`: shared errors, process handles, and fast-path primitives
+- `tsgo_rs_jsonrpc`: stdio JSON-RPC framing and connection management
+- `tsgo_rs_client`: typed tsgo stdio client bindings for JSON-RPC and msgpack
+- `tsgo_rs_lsp`: LSP client support plus virtual-document overlays
+- `tsgo_rs_orchestrator`: local orchestration, caching, and experimental replicated state / Raft core
+- `tsgo_rs_runtime`: lightweight custom runtime and task primitives
+- `tsgo_rs_ref`: exact upstream pin, sync, and verification tooling
+- `tsgo_rs`: top-level facade crate, mock server, and native benchmark binaries
 - `npm/tsgo_rs_node`: `napi-rs` native bindings and the TypeScript wrapper package
 - `npm/typescript_oxlint`: `typescript-eslint`-style compatibility layer for type-aware Oxlint JS plugins
 - `bench`: Vitest benchmark project for the Node binding
@@ -230,7 +230,7 @@ The repository is intentionally aggressive about change detection because `types
 - the real-tsgo regression suite includes a hot-path guard that fails if msgpack falls too far behind JSON-RPC on the same machine
 - `vp run -w bench_native` and `vp run -w bench_ts` give repeatable transport-level measurements for Rust and Node
 - `vp run -w bench_verify` regenerates both reports and fails if benchmark samples disappear or hot-path budgets regress
-- `tsgo-rs-ref` enforces detached-HEAD exact-commit verification for `ref/typescript-go`
+- `tsgo_rs_ref` enforces detached-HEAD exact-commit verification for `ref/typescript-go`
 - CI structure and local reproduction notes live in [`docs/ci_guide.md`](./docs/ci_guide.md)
 
 ## Upstream Tracking

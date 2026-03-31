@@ -675,23 +675,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5d99f8c9a7727884afe522e9bd5edbfc91a3312b36a77b5fb8926e4c31a41801"
 
 [[package]]
-name = "tsgo-rs"
+name = "tsgo_rs"
 version = "0.1.0"
 dependencies = [
  "base64",
  "lsp-types",
  "serde_json",
  "tempfile",
- "tsgo-rs-client",
- "tsgo-rs-core",
- "tsgo-rs-jsonrpc",
- "tsgo-rs-lsp",
- "tsgo-rs-orchestrator",
- "tsgo-rs-runtime",
+ "tsgo_rs_client",
+ "tsgo_rs_core",
+ "tsgo_rs_jsonrpc",
+ "tsgo_rs_lsp",
+ "tsgo_rs_orchestrator",
+ "tsgo_rs_runtime",
 ]
 
 [[package]]
-name = "tsgo-rs-client"
+name = "tsgo_rs_client"
 version = "0.1.0"
 dependencies = [
  "base64",
@@ -700,13 +700,13 @@ dependencies = [
  "phf",
  "serde",
  "serde_json",
- "tsgo-rs-core",
- "tsgo-rs-jsonrpc",
- "tsgo-rs-runtime",
+ "tsgo_rs_core",
+ "tsgo_rs_jsonrpc",
+ "tsgo_rs_runtime",
 ]
 
 [[package]]
-name = "tsgo-rs-core"
+name = "tsgo_rs_core"
 version = "0.1.0"
 dependencies = [
  "base64",
@@ -721,32 +721,32 @@ dependencies = [
 ]
 
 [[package]]
-name = "tsgo-rs-jsonrpc"
+name = "tsgo_rs_jsonrpc"
 version = "0.1.0"
 dependencies = [
  "log",
  "parking_lot",
  "serde",
  "serde_json",
- "tsgo-rs-core",
- "tsgo-rs-runtime",
+ "tsgo_rs_core",
+ "tsgo_rs_runtime",
 ]
 
 [[package]]
-name = "tsgo-rs-lsp"
+name = "tsgo_rs_lsp"
 version = "0.1.0"
 dependencies = [
  "log",
  "lsp-types",
  "parking_lot",
  "serde",
- "tsgo-rs-core",
- "tsgo-rs-jsonrpc",
- "tsgo-rs-runtime",
+ "tsgo_rs_core",
+ "tsgo_rs_jsonrpc",
+ "tsgo_rs_runtime",
 ]
 
 [[package]]
-name = "tsgo-rs-node"
+name = "tsgo_rs_node"
 version = "0.1.0"
 dependencies = [
  "lsp-types",
@@ -755,11 +755,11 @@ dependencies = [
  "napi-derive",
  "serde",
  "serde_json",
- "tsgo-rs",
+ "tsgo_rs",
 ]
 
 [[package]]
-name = "tsgo-rs-orchestrator"
+name = "tsgo_rs_orchestrator"
 version = "0.1.0"
 dependencies = [
  "log",
@@ -767,24 +767,24 @@ dependencies = [
  "parking_lot",
  "serde",
  "serde_json",
- "tsgo-rs-client",
- "tsgo-rs-core",
- "tsgo-rs-lsp",
- "tsgo-rs-runtime",
+ "tsgo_rs_client",
+ "tsgo_rs_core",
+ "tsgo_rs_lsp",
+ "tsgo_rs_runtime",
 ]
 
 [[package]]
-name = "tsgo-rs-ref"
+name = "tsgo_rs_ref"
 version = "0.1.0"
 dependencies = [
  "serde",
  "tempfile",
  "toml",
- "tsgo-rs-core",
+ "tsgo_rs_core",
 ]
 
 [[package]]
-name = "tsgo-rs-runtime"
+name = "tsgo_rs_runtime"
 version = "0.1.0"
 dependencies = [
  "smallvec",

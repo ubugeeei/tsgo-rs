@@ -52,8 +52,8 @@ For editor-like integrations:
 - `vp check`
 - `cargo clippy --workspace --all-targets -- -D warnings`
 - `vp run -w test`
-- `cargo test -p tsgo-rs --no-default-features --test orchestrator`
-- `cargo test -p tsgo-rs --features experimental-distributed --test orchestrator`
+- `cargo test -p tsgo_rs --no-default-features --test orchestrator`
+- `cargo test -p tsgo_rs --features experimental-distributed --test orchestrator`
 - `vp run -w bench_verify`
 - `vp run -w verify_ref`
 - `cargo deny check advisories bans licenses sources`

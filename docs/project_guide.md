@@ -39,7 +39,7 @@ That means:
 - benchmark wins have to come from transport and orchestration, not private engine modifications
 - upgrading upstream is work, but it is honest work
 
-This policy is enforced through `ref/typescript-go`, `tsgo_ref.lock.toml`, and `tsgo-rs-ref`.
+This policy is enforced through `ref/typescript-go`, `tsgo_ref.lock.toml`, and `tsgo_rs_ref`.
 
 ### 2. Reproducibility Beats Convenience
 
@@ -89,19 +89,19 @@ At a high level, the repository looks like this:
 ```mermaid
 flowchart LR
     A["Rust caller"] --> B["tsgo-rs facade"]
-    B --> C["tsgo-rs-client"]
-    B --> D["tsgo-rs-lsp"]
-    C --> E["tsgo-rs-jsonrpc"]
+    B --> C["tsgo_rs_client"]
+    B --> D["tsgo_rs_lsp"]
+    C --> E["tsgo_rs_jsonrpc"]
     C --> F["msgpack worker"]
     D --> E
-    C --> G["tsgo-rs-core"]
+    C --> G["tsgo_rs_core"]
     D --> G
     E --> G
     C --> H["tsgo process"]
     D --> H
-    I["tsgo-rs-orchestrator"] --> C
+    I["tsgo_rs_orchestrator"] --> C
     I --> D
-    J["tsgo-rs-node"] --> B
+    J["tsgo_rs_node"] --> B
     K["typescript_oxlint"] --> J
 ```
 
@@ -114,11 +114,11 @@ The mental model is:
 - `orchestrator` owns pooling, caching, and replicated state
 - `runtime` keeps async execution lightweight and local to the repository
 - `ref` owns upstream pinning and verification
-- `tsgo-rs-node` and `typescript_oxlint` expose the Rust engine to JS and TS consumers
+- `tsgo_rs_node` and `typescript_oxlint` expose the Rust engine to JS and TS consumers
 
 ## Workspace Walkthrough
 
-### `tsgo-rs-core`
+### `tsgo_rs_core`
 
 Role:
 
@@ -138,7 +138,7 @@ Touch this crate when:
 - adjusting process shutdown behavior
 - changing low-level shared performance primitives
 
-### `tsgo-rs-jsonrpc`
+### `tsgo_rs_jsonrpc`
 
 Role:
 
@@ -157,7 +157,7 @@ Touch this crate when:
 - a callback or event routing issue shows up
 - a transport-level benchmark regression points at JSON-RPC framing or synchronization
 
-### `tsgo-rs-client`
+### `tsgo_rs_client`
 
 Role:
 
@@ -177,7 +177,7 @@ Touch this crate when:
 - refining Rust-side response or handle modeling
 - changing transport defaults or behavior
 
-### `tsgo-rs-lsp`
+### `tsgo_rs_lsp`
 
 Role:
 
@@ -196,7 +196,7 @@ Touch this crate when:
 - debugging overlay or UTF-16 position handling
 - replicating virtual state through higher-level orchestration
 
-### `tsgo-rs-orchestrator`
+### `tsgo_rs_orchestrator`
 
 Role:
 
@@ -217,7 +217,7 @@ Touch this crate when:
 - adding new caching strategies
 - experimenting with replicated editor state
 
-### `tsgo-rs-runtime`
+### `tsgo_rs_runtime`
 
 Role:
 
@@ -239,7 +239,7 @@ Do not touch it casually:
 
 - every new primitive added here becomes an architectural choice for the whole workspace
 
-### `tsgo-rs-ref`
+### `tsgo_rs_ref`
 
 Role:
 
@@ -255,7 +255,7 @@ Touch this crate when:
 - the upstream pinning policy changes
 - CI or local reproduction around `ref/typescript-go` needs stronger guarantees
 
-### `tsgo-rs`
+### `tsgo_rs`
 
 Role:
 
@@ -578,9 +578,9 @@ If you are new to the codebase, this reading order works well:
 1. [README.md](../README.md)
 2. this guide
 3. crate roots under `crates/*/src/lib.rs`
-4. `tsgo-rs-client` methods and response types
-5. `tsgo-rs-lsp` overlay and virtual document logic
-6. `tsgo-rs-orchestrator` pooling, state, and Raft code
+4. `tsgo_rs_client` methods and response types
+5. `tsgo_rs_lsp` overlay and virtual document logic
+6. `tsgo_rs_orchestrator` pooling, state, and Raft code
 7. benchmark runners under `crates/tsgo_rs/src/bin`
 
 If you are debugging performance:
@@ -594,7 +594,7 @@ If you are debugging CI or environment issues:
 
 1. [ci_guide.md](./ci_guide.md)
 2. `vite.config.ts`
-3. `tsgo-rs-ref`
+3. `tsgo_rs_ref`
 4. the managed upstream checkout under `ref/typescript-go`
 
 ## Final Mental Model

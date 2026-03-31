@@ -3,7 +3,7 @@ use std::{env, path::PathBuf};
 use tsgo_rs::fast::{CompactString, SmallVec};
 
 const HELP: &str = "\
-usage: cargo run -p tsgo-rs --bin bench_tooling_compare -- [options]
+usage: cargo run -p tsgo_rs --bin bench_tooling_compare -- [options]
 
 options:
   --tsgo PATH                tsgo executable (default: .cache/tsgo)

@@ -64,10 +64,10 @@ export default defineConfig({
   run: {
     tasks: {
       sync_ref: {
-        command: "cargo run -p tsgo-rs-ref -- sync",
+        command: "cargo run -p tsgo_rs_ref -- sync",
       },
       verify_ref: {
-        command: "cargo run -p tsgo-rs-ref -- verify",
+        command: "cargo run -p tsgo_rs_ref -- verify",
       },
       build: {
         command: noopCommand,
@@ -77,7 +77,7 @@ export default defineConfig({
         command: "cargo build --workspace",
       },
       build_mock: {
-        command: "cargo build -p tsgo-rs --bin mock_tsgo",
+        command: "cargo build -p tsgo_rs --bin mock_tsgo",
       },
       build_tsgo: {
         command: "node ./scripts/build_tsgo.mjs",
@@ -120,11 +120,11 @@ export default defineConfig({
         command: "cargo test --workspace",
       },
       test_rust_experimental: {
-        command: "cargo test -p tsgo-rs --no-default-features --test orchestrator",
+        command: "cargo test -p tsgo_rs --no-default-features --test orchestrator",
         dependsOn: ["test_rust_experimental_feature"],
       },
       test_rust_experimental_feature: {
-        command: "cargo test -p tsgo-rs --features experimental-distributed --test orchestrator",
+        command: "cargo test -p tsgo_rs --features experimental-distributed --test orchestrator",
       },
       test_ts: {
         command: "vp test run --config ./vite.config.ts",
@@ -136,12 +136,12 @@ export default defineConfig({
       },
       bench_native: {
         command:
-          "cargo run --release -p tsgo-rs --bin bench_real_tsgo -- --cold-iterations 5 --warm-iterations 20 --json-output .cache/bench_native.json",
+          "cargo run --release -p tsgo_rs --bin bench_real_tsgo -- --cold-iterations 5 --warm-iterations 20 --json-output .cache/bench_native.json",
         dependsOn: ["build_tsgo"],
       },
       bench_native_deep: {
         command:
-          "cargo run --release -p tsgo-rs --bin bench_real_tsgo -- --cold-iterations 10 --warm-iterations 80 --json-output .cache/bench_native_deep.json",
+          "cargo run --release -p tsgo_rs --bin bench_real_tsgo -- --cold-iterations 10 --warm-iterations 80 --json-output .cache/bench_native_deep.json",
         dependsOn: ["build_tsgo"],
       },
       bench_tooling_setup: {
@@ -158,7 +158,7 @@ export default defineConfig({
       },
       bench_tooling_compare: {
         command:
-          "cargo run --release -p tsgo-rs --bin bench_tooling_compare -- --iterations 10 --warmup-iterations 2 --json-output .cache/bench_tooling_compare.json",
+          "cargo run --release -p tsgo_rs --bin bench_tooling_compare -- --iterations 10 --warmup-iterations 2 --json-output .cache/bench_tooling_compare.json",
         dependsOn: ["build_tsgo", "bench_tooling_setup"],
       },
       bench_ts: {

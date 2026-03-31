@@ -6,7 +6,7 @@ use tsgo_rs::{
 };
 
 const HELP: &str = "\
-usage: cargo run -p tsgo-rs --bin bench_real_tsgo -- [options]
+usage: cargo run -p tsgo_rs --bin bench_real_tsgo -- [options]
 
 options:
   --tsgo PATH              tsgo executable (default: .cache/tsgo)

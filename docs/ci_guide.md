@@ -70,7 +70,7 @@ The important commands are:
 vp run -w sync_ref
 vp run -w verify_ref
 vp run -w build_tsgo
-cargo test -p tsgo-rs --no-default-features --test real_tsgo_regression --test real_tsgo_typecheck
+cargo test -p tsgo_rs --no-default-features --test real_tsgo_regression --test real_tsgo_typecheck
 ```
 
 ## `bench-tsgo-ref`
@@ -123,7 +123,7 @@ nix shell nixpkgs#nodejs_22 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w tes
 nix shell nixpkgs#nodejs_22 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w sync_ref'
 nix shell nixpkgs#nodejs_22 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w verify_ref'
 nix shell nixpkgs#nodejs_22 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w build_tsgo'
-cargo test -p tsgo-rs --test real_tsgo_baseline --test real_tsgo_regression
+cargo test -p tsgo_rs --test real_tsgo_baseline --test real_tsgo_regression
 nix shell nixpkgs#nodejs_22 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w bench_verify'
 ```
 
@@ -222,7 +222,7 @@ A relative path looks harmless but is rejected by the Go toolchain.
 
 ## 5. `verify_ref` Is Supposed to Be Strict
 
-The `tsgo-rs-ref` checks are intentionally unforgiving.
+The `tsgo_rs_ref` checks are intentionally unforgiving.
 
 They enforce that `ref/typescript-go` is:
 

@@ -4,13 +4,13 @@ import { fileURLToPath } from "node:url";
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const crates = [
-  "tsgo-rs-core",
-  "tsgo-rs-runtime",
-  "tsgo-rs-jsonrpc",
-  "tsgo-rs-client",
-  "tsgo-rs-lsp",
-  "tsgo-rs-orchestrator",
-  "tsgo-rs",
+  "tsgo_rs_core",
+  "tsgo_rs_runtime",
+  "tsgo_rs_jsonrpc",
+  "tsgo_rs_client",
+  "tsgo_rs_lsp",
+  "tsgo_rs_orchestrator",
+  "tsgo_rs",
 ];
 const delayMs = Number(process.env.CARGO_PUBLISH_DELAY_MS ?? "30000");
 

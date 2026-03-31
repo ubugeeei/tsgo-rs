@@ -1,5 +1,5 @@
 [package]
-name = "tsgo-rs-core"
+name = "tsgo_rs_core"
 version = "0.1.0"
 edition = "2024"
 description = "Shared errors, process lifecycle helpers, and fast-path primitives for tsgo-rs"

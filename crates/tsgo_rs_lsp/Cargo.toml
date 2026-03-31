@@ -1,5 +1,5 @@
 [package]
-name = "tsgo-rs-lsp"
+name = "tsgo_rs_lsp"
 version = "0.1.0"
 edition = "2024"
 description = "LSP-focused clients, overlays, and virtual documents for typescript-go"
@@ -20,6 +20,6 @@ log = { workspace = true }
 lsp-types = "0.97"
 parking_lot = "0.12"
 serde = { version = "1", features = ["derive"] }
-tsgo-rs-core = { version = "0.1.0", path = "../tsgo_rs_core" }
-tsgo-rs-jsonrpc = { version = "0.1.0", path = "../tsgo_rs_jsonrpc" }
-tsgo-rs-runtime = { version = "0.1.0", path = "../tsgo_rs_runtime" }
+tsgo_rs_core = { version = "0.1.0", path = "../tsgo_rs_core" }
+tsgo_rs_jsonrpc = { version = "0.1.0", path = "../tsgo_rs_jsonrpc" }
+tsgo_rs_runtime = { version = "0.1.0", path = "../tsgo_rs_runtime" }
