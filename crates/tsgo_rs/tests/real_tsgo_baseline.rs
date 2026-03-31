@@ -12,6 +12,8 @@ use tsgo_rs::{
 fn real_tsgo_api_summary_matches_pinned_baseline() {
     block_on(async {
         let baseline = load_baseline();
+        let mut observed_case_sensitivity = None;
+        let mut observed_source_bytes = None;
         for mode in [ApiMode::SyncMsgpackStdio, ApiMode::AsyncJsonRpcStdio] {
             let Some(config) = support::real_api_config(mode) else {
                 return;
@@ -62,17 +64,25 @@ fn real_tsgo_api_summary_matches_pinned_baseline() {
                 )
                 .await
                 .unwrap();
+            let source_bytes = source.as_bytes().len();
+            if let Some(previous) = observed_case_sensitivity.replace(init.use_case_sensitive_file_names)
+            {
+                assert_eq!(previous, init.use_case_sensitive_file_names);
+            }
+            if let Some(previous) = observed_source_bytes.replace(source_bytes) {
+                assert_eq!(previous, source_bytes);
+            }
+            // These values vary with the runner environment, so we assert local invariants
+            // above and keep the shared JSON baseline focused on the stable project summary.
             assert_eq!(
                 summary(SummaryInput {
                     workspace_root: &workspace_root,
-                    use_case_sensitive_file_names: init.use_case_sensitive_file_names,
                     current_directory: &init.current_directory,
                     files: &config.file_names,
                     project_count: snapshot.projects.len(),
                     config_file_name: &project.config_file_name,
                     root_files: project.root_files.len(),
                     primary_file: primary_file.as_str(),
-                    source_bytes: source.as_bytes().len(),
                     string_type_flags: string_type.flags,
                     rendered: rendered.as_str(),
                 }),
@@ -92,21 +102,18 @@ fn load_baseline() -> Value {
 
 struct SummaryInput<'a> {
     workspace_root: &'a Path,
-    use_case_sensitive_file_names: bool,
     current_directory: &'a str,
     files: &'a [String],
     project_count: usize,
     config_file_name: &'a str,
     root_files: usize,
     primary_file: &'a str,
-    source_bytes: usize,
     string_type_flags: u32,
     rendered: &'a str,
 }
 
 fn summary(input: SummaryInput<'_>) -> Value {
     json!({
-        "useCaseSensitiveFileNames": input.use_case_sensitive_file_names,
         "currentDirectory": normalize_path(input.workspace_root, input.current_directory),
         "fileCount": input.files.len(),
         "firstFile": normalize_path(input.workspace_root, &input.files[0]),
@@ -115,7 +122,6 @@ fn summary(input: SummaryInput<'_>) -> Value {
         "rootFiles": input.root_files,
         "configFileName": normalize_path(input.workspace_root, input.config_file_name),
         "primaryFile": normalize_path(input.workspace_root, input.primary_file),
-        "sourceBytes": input.source_bytes,
         "stringTypeFlags": input.string_type_flags,
         "rendered": input.rendered,
     })
