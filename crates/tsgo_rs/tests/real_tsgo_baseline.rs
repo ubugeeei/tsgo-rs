@@ -65,7 +65,8 @@ fn real_tsgo_api_summary_matches_pinned_baseline() {
                 .await
                 .unwrap();
             let source_bytes = source.as_bytes().len();
-            if let Some(previous) = observed_case_sensitivity.replace(init.use_case_sensitive_file_names)
+            if let Some(previous) =
+                observed_case_sensitivity.replace(init.use_case_sensitive_file_names)
             {
                 assert_eq!(previous, init.use_case_sensitive_file_names);
             }
