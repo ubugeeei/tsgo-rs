@@ -1,10 +1,10 @@
-name: Publish Rust
+name: Publish npm
 
 on:
   workflow_dispatch:
     inputs:
       confirm:
-        description: Type `publish-rust` to continue
+        description: Type `publish-npm` to continue
         required: true
         type: string
 
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: publish-rust
+  group: publish-npm
   cancel-in-progress: false
 
 env:
@@ -20,7 +20,7 @@ env:
 
 jobs:
   release-gates:
-    if: ${{ inputs.confirm == 'publish-rust' }}
+    if: ${{ inputs.confirm == 'publish-npm' }}
     name: Release Gates
     runs-on: ubuntu-latest
     steps:
@@ -44,7 +44,7 @@ jobs:
       - name: Setup Vite+
         uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: lts
+          node-version: "24"
           cache: true
           run-install: true
 
@@ -75,8 +75,8 @@ jobs:
         run: vp run -w release_dry_run
 
   publish:
-    if: ${{ inputs.confirm == 'publish-rust' }}
-    name: Publish Rust Crates
+    if: ${{ inputs.confirm == 'publish-npm' }}
+    name: Publish npm packages
     needs:
       - release-gates
     runs-on: ubuntu-latest
@@ -94,11 +94,25 @@ jobs:
       - name: Restore Cargo cache
         uses: Swatinem/rust-cache@v2
 
-      - name: Exchange OIDC token for crates.io token
-        id: auth
-        uses: rust-lang/crates-io-auth-action@v1
+      - name: Setup Node.js for npm trusted publishing
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
 
-      - name: Publish ordered crates
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
-        run: node ./scripts/publish_rust.mjs
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "24"
+          cache: true
+          run-install: true
+
+      - name: Build publishable npm artifacts
+        run: vp run -w build
+
+      - name: Placeholder for napi-rs cross-build fan-out
+        run: |
+          echo "TODO: replace this runner-local build with multi-platform napi-rs artifact packaging before advertising cross-platform prebuild support."
+
+      - name: Publish packed tarballs with npm trusted publishing
+        run: node ./scripts/publish_npm.mjs

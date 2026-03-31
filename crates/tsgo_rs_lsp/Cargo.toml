@@ -3,6 +3,7 @@ name = "tsgo-rs-lsp"
 version = "0.1.0"
 edition = "2024"
 description = "LSP-focused clients, overlays, and virtual documents for typescript-go"
+publish = ["crates-io"]
 documentation.workspace = true
 homepage.workspace = true
 license.workspace = true
