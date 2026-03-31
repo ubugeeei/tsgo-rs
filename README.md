@@ -45,7 +45,7 @@ Current focus:
 - Runtime: custom in-house runtime, no `tokio`
 - Fast-path bias: `CompactString`, `SmallVec`, `bumpalo`, `memchr`, `phf`, `FxHash`
 - JS toolchain: `pnpm` + Vite+ (`vp`) with `oxfmt` / `oxlint`
-- Node bindings: `npm/tsgo_rs_node` (repository-local `ESM-only` JS surface; npm publish remains private)
+- Node bindings: `npm/tsgo_rs_node` and `npm/typescript_oxlint` (public npm packages that still expect a caller-managed `typescript-go` executable)
 - Distributed orchestration: `experimental-distributed` cargo feature
 - TS benchmark project: `bench`
 - Default request timeout: `30s`

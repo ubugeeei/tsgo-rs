@@ -1,7 +1,6 @@
 {
   "name": "typescript-oxlint",
   "version": "0.1.0",
-  "private": true,
   "description": "typescript-eslint-style Oxlint helpers powered by tsgo-rs and typescript-go",
   "homepage": "https://github.com/ubugeeei/tsgo-rs/tree/main/npm/typescript_oxlint",
   "bugs": {

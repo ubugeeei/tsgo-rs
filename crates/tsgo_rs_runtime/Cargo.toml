@@ -3,6 +3,7 @@ name = "tsgo-rs-runtime"
 version = "0.1.0"
 edition = "2024"
 description = "Small executor, task primitives, and broadcast channels for tsgo-rs"
+publish = ["crates-io"]
 documentation.workspace = true
 homepage.workspace = true
 license.workspace = true

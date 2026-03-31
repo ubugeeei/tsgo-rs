@@ -3,6 +3,7 @@ name = "tsgo-rs-orchestrator"
 version = "0.1.0"
 edition = "2024"
 description = "Worker pooling, caching, and experimental replicated orchestration for tsgo-rs"
+publish = ["crates-io"]
 documentation.workspace = true
 homepage.workspace = true
 license.workspace = true

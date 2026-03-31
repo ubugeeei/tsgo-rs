@@ -3,6 +3,7 @@ name = "tsgo-rs-client"
 version = "0.1.0"
 edition = "2024"
 description = "Typed stdio API client bindings for typescript-go"
+publish = ["crates-io"]
 documentation.workspace = true
 homepage.workspace = true
 license.workspace = true

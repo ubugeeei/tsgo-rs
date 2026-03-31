@@ -4,8 +4,9 @@ import { dirname, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
+import { npmPackages, publishPackedTarball } from "./npm_release_utils.mjs";
+
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 const crates = [
   {
     name: "tsgo-rs-core",
@@ -50,11 +51,6 @@ const crates = [
     ],
   },
 ];
-const npmPackages = [
-  resolve(rootDir, "npm/tsgo_rs_node"),
-  resolve(rootDir, "npm/typescript_oxlint"),
-];
-
 function run(command, args, cwd = rootDir) {
   const result = spawnSync(command, args, {
     cwd,
@@ -107,6 +103,6 @@ for (const crate of crates) {
   }
 }
 
-for (const packageDir of npmPackages) {
-  run(npmCommand, ["pack", "--dry-run"], packageDir);
+for (const npmPackage of npmPackages) {
+  publishPackedTarball(npmPackage, { dryRun: true });
 }

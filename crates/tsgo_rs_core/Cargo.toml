@@ -3,6 +3,7 @@ name = "tsgo-rs-core"
 version = "0.1.0"
 edition = "2024"
 description = "Shared errors, process lifecycle helpers, and fast-path primitives for tsgo-rs"
+publish = ["crates-io"]
 documentation.workspace = true
 homepage.workspace = true
 license.workspace = true
