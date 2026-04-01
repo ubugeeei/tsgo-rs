@@ -1,7 +1,7 @@
 use std::{path::Path, process::Command};
 use tsgo_rs_core::{
-    fast::{compact_format, CompactString},
     Result, TsgoError,
+    fast::{CompactString, compact_format},
 };
 
 /// Commit metadata recorded in the lockfile and repository snapshots.

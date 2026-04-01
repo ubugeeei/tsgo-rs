@@ -1,8 +1,8 @@
 use crate::jsonrpc::{RpcHandler, RpcHandlerMap, RpcResponseError};
 use phf::phf_map;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::sync::Arc;
-use tsgo_rs_core::fast::{compact_format, Bump, BumpString, CompactString, SmallVec};
+use tsgo_rs_core::fast::{Bump, BumpString, CompactString, SmallVec, compact_format};
 
 const CALLBACK_PREFIX: &str = "--callbacks=";
 
