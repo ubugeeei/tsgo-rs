@@ -133,7 +133,9 @@ fn is_unsafe_flow(source: &SimpleType, target: &SimpleType) -> bool {
         }
         SimpleType::Array(source_item) => match target {
             SimpleType::Array(target_item) => is_unsafe_flow(source_item, target_item),
-            SimpleType::Generic { base, args } if is_array_like_base(base.as_str()) && args.len() == 1 => {
+            SimpleType::Generic { base, args }
+                if is_array_like_base(base.as_str()) && args.len() == 1 =>
+            {
                 is_unsafe_flow(source_item, &args[0])
             }
             _ => false,
@@ -146,7 +148,9 @@ fn is_unsafe_flow(source: &SimpleType, target: &SimpleType) -> bool {
             SimpleType::Array(target_item) => source_items
                 .iter()
                 .any(|source_item| is_unsafe_flow(source_item, target_item)),
-            SimpleType::Generic { base, args } if is_array_like_base(base.as_str()) && args.len() == 1 => {
+            SimpleType::Generic { base, args }
+                if is_array_like_base(base.as_str()) && args.len() == 1 =>
+            {
                 source_items
                     .iter()
                     .any(|source_item| is_unsafe_flow(source_item, &args[0]))
@@ -183,9 +187,9 @@ fn contains_any_like(ty: &SimpleType) -> bool {
     match ty {
         SimpleType::Any => true,
         SimpleType::Array(inner) => contains_any_like(inner),
-        SimpleType::Tuple(items)
-        | SimpleType::Union(items)
-        | SimpleType::Intersection(items) => items.iter().any(contains_any_like),
+        SimpleType::Tuple(items) | SimpleType::Union(items) | SimpleType::Intersection(items) => {
+            items.iter().any(contains_any_like)
+        }
         SimpleType::Generic { args, .. } => args.iter().any(contains_any_like),
         _ => false,
     }
@@ -370,7 +374,10 @@ mod tests {
 
     #[test]
     fn flags_direct_any_assignment() {
-        assert!(has_unsafe_any_flow(&[String::from("any")], &[String::from("string")]));
+        assert!(has_unsafe_any_flow(
+            &[String::from("any")],
+            &[String::from("string")]
+        ));
     }
 
     #[test]
