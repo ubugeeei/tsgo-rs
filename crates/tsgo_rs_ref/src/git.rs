@@ -1,7 +1,7 @@
 use std::{path::Path, process::Command};
 use tsgo_rs_core::{
+    fast::{compact_format, CompactString},
     Result, TsgoError,
-    fast::{CompactString, compact_format},
 };
 
 /// Commit metadata recorded in the lockfile and repository snapshots.
@@ -46,13 +46,19 @@ pub fn canonical_repository_id(url: &str) -> CompactString {
     let ssh = trimmed
         .strip_prefix("git@")
         .map(|value| value.replacen(':', "/", 1));
-    let https = trimmed
+    let normalized = trimmed
         .strip_prefix("https://")
         .or_else(|| trimmed.strip_prefix("http://"))
-        .or_else(|| trimmed.strip_prefix("ssh://"));
-    ssh.or(https.map(str::to_owned))
-        .map(CompactString::from)
-        .unwrap_or_else(|| CompactString::from(trimmed))
+        .or_else(|| trimmed.strip_prefix("ssh://"))
+        .map(|value| {
+            value
+                .strip_prefix("git@")
+                .map(|value| value.replacen(':', "/", 1))
+                .unwrap_or_else(|| value.to_owned())
+        });
+    ssh.or(normalized)
+        .unwrap_or_else(|| trimmed.to_owned())
+        .into()
 }
 
 /// Converts a repository URL into the canonical HTTPS form used in the lockfile.
@@ -197,6 +203,14 @@ mod tests {
         );
         assert_eq!(
             canonical_repository_url("git@github.com:microsoft/typescript-go.git"),
+            "https://github.com/microsoft/typescript-go.git"
+        );
+        assert_eq!(
+            canonical_repository_id("ssh://git@github.com/microsoft/typescript-go.git"),
+            "github.com/microsoft/typescript-go"
+        );
+        assert_eq!(
+            canonical_repository_url("ssh://git@github.com/microsoft/typescript-go.git"),
             "https://github.com/microsoft/typescript-go.git"
         );
     }
