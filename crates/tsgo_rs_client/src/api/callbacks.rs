@@ -1,8 +1,8 @@
 use crate::jsonrpc::{RpcHandler, RpcHandlerMap, RpcResponseError};
 use phf::phf_map;
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 use std::sync::Arc;
-use tsgo_rs_core::fast::{Bump, BumpString, CompactString, SmallVec, compact_format};
+use tsgo_rs_core::fast::{compact_format, Bump, BumpString, CompactString, SmallVec};
 
 const CALLBACK_PREFIX: &str = "--callbacks=";
 
@@ -176,22 +176,23 @@ pub(crate) fn invoke_callback(
     let Some(kind) = CALLBACKS.get(method).copied() else {
         return Err(unsupported_callback(method));
     };
+    let path = callback_path(method, payload)?;
     Ok(match kind {
-        CallbackKind::ReadFile => match fs.read_file(payload.as_str().unwrap_or_default()) {
+        CallbackKind::ReadFile => match fs.read_file(path) {
             ReadFileResult::Fallback => Value::Null,
             ReadFileResult::NotFound => json!({ "content": Value::Null }),
             ReadFileResult::Content(content) => json!({ "content": content }),
         },
         CallbackKind::FileExists => fs
-            .file_exists(payload.as_str().unwrap_or_default())
+            .file_exists(path)
             .map(Value::Bool)
             .unwrap_or(Value::Null),
         CallbackKind::DirectoryExists => fs
-            .directory_exists(payload.as_str().unwrap_or_default())
+            .directory_exists(path)
             .map(Value::Bool)
             .unwrap_or(Value::Null),
         CallbackKind::GetAccessibleEntries => fs
-            .get_accessible_entries(payload.as_str().unwrap_or_default())
+            .get_accessible_entries(path)
             .map(|entries| {
                 json!({
                     "files": Value::Array(
@@ -204,7 +205,7 @@ pub(crate) fn invoke_callback(
             })
             .unwrap_or(Value::Null),
         CallbackKind::Realpath => fs
-            .realpath(payload.as_str().unwrap_or_default())
+            .realpath(path)
             .map(|path| Value::String(path.into()))
             .unwrap_or(Value::Null),
     })
@@ -236,6 +237,19 @@ fn unsupported_callback(method: &str) -> RpcResponseError {
         message: compact_format(format_args!("unsupported callback: {method}")),
         data: None,
     }
+}
+
+fn callback_path<'a>(
+    method: &str,
+    payload: &'a Value,
+) -> std::result::Result<&'a str, RpcResponseError> {
+    payload.as_str().ok_or_else(|| RpcResponseError {
+        code: -32602,
+        message: compact_format(format_args!(
+            "invalid callback params for {method}: expected a string path"
+        )),
+        data: None,
+    })
 }
 
 #[cfg(test)]

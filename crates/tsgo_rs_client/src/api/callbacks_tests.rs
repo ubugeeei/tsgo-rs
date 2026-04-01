@@ -108,3 +108,19 @@ fn unknown_callback_returns_jsonrpc_error() {
     let error = invoke_callback(&FullFs, "missing", &Value::Null).unwrap_err();
     assert_eq!(error.code, -32601);
 }
+
+#[test]
+fn invalid_callback_payload_returns_invalid_params_error() {
+    let error = invoke_callback(&FullFs, "readFile", &json!({ "path": "/found.ts" })).unwrap_err();
+    assert_eq!(error.code, -32602);
+    assert!(error.message.contains("expected a string path"));
+}
+
+#[test]
+fn jsonrpc_handler_propagates_invalid_callback_params() {
+    let handlers = jsonrpc_handlers(Arc::new(FullFs));
+    let handler = handlers.get("realpath").unwrap();
+    let error = handler(json!(["/virtual/a.ts"])).unwrap_err();
+    assert_eq!(error.code, -32602);
+    assert!(error.message.contains("realpath"));
+}
