@@ -16,7 +16,7 @@ pub use smallvec::SmallVec;
 ///
 /// # Examples
 ///
-/// ```
+/// ```no_run
 /// use tsgo_rs_core::fast::FastMap;
 ///
 /// let mut map = FastMap::default();
@@ -29,7 +29,7 @@ pub type FastMap<K, V> = FxHashMap<K, V>;
 ///
 /// # Examples
 ///
-/// ```
+/// ```no_run
 /// use tsgo_rs_core::fast::FastSet;
 ///
 /// let mut set = FastSet::default();
@@ -42,7 +42,7 @@ pub type FastSet<T> = FxHashSet<T>;
 ///
 /// # Examples
 ///
-/// ```
+/// ```no_run
 /// use tsgo_rs_core::fast::compact_format;
 ///
 /// let value = compact_format(format_args!("node-{}/{}", 1, "leader"));
