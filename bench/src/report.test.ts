@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -10,7 +12,7 @@ import {
 describe("bench report helpers", () => {
   it("flattens Vitest benchmark groups", () => {
     const entries = readTsBenchEntries(
-      new URL("../fixtures/ts_bench_report.json", import.meta.url).pathname,
+      fileURLToPath(new URL("../fixtures/ts_bench_report.json", import.meta.url)),
     );
 
     expect(entries).toEqual([
@@ -36,7 +38,7 @@ describe("bench report helpers", () => {
 
   it("loads native benchmark rows", () => {
     const entries = readNativeBenchEntries(
-      new URL("../fixtures/native_bench_report.json", import.meta.url).pathname,
+      fileURLToPath(new URL("../fixtures/native_bench_report.json", import.meta.url)),
     );
 
     expect(entries).toHaveLength(2);
