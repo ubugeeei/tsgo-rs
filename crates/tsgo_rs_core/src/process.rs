@@ -189,12 +189,11 @@ pub fn terminate_child_process(child: &mut Child) -> std::io::Result<()> {
     Ok(())
 }
 
-#[cfg(test)]
+#[cfg(all(test, unix))]
 mod tests {
     use super::{terminate_child_process, wait_for_child_exit};
     use std::{process::Command, time::Duration};
 
-    #[cfg(unix)]
     #[test]
     fn terminate_child_process_reaps_running_child() {
         let mut child = Command::new("sh")
@@ -206,7 +205,6 @@ mod tests {
         assert!(child.try_wait().expect("try_wait").is_some());
     }
 
-    #[cfg(unix)]
     #[test]
     fn wait_for_child_exit_times_out_and_reaps() {
         let mut child = Command::new("sh")
@@ -218,7 +216,6 @@ mod tests {
         assert!(child.try_wait().expect("try_wait").is_some());
     }
 
-    #[cfg(unix)]
     #[test]
     fn terminate_child_process_is_ok_after_natural_exit() {
         let mut child = Command::new("sh")
