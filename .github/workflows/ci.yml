@@ -108,6 +108,9 @@ jobs:
       - name: Real tsgo smoke tests
         run: cargo test -p tsgo-rs --no-default-features --test real_tsgo_regression --test real_tsgo_typecheck
 
+      - name: Real examples
+        run: vp run -w examples_real
+
   bench-tsgo-ref:
     name: tsgo Ref Bench
     runs-on: ubuntu-latest

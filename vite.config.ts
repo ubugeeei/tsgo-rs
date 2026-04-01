@@ -179,6 +179,11 @@ export default defineConfig({
         cwd: "examples",
         dependsOn: ["build"],
       },
+      examples_real: {
+        command: "pnpm run real",
+        cwd: "examples",
+        dependsOn: ["build", "sync_ref", "verify_ref", "build_tsgo"],
+      },
     },
   },
   test: {

@@ -26,7 +26,7 @@ Build the real pinned `tsgo` binary before running the real snapshot example:
 vp run -w sync_ref
 vp run -w verify_ref
 vp run -w build_tsgo
-pnpm --dir examples run real-snapshot
+vp run -w examples_real
 ```
 
 ## Node Binding Examples
@@ -42,3 +42,4 @@ pnpm --dir examples run real-snapshot
 - `typescript_oxlint/custom_plugin.ts`: plugin wrapper around the custom rule
 - `typescript_oxlint/custom_rules_config.ts`: flat config using the custom plugin
 - `typescript_oxlint/native_rules_config.ts`: flat config using the built-in native rules
+- `typescript_oxlint/rule_tester.ts`: executable `RuleTester` example against the real pinned `tsgo` binary

@@ -121,7 +121,7 @@ Run the real pinned-`tsgo` snapshot example with:
 vp run -w sync_ref
 vp run -w verify_ref
 vp run -w build_tsgo
-pnpm --dir examples run real-snapshot
+vp run -w examples_real
 ```
 
 ## Type-Aware Oxlint
