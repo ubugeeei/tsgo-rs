@@ -1,10 +1,4 @@
-import {
-  assertCommandSucceeded,
-  fail,
-  rootDir,
-  runCommandCapture,
-  sleep,
-} from "./shared.ts";
+import { assertCommandSucceeded, fail, rootDir, runCommandCapture, sleep } from "./shared.ts";
 
 const crateNames = [
   "tsgo_rs_core",
@@ -68,7 +62,9 @@ async function isCrateVersionPublished(crate: CrateSpec): Promise<boolean> {
 }
 
 function parseRetryAfter(output: string): Date | null {
-  const match = output.match(/Please try again after (.+?) and see https:\/\/crates\.io\/docs\/rate-limits/i);
+  const match = output.match(
+    /Please try again after (.+?) and see https:\/\/crates\.io\/docs\/rate-limits/i,
+  );
   if (!match) {
     return null;
   }
@@ -112,8 +108,9 @@ async function main(): Promise<void> {
 
       const output = `${result.stdout}\n${result.stderr}`;
       const retryAt = parseRetryAfter(output);
-      if (!retryAt) {
+      if (retryAt === null) {
         assertCommandSucceeded("cargo", ["publish", "--locked", "-p", crate.name], result);
+        continue;
       }
 
       const waitMs = retryAt.getTime() - Date.now();
