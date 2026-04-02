@@ -2,8 +2,8 @@ import { bench, describe } from "vitest";
 
 import type { ApiMode } from "@tsgo-rs/node";
 
-import type { TsgoNode, TsgoTypeCheckerShape } from "typescript-oxlint";
-import { getParserServices } from "typescript-oxlint";
+import type { TsgoNode, TsgoTypeCheckerShape } from "oxlint-plugin-typescript-go";
+import { getParserServices } from "oxlint-plugin-typescript-go";
 
 import {
   ensureBenchInputs,
@@ -28,7 +28,7 @@ const warmCheckers = {
 } as const;
 
 for (const mode of ["msgpack", "jsonrpc"] as const) {
-  describe(`typescript-oxlint ${mode}`, () => {
+  describe(`oxlint-plugin-typescript-go ${mode}`, () => {
     bench("parserServices init", () => {
       const services = getParserServices(createContext(mode) as never);
       const checker = services.program.getTypeChecker();

@@ -11,7 +11,7 @@ const workspaceRoot = resolve(import.meta.dirname, "../../..");
 const realTsgoBinary = defaultTsgoExecutable(workspaceRoot);
 const integrationCase = existsSync(realTsgoBinary) ? it : it.skip;
 
-describe("typescript-oxlint native rule edges", () => {
+describe("oxlint-plugin-typescript-go native rule edges", () => {
   integrationCase("covers array and enum edge cases", () => {
     const tester = createTester();
 

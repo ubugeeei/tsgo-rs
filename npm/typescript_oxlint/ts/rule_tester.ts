@@ -24,7 +24,8 @@ let cleanupInstalled = false;
 
 export class RuleTester {
   /**
-   * A thin Oxlint `RuleTester` wrapper that injects `typescript-oxlint`
+   * A thin Oxlint `RuleTester` wrapper that injects
+   * `settings.typescriptOxlint`
    * settings, temporary fixtures, and a default project service.
    *
    * @example
@@ -65,7 +66,7 @@ export class RuleTester {
   }
 
   run(ruleName: string, rule: Record<string, unknown>, tests: TestCases): void {
-    const workspace = mkdtempSync(join(tmpdir(), "typescript-oxlint-"));
+    const workspace = mkdtempSync(join(tmpdir(), "oxlint-plugin-typescript-go-"));
     registerCleanup(workspace);
     const transformed = {
       valid: tests.valid.map((test) => prepareTestCase(workspace, test, this.#config)),

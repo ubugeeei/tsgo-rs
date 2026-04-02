@@ -3,7 +3,7 @@
 These examples are split into two groups:
 
 - `examples/node/*`: executable `@tsgo-rs/node` samples
-- `examples/typescript_oxlint/*`: reusable `typescript-oxlint` rule/plugin/config samples
+- `examples/typescript_oxlint/*`: reusable `oxlint-plugin-typescript-go` rule/plugin/config samples
 
 ## Prerequisites
 
@@ -37,7 +37,7 @@ vp run -w examples_real
 - `node/distributed_orchestrator.ts`: opens and replicates virtual documents across the in-process cluster
 - `node/real_snapshot.ts`: opens the real pinned `typescript-go` project and fetches a source file snapshot
 
-## typescript-oxlint Examples
+## oxlint-plugin-typescript-go Examples
 
 - `typescript_oxlint/custom_rule.ts`: custom type-aware rule using `ESLintUtils.getParserServices()`
 - `typescript_oxlint/custom_plugin.ts`: plugin wrapper around the custom rule

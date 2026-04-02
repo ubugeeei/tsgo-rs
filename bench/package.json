@@ -3,6 +3,6 @@
   "private": true,
   "dependencies": {
     "@tsgo-rs/node": "workspace:*",
-    "typescript-oxlint": "workspace:*"
+    "oxlint-plugin-typescript-go": "workspace:*"
   }
 }

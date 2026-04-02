@@ -1,4 +1,4 @@
-import { typescriptOxlintPlugin } from "typescript-oxlint/rules";
+import { typescriptOxlintPlugin } from "oxlint-plugin-typescript-go/rules";
 
 import { createExampleParserOptions } from "./shared.ts";
 

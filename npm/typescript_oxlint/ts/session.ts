@@ -177,7 +177,7 @@ export class TsgoProjectSession {
     const config = this.#config;
     if (!config) {
       throw new Error(
-        `typescript-oxlint could not parse a tsgo config for ${this.project.configPath}`,
+        `oxlint-plugin-typescript-go could not parse a tsgo config for ${this.project.configPath}`,
       );
     }
     return config;
@@ -230,7 +230,7 @@ export class TsgoProjectSession {
     const id = this.#projects[0]?.id;
     if (!id) {
       throw new Error(
-        `typescript-oxlint could not resolve a tsgo project for ${this.project.filename}`,
+        `oxlint-plugin-typescript-go could not resolve a tsgo project for ${this.project.filename}`,
       );
     }
     return id;

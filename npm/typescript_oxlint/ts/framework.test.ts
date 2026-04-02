@@ -11,7 +11,7 @@ import { RuleTester } from "./rule_tester";
 const workspaceRoot = resolve(import.meta.dirname, "../../..");
 const realTsgoBinary = defaultTsgoExecutable(workspaceRoot);
 
-describe("typescript-oxlint", () => {
+describe("oxlint-plugin-typescript-go", () => {
   it("creates docs URLs through the typescript-eslint-compatible RuleCreator", () => {
     const createRule = ESLintUtils.RuleCreator((name) => `https://example.com/rules/${name}`);
     const rule = createRule({
@@ -39,7 +39,7 @@ describe("typescript-oxlint", () => {
 
   it("wraps plugin rules with parserServices access", () => {
     const plugin = definePlugin({
-      meta: { name: "typescript-oxlint-demo" },
+      meta: { name: "oxlint-plugin-typescript-go-demo" },
       rules: {
         demo: {
           create(context) {
