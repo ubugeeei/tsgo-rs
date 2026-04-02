@@ -34,7 +34,7 @@ export function resolveProjectConfig(context: ContextWithParserOptions): Resolve
     discoverTsconfig(filename, rootDir) ??
     resolveDefaultProject(rootDir, filename, parserOptions.projectService);
   if (!configPath) {
-    throw new Error(`typescript-oxlint could not resolve a tsconfig for ${filename}`);
+    throw new Error(`oxlint-plugin-typescript-go could not resolve a tsconfig for ${filename}`);
   }
   return { filename, rootDir, configPath, runtime };
 }
@@ -43,7 +43,7 @@ export function resolveProjectConfig(context: ContextWithParserOptions): Resolve
  * Resolves the type-aware parser options visible to a rule.
  *
  * Oxlint exposes a fixed `context.languageOptions.parserOptions` object at
- * runtime, so `typescript-oxlint` stores its richer configuration under
+ * runtime, so `oxlint-plugin-typescript-go` stores its richer configuration under
  * `settings.typescriptOxlint` and rehydrates the expected
  * `typescript-eslint`-style shape from there.
  *

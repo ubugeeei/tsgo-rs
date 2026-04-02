@@ -7,14 +7,14 @@
     "rewriteRelativeImportExtensions": true,
     "paths": {
       "@tsgo-rs/node": ["./npm/tsgo_rs_node/ts/index.ts"],
-      "typescript-oxlint": ["./npm/typescript_oxlint/ts/index.ts"],
-      "typescript-oxlint/ast-utils": ["./npm/typescript_oxlint/ts/ast_utils.ts"],
-      "typescript-oxlint/eslint-utils": ["./npm/typescript_oxlint/ts/eslint_utils.ts"],
-      "typescript-oxlint/json-schema": ["./npm/typescript_oxlint/ts/json_schema.ts"],
-      "typescript-oxlint/rule-tester": ["./npm/typescript_oxlint/ts/rule_tester.ts"],
-      "typescript-oxlint/rules": ["./npm/typescript_oxlint/ts/rules/index.ts"],
-      "typescript-oxlint/ts-eslint": ["./npm/typescript_oxlint/ts/ts_eslint.ts"],
-      "typescript-oxlint/ts-estree": ["./npm/typescript_oxlint/ts/ts_estree.ts"]
+      "oxlint-plugin-typescript-go": ["./npm/typescript_oxlint/ts/index.ts"],
+      "oxlint-plugin-typescript-go/ast-utils": ["./npm/typescript_oxlint/ts/ast_utils.ts"],
+      "oxlint-plugin-typescript-go/eslint-utils": ["./npm/typescript_oxlint/ts/eslint_utils.ts"],
+      "oxlint-plugin-typescript-go/json-schema": ["./npm/typescript_oxlint/ts/json_schema.ts"],
+      "oxlint-plugin-typescript-go/rule-tester": ["./npm/typescript_oxlint/ts/rule_tester.ts"],
+      "oxlint-plugin-typescript-go/rules": ["./npm/typescript_oxlint/ts/rules/index.ts"],
+      "oxlint-plugin-typescript-go/ts-eslint": ["./npm/typescript_oxlint/ts/ts_eslint.ts"],
+      "oxlint-plugin-typescript-go/ts-estree": ["./npm/typescript_oxlint/ts/ts_estree.ts"]
     },
     "strict": true,
     "declaration": true,

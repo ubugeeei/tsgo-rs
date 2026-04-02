@@ -1,7 +1,7 @@
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import type { TypeAwareParserOptions } from "typescript-oxlint";
+import type { TypeAwareParserOptions } from "oxlint-plugin-typescript-go";
 
 const examplesDir = dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = resolve(examplesDir, "../..");

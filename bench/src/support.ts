@@ -36,7 +36,7 @@ export function ensureBenchInputs(): void {
     throw new Error("missing pinned tsgo dataset under ref/typescript-go");
   }
   if (!existsSync(typescriptOxlintConfigPath)) {
-    throw new Error("missing typescript-oxlint fixture tsconfig");
+    throw new Error("missing oxlint-plugin-typescript-go fixture tsconfig");
   }
 }
 

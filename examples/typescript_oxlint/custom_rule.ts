@@ -1,4 +1,4 @@
-import { ESLintUtils } from "typescript-oxlint";
+import { ESLintUtils } from "oxlint-plugin-typescript-go";
 
 const createRule = ESLintUtils.RuleCreator(
   (name) => `https://github.com/ubugeeei/tsgo-rs/tree/main/examples/typescript_oxlint/${name}.ts`,

@@ -32,7 +32,7 @@ importers:
       '@tsgo-rs/node':
         specifier: workspace:*
         version: link:../npm/tsgo_rs_node
-      typescript-oxlint:
+      oxlint-plugin-typescript-go:
         specifier: workspace:*
         version: link:../npm/typescript_oxlint
 
@@ -41,7 +41,7 @@ importers:
       '@tsgo-rs/node':
         specifier: workspace:*
         version: link:../npm/tsgo_rs_node
-      typescript-oxlint:
+      oxlint-plugin-typescript-go:
         specifier: workspace:*
         version: link:../npm/typescript_oxlint
 

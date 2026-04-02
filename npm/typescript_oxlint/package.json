@@ -1,5 +1,5 @@
 {
-  "name": "typescript-oxlint",
+  "name": "oxlint-plugin-typescript-go",
   "version": "0.1.0",
   "description": "typescript-eslint-style Oxlint helpers powered by tsgo-rs and typescript-go",
   "homepage": "https://github.com/ubugeeei/tsgo-rs/tree/main/npm/typescript_oxlint",

@@ -34,7 +34,7 @@ export function createNodeMaps(context: ContextWithParserOptions): {
       get(node) {
         const value = tsgoToEstree.get(node);
         if (!value) {
-          throw new Error("typescript-oxlint could not map tsgo node back to ESTree");
+          throw new Error("oxlint-plugin-typescript-go could not map tsgo node back to ESTree");
         }
         return value;
       },
@@ -62,7 +62,7 @@ function createTsgoNode(fileName: string, node: Node): TsgoNode {
 function assertRange(node: Node): readonly [number, number] {
   const range = (node as Node & { range?: readonly [number, number] }).range;
   if (!range) {
-    throw new Error("typescript-oxlint requires ESTree nodes with range data");
+    throw new Error("oxlint-plugin-typescript-go requires ESTree nodes with range data");
   }
   return range;
 }

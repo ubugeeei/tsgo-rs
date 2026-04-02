@@ -1,5 +1,5 @@
-import { RuleTester } from "typescript-oxlint";
-import { typescriptOxlintRules } from "typescript-oxlint/rules";
+import { RuleTester } from "oxlint-plugin-typescript-go";
+import { typescriptOxlintRules } from "oxlint-plugin-typescript-go/rules";
 
 import { isMain } from "../shared.ts";
 import { createExampleSettings } from "./shared.ts";

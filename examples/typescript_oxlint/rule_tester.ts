@@ -1,4 +1,4 @@
-import { RuleTester } from "typescript-oxlint";
+import { RuleTester } from "oxlint-plugin-typescript-go";
 
 import { isMain } from "../shared.ts";
 import { noStringPlusNumberRule } from "./custom_rule.ts";

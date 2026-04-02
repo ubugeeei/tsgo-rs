@@ -46,7 +46,7 @@ Current focus:
 - Fast-path bias: `CompactString`, `SmallVec`, `bumpalo`, `memchr`, `phf`, `FxHash`
 - JS toolchain: `pnpm` + Vite+ (`vp`) with `oxfmt` / `oxlint`
 - Repo automation: `scripts/*.ts` executed directly through Node `24` with `--strip-types`
-- Node bindings: `@tsgo-rs/node` (`npm/tsgo_rs_node`) and `npm/typescript_oxlint` (public npm packages that still expect a caller-managed `typescript-go` executable)
+- Node bindings: `@tsgo-rs/node` (`npm/tsgo_rs_node`) and `oxlint-plugin-typescript-go` (`npm/typescript_oxlint`) (public npm packages that still expect a caller-managed `typescript-go` executable)
 - Distributed orchestration: `experimental-distributed` cargo feature
 - TS benchmark project: `bench`
 - Example workspace: `examples`
@@ -75,7 +75,7 @@ Pinned upstream at the time of writing:
 - `npm/tsgo_rs_node`: `napi-rs` native bindings and the `@tsgo-rs/node` TypeScript wrapper package
 - `npm/typescript_oxlint`: `typescript-eslint`-style compatibility layer for type-aware Oxlint JS plugins
 - `bench`: Vitest benchmark project for the Node binding
-- `examples`: executable Node binding samples plus `typescript-oxlint` rule/config examples
+- `examples`: executable Node binding samples plus `oxlint-plugin-typescript-go` rule/config examples
 
 For a detailed architecture walkthrough, design strategy, and implementation tips, see [docs/project_guide.md](./docs/project_guide.md).
 For deployment-oriented defaults, supported scope, and release checks, see [docs/production_readiness.md](./docs/production_readiness.md).
@@ -107,7 +107,7 @@ still target Node `22+`.
 ## Examples
 
 The repository now ships executable examples for both `@tsgo-rs/node` and
-`typescript-oxlint` under [`examples/`](./examples/README.md).
+`oxlint-plugin-typescript-go` under [`examples/`](./examples/README.md).
 
 Run the smoke-tested examples with:
 
@@ -126,14 +126,14 @@ vp run -w examples_real
 
 ## Type-Aware Oxlint
 
-`typescript-oxlint` lets us write Oxlint JS plugins with a familiar
+`oxlint-plugin-typescript-go` lets us write Oxlint JS plugins with a familiar
 `typescript-eslint` authoring model while sourcing type information from the
 pinned `tsgo` binary. The heavy lifting stays in Rust, then `napi-rs` binds
 that implementation into JS so end users can keep writing custom plugins and
 custom rules in JS/TS.
 
 ```ts
-import { ESLintUtils } from "typescript-oxlint";
+import { ESLintUtils } from "oxlint-plugin-typescript-go";
 
 const createRule = ESLintUtils.RuleCreator((name) => `https://example.com/rules/${name}`);
 
@@ -180,10 +180,10 @@ export const noStringPlusNumber = createRule({
 The rule-side type-aware config lives under `settings.typescriptOxlint`. Package
 details and caveats are documented in [`npm/typescript_oxlint/README.md`](./npm/typescript_oxlint/README.md).
 
-`typescript-oxlint/rules` exposes a TS-native type-aware rule set and plugin:
+`oxlint-plugin-typescript-go/rules` exposes a TS-native type-aware rule set and plugin:
 
 ```ts
-import { typescriptOxlintPlugin } from "typescript-oxlint/rules";
+import { typescriptOxlintPlugin } from "oxlint-plugin-typescript-go/rules";
 
 export default [
   {
@@ -234,8 +234,8 @@ The repo ships two benchmark layers:
 
 - Native Rust benchmark: `vp run -w bench_native`
 - Node binding benchmark: `vp run -w bench_ts`
-- `typescript-oxlint` checker benchmark: `vp test bench --config ./vite.config.ts bench/src/typescript_oxlint.bench.ts`
-- `typescript-oxlint` native-rule benchmark: `vp test bench --config ./vite.config.ts bench/src/typescript_oxlint_rules.bench.ts`
+- `oxlint-plugin-typescript-go` checker benchmark: `vp test bench --config ./vite.config.ts bench/src/typescript_oxlint.bench.ts`
+- `oxlint-plugin-typescript-go` native-rule benchmark: `vp test bench --config ./vite.config.ts bench/src/typescript_oxlint_rules.bench.ts`
 - Combined benchmark + budget guard: `vp run -w bench`
 
 The TS benchmark writes machine-readable output to `.cache/bench_ts.json`.

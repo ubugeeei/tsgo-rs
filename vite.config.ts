@@ -44,14 +44,14 @@ export default defineConfig({
   resolve: {
     alias: {
       "@tsgo-rs/node": resolve(nodePackageDir, "ts/index.ts"),
-      "typescript-oxlint/ast-utils": resolve(typescriptOxlintDir, "ts/ast_utils.ts"),
-      "typescript-oxlint/eslint-utils": resolve(typescriptOxlintDir, "ts/eslint_utils.ts"),
-      "typescript-oxlint/json-schema": resolve(typescriptOxlintDir, "ts/json_schema.ts"),
-      "typescript-oxlint/rule-tester": resolve(typescriptOxlintDir, "ts/rule_tester.ts"),
-      "typescript-oxlint/rules": resolve(typescriptOxlintDir, "ts/rules/index.ts"),
-      "typescript-oxlint/ts-eslint": resolve(typescriptOxlintDir, "ts/ts_eslint.ts"),
-      "typescript-oxlint/ts-estree": resolve(typescriptOxlintDir, "ts/ts_estree.ts"),
-      "typescript-oxlint": resolve(typescriptOxlintDir, "ts/index.ts"),
+      "oxlint-plugin-typescript-go/ast-utils": resolve(typescriptOxlintDir, "ts/ast_utils.ts"),
+      "oxlint-plugin-typescript-go/eslint-utils": resolve(typescriptOxlintDir, "ts/eslint_utils.ts"),
+      "oxlint-plugin-typescript-go/json-schema": resolve(typescriptOxlintDir, "ts/json_schema.ts"),
+      "oxlint-plugin-typescript-go/rule-tester": resolve(typescriptOxlintDir, "ts/rule_tester.ts"),
+      "oxlint-plugin-typescript-go/rules": resolve(typescriptOxlintDir, "ts/rules/index.ts"),
+      "oxlint-plugin-typescript-go/ts-eslint": resolve(typescriptOxlintDir, "ts/ts_eslint.ts"),
+      "oxlint-plugin-typescript-go/ts-estree": resolve(typescriptOxlintDir, "ts/ts_estree.ts"),
+      "oxlint-plugin-typescript-go": resolve(typescriptOxlintDir, "ts/index.ts"),
     },
   },
   lint: {

@@ -8,7 +8,7 @@ import * as tsestreeEntry from "./ts_estree";
 describe("api surface", () => {
   it("re-exports the ts-eslint compatibility entrypoint", () => {
     expect(typeof tseslintEntry.tseslint.config).toBe("function");
-    expect(tseslintEntry.tseslint.parser.meta.name).toBe("typescript-oxlint/parser");
+    expect(tseslintEntry.tseslint.parser.meta.name).toBe("oxlint-plugin-typescript-go/parser");
   });
 
   it("re-exports ts-estree helpers from the root entry", () => {

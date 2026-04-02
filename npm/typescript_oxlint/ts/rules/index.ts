@@ -108,6 +108,6 @@ export const typescriptOxlintRules = Object.freeze({
 });
 
 export const typescriptOxlintPlugin = definePlugin({
-  meta: { name: "typescript-oxlint" },
+  meta: { name: "oxlint-plugin-typescript-go" },
   rules: typescriptOxlintRules,
 });

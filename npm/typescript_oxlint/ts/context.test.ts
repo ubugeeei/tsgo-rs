@@ -55,7 +55,7 @@ describe("context", () => {
   });
 
   it("creates a default project when projectService is enabled from settings", () => {
-    const workspace = mkdtempSync(join(tmpdir(), "typescript-oxlint-context-"));
+    const workspace = mkdtempSync(join(tmpdir(), "oxlint-plugin-typescript-go-context-"));
     cleanupDirs.add(workspace);
     const filename = resolve(workspace, "src/demo.ts");
     mkdirSync(dirname(filename), { recursive: true });

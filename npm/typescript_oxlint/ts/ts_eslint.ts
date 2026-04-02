@@ -7,12 +7,12 @@ export const tseslint = Object.freeze({
   configs: Object.freeze({}),
   parser: Object.freeze({
     meta: {
-      name: "typescript-oxlint/parser",
+      name: "oxlint-plugin-typescript-go/parser",
       version: "0.1.0",
     },
     parseForESLint() {
       throw new Error(
-        "typescript-oxlint relies on oxlint for parsing; use it as a JS plugin, not as an ESLint parser",
+        "oxlint-plugin-typescript-go relies on oxlint for parsing; use it as a JS plugin, not as an ESLint parser",
       );
     },
   }),
