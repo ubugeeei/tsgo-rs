@@ -22,7 +22,7 @@ Internal Rust crates:
 Public npm packages:
 
 - `@tsgo-rs/node` (`npm/tsgo_rs_node`)
-- `typescript-oxlint` (`npm/typescript_oxlint`)
+- `oxlint-plugin-typescript-go` (`npm/typescript_oxlint`)
 
 The npm packages do not bundle the `typescript-go` executable. Consumers must
 point them at a compatible `tsgo` binary at runtime.
@@ -34,6 +34,9 @@ the root package plus target-specific native binary packages for:
 - `darwin-x64`
 - `linux-x64-gnu`
 - `win32-x64-msvc`
+
+Trusted publishing must be configured for each of those target-specific native
+packages as well as the `@tsgo-rs/node` root package.
 
 The root package stays JS-only at publish time and resolves the correct native
 binding through optional dependencies.
@@ -55,7 +58,7 @@ Publish crates in dependency order:
 Publish npm packages in dependency order:
 
 1. `@tsgo-rs/node`
-2. `typescript-oxlint`
+2. `oxlint-plugin-typescript-go`
 
 ## Dry Run
 
@@ -90,7 +93,7 @@ Before publishing Rust crates:
 Before publishing npm packages, run the same gates plus a fresh `vp run -w build`.
 The GitHub publish workflow fan-outs native binding builds per target, downloads
 those `.node` artifacts into the publish job, and only then publishes the root
-package and `typescript-oxlint`.
+package and `oxlint-plugin-typescript-go`.
 
 ## Trusted Publishing
 
@@ -113,6 +116,14 @@ Publishing for each package with:
 - workflow filename: `publish-npm.yml`
 - environment: `release`
 
+For `@tsgo-rs/node`, also configure the same trusted publisher on each native
+binary package:
+
+- `@tsgo-rs/node-darwin-arm64`
+- `@tsgo-rs/node-darwin-x64`
+- `@tsgo-rs/node-linux-x64-gnu`
+- `@tsgo-rs/node-win32-x64-msvc`
+
 The npm workflow pins Node `24`, which satisfies npm's Trusted Publishing
 minimum (`Node >= 22.14.0`, `npm >= 11.5.1`).
 
@@ -134,18 +145,33 @@ node --strip-types ./scripts/publish_rust.ts
 This publishes the public crates in dependency order with the same sequencing
 used by CI.
 
+If crates.io rate-limits the first burst of new crates, the publish script now
+waits until the reported retry time and continues automatically. If the process
+stops midway, resume from the first missing crate:
+
+```bash
+CARGO_PUBLISH_START_AT=tsgo_rs node --strip-types ./scripts/publish_rust.ts
+```
+
 ### npm
 
 ```bash
 npm login
 vp install
 vp run -w build
-node --strip-types ./scripts/publish_npm.ts
+NAPI_ARTIFACTS_DIR=./artifacts node --strip-types ./scripts/publish_npm.ts
 ```
 
 This packs each workspace package through `pnpm pack`, then publishes the
 resulting tarballs with `npm publish`, so the packed manifest already contains
 real semver ranges instead of `workspace:*`.
+
+For production releases, the npm publish script now refuses to publish the
+`@tsgo-rs/node` root package unless every configured native binding target is
+present. Stage the `.node` artifacts from the build matrix into `./artifacts`
+before running the first manual publish. `NAPI_REQUIRE_ALL_TARGETS=0` is still
+available for local experimentation, but it is not production-safe for a real
+release.
 
 The trusted-publishing workflow follows the same order, but publishes the
 target-specific native binding packages first and the JS-only
@@ -153,6 +179,12 @@ target-specific native binding packages first and the JS-only
 
 If your npm account enforces 2FA, complete the interactive challenge during
 this first manual publish.
+
+If a publish partially succeeds, rerun from the first missing package:
+
+```bash
+NPM_PUBLISH_START_AT=oxlint-plugin-typescript-go NAPI_ARTIFACTS_DIR=./artifacts node --strip-types ./scripts/publish_npm.ts
+```
 
 ## Changelog Expectations
 

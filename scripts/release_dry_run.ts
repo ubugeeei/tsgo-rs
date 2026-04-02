@@ -95,7 +95,6 @@ async function main(): Promise<void> {
           "package",
           "--locked",
           "--allow-dirty",
-          "--no-verify",
           "--config",
           configPath,
           "-p",

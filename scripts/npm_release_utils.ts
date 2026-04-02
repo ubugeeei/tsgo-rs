@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import {
   copyFileSync,
   cpSync,
@@ -15,6 +16,7 @@ import { rootDir, runCommand, sleep } from "./shared.ts";
 
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 const pnpmCommand = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+const defaultNpmRegistry = "https://registry.npmjs.org";
 
 export interface NodeBindingTarget {
   abi: string | null;
@@ -87,7 +89,7 @@ export const nodeBindingPackage: PublishablePackage = {
 };
 
 export const typescriptOxlintPackage: PublishablePackage = {
-  name: "typescript-oxlint",
+  name: "oxlint-plugin-typescript-go",
   path: resolve(rootDir, "npm/typescript_oxlint"),
 };
 
@@ -123,6 +125,83 @@ function readJson<T>(path: string): T {
 
 function writeJson(path: string, value: unknown): void {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+}
+
+function getWorkspacePackageManagerVersion(): string {
+  const rootPackage = readJson<{ packageManager?: string }>(resolve(rootDir, "package.json"));
+  const packageManager = rootPackage.packageManager?.trim();
+  if (!packageManager?.startsWith("pnpm@")) {
+    return "10.0.0";
+  }
+  return packageManager.slice("pnpm@".length);
+}
+
+function resolvePackCommand(): { args: string[]; command: string } {
+  const probe = spawnSync(pnpmCommand, ["--version"], {
+    encoding: "utf8",
+    stdio: "pipe",
+  });
+
+  if (!probe.error && probe.status === 0) {
+    return { command: pnpmCommand, args: [] };
+  }
+
+  const pnpmVersion = getWorkspacePackageManagerVersion();
+  return {
+    command: npmCommand,
+    args: ["exec", "--yes", `pnpm@${pnpmVersion}`, "--"],
+  };
+}
+
+function getPackageManifest(pkg: PublishablePackage): NodeBindingManifest {
+  return readJson<NodeBindingManifest>(resolve(pkg.path, "package.json"));
+}
+
+function normalizeRegistryBase(registry: string): string {
+  return registry.endsWith("/") ? registry.slice(0, -1) : registry;
+}
+
+function getNpmRegistryBase(): string {
+  return normalizeRegistryBase(
+    process.env.NPM_CONFIG_REGISTRY?.trim() ||
+      process.env.npm_config_registry?.trim() ||
+      defaultNpmRegistry,
+  );
+}
+
+export function getPackageVersion(pkg: PublishablePackage): string {
+  return getPackageManifest(pkg).version;
+}
+
+export function assertPublishablePackageManifest(pkg: PublishablePackage): void {
+  const manifest = getPackageManifest(pkg);
+  if (manifest.name !== pkg.name) {
+    throw new Error(
+      `Publish manifest mismatch for ${pkg.path}: expected ${pkg.name}, found ${manifest.name}`,
+    );
+  }
+}
+
+export async function isNpmPackageVersionPublished(
+  pkg: PublishablePackage,
+  version = getPackageVersion(pkg),
+): Promise<boolean> {
+  const response = await fetch(`${getNpmRegistryBase()}/${encodeURIComponent(pkg.name)}`);
+
+  if (response.status === 404) {
+    return false;
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to query npm registry for ${pkg.name}: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const metadata = (await response.json()) as {
+    versions?: Record<string, unknown>;
+  };
+  return version in (metadata.versions ?? {});
 }
 
 function pickDefined<T extends Record<string, unknown>, K extends keyof T>(
@@ -414,8 +493,13 @@ export function withPackedTarball<T>(
   callback: (tarballPath: string) => T,
 ): T {
   const packDir = mkdtempSync(resolve(tmpdir(), "tsgo-rs-npm-pack-"));
+  const packCommand = resolvePackCommand();
   try {
-    runCommand(pnpmCommand, ["pack", "--pack-destination", packDir], { cwd: pkg.path });
+    runCommand(
+      packCommand.command,
+      [...packCommand.args, "pack", "--pack-destination", packDir],
+      { cwd: pkg.path },
+    );
     const tarballName = readdirSync(packDir).find((entry) => entry.endsWith(".tgz"));
     if (!tarballName) {
       throw new Error(`Failed to pack npm tarball for ${pkg.name}`);

@@ -77,3 +77,8 @@ Published Node prebuild coverage currently targets:
 - `darwin-x64`
 - `linux-x64-gnu`
 - `win32-x64-msvc`
+
+Release safety rule: do not publish `@tsgo-rs/node` for a new version until all
+four native binding packages for that version are built and staged. The root
+package's optional dependencies are versioned, so a partial first publish would
+leave later platforms stranded until the next release.
