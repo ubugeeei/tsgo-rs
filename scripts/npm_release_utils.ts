@@ -495,11 +495,9 @@ export function withPackedTarball<T>(
   const packDir = mkdtempSync(resolve(tmpdir(), "tsgo-rs-npm-pack-"));
   const packCommand = resolvePackCommand();
   try {
-    runCommand(
-      packCommand.command,
-      [...packCommand.args, "pack", "--pack-destination", packDir],
-      { cwd: pkg.path },
-    );
+    runCommand(packCommand.command, [...packCommand.args, "pack", "--pack-destination", packDir], {
+      cwd: pkg.path,
+    });
     const tarballName = readdirSync(packDir).find((entry) => entry.endsWith(".tgz"));
     if (!tarballName) {
       throw new Error(`Failed to pack npm tarball for ${pkg.name}`);

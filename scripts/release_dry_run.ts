@@ -91,15 +91,7 @@ async function main(): Promise<void> {
     try {
       runCommand(
         "cargo",
-        [
-          "package",
-          "--locked",
-          "--allow-dirty",
-          "--config",
-          configPath,
-          "-p",
-          crate.name,
-        ],
+        ["package", "--locked", "--allow-dirty", "--config", configPath, "-p", crate.name],
         { cwd: rootDir },
       );
     } finally {

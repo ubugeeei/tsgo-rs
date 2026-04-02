@@ -44,7 +44,9 @@ async function main(): Promise<void> {
             publishPackedTarball(pkg, { tag: distTag });
           } catch (error) {
             if (await isNpmPackageVersionPublished(pkg, version)) {
-              console.log(`npm package ${pkg.name}@${version} was published concurrently; skipping`);
+              console.log(
+                `npm package ${pkg.name}@${version} was published concurrently; skipping`,
+              );
             } else {
               throw error;
             }
