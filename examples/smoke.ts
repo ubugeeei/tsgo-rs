@@ -1,5 +1,7 @@
 import { runDistributedOrchestratorExample } from "./node/distributed_orchestrator.ts";
+import { runMinimalStartExample } from "./node/minimal_start.ts";
 import { runMockClientExample } from "./node/mock_client.ts";
+import { runRawCallsExample } from "./node/raw_calls.ts";
 import { runUnsafeTypeFlowExample } from "./node/unsafe_type_flow.ts";
 import { runVirtualDocumentExample } from "./node/virtual_document.ts";
 import customRulesConfig from "./typescript_oxlint/custom_rules_config.ts";
@@ -23,8 +25,10 @@ const result = {
       ?.description ?? null,
   customRuleEntries: ruleCount(customRulesConfig),
   distributedOrchestrator: runDistributedOrchestratorExample(),
+  minimalStart: runMinimalStartExample(),
   mockClient: runMockClientExample(),
   nativeRuleEntries: ruleCount(nativeRulesConfig),
+  rawCalls: runRawCallsExample(),
   unsafeTypeFlow: runUnsafeTypeFlowExample(),
   virtualDocument: runVirtualDocumentExample(),
 };

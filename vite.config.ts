@@ -191,15 +191,35 @@ export default defineConfig({
         command: "node --strip-types ./scripts/release_dry_run.ts",
         dependsOn: ["build"],
       },
-      examples_smoke: {
+      examples_node_smoke: {
         command: "pnpm run smoke",
         cwd: "examples",
         dependsOn: ["build"],
       },
-      examples_real: {
+      examples_node_real: {
         command: "pnpm run real",
         cwd: "examples",
         dependsOn: ["build", "sync_ref", "verify_ref", "build_tsgo"],
+      },
+      examples_rust_smoke: {
+        command: "node --strip-types ./scripts/run_rust_examples.ts smoke",
+        dependsOn: ["build_mock"],
+      },
+      examples_rust_real: {
+        command: "node --strip-types ./scripts/run_rust_examples.ts real",
+        dependsOn: ["sync_ref", "verify_ref", "build_tsgo"],
+      },
+      examples_rust_experimental: {
+        command: "node --strip-types ./scripts/run_rust_examples.ts experimental",
+        dependsOn: ["build_mock"],
+      },
+      examples_smoke: {
+        command: noopCommand,
+        dependsOn: ["examples_node_smoke", "examples_rust_smoke"],
+      },
+      examples_real: {
+        command: noopCommand,
+        dependsOn: ["examples_node_real", "examples_rust_real"],
       },
     },
   },

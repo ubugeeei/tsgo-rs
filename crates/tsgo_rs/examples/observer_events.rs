@@ -1,0 +1,114 @@
+mod support;
+
+use std::{
+    sync::{Arc, Mutex},
+    time::Duration,
+};
+
+use serde_json::{Value, json};
+use tsgo_rs::{
+    api::{ApiMode, ApiProfile, UpdateSnapshotParams},
+    observability::{TsgoEvent, TsgoObserver},
+    orchestrator::{ApiOrchestrator, ApiOrchestratorConfig},
+    runtime::block_on,
+};
+
+#[derive(Default)]
+struct EventCollector {
+    events: Mutex<Vec<TsgoEvent>>,
+}
+
+impl TsgoObserver for EventCollector {
+    fn on_event(&self, event: &TsgoEvent) {
+        self.events.lock().unwrap().push(event.clone());
+    }
+}
+
+fn event_to_value(event: &TsgoEvent) -> Value {
+    match event {
+        TsgoEvent::OrchestratorSnapshotEvicted { key } => {
+            json!({ "kind": "orchestratorSnapshotEvicted", "key": key })
+        }
+        TsgoEvent::OrchestratorResultEvicted { key } => {
+            json!({ "kind": "orchestratorResultEvicted", "key": key })
+        }
+        other => json!({ "kind": "other", "debug": format!("{other:?}") }),
+    }
+}
+
+fn main() -> Result<(), tsgo_rs::TsgoError> {
+    let result = block_on(async {
+        let observer = Arc::new(EventCollector::default());
+        let orchestrator = ApiOrchestrator::new(
+            ApiOrchestratorConfig {
+                max_workers_per_profile: 2,
+                max_cached_snapshots: 1,
+                max_cached_results: 1,
+                work_queue_capacity: 4,
+                observer: None,
+            }
+            .with_observer(observer.clone()),
+        );
+        let profile = ApiProfile::new(
+            "observability-demo",
+            support::mock_api_config("observer_events", ApiMode::AsyncJsonRpcStdio)?,
+        );
+
+        let _ = orchestrator
+            .cached_snapshot(
+                &profile,
+                "workspace-a",
+                UpdateSnapshotParams {
+                    open_project: Some("/workspace/a/tsconfig.json".into()),
+                    file_changes: None,
+                },
+            )
+            .await?;
+        let _ = orchestrator
+            .cached_snapshot(
+                &profile,
+                "workspace-b",
+                UpdateSnapshotParams {
+                    open_project: Some("/workspace/b/tsconfig.json".into()),
+                    file_changes: None,
+                },
+            )
+            .await?;
+        let _: Value = orchestrator
+            .cached(
+                &profile,
+                "ping-a",
+                Some(Duration::from_secs(30)),
+                |client| async move { client.raw_json_request("ping", Value::Null).await },
+            )
+            .await?;
+        let _: Value = orchestrator
+            .cached(
+                &profile,
+                "ping-b",
+                Some(Duration::from_secs(30)),
+                |client| async move { client.raw_json_request("ping", Value::Null).await },
+            )
+            .await?;
+        let stats = orchestrator.stats();
+        let events = observer
+            .events
+            .lock()
+            .unwrap()
+            .iter()
+            .map(event_to_value)
+            .collect::<Vec<_>>();
+
+        Ok::<_, tsgo_rs::TsgoError>(json!({
+            "events": events,
+            "stats": {
+                "cachedSnapshotCount": stats.cached_snapshot_count,
+                "cachedResultCount": stats.cached_result_count,
+                "workerCount": stats.worker_count,
+            },
+        }))
+    })?;
+
+    support::print_json(result);
+    Ok(())
+}

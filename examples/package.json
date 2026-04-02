@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "smoke": "node --strip-types ./smoke.ts",
+    "minimal-start": "node --strip-types ./node/minimal_start.ts",
     "mock-client": "node --strip-types ./node/mock_client.ts",
+    "raw-calls": "node --strip-types ./node/raw_calls.ts",
     "unsafe-type-flow": "node --strip-types ./node/unsafe_type_flow.ts",
     "virtual-document": "node --strip-types ./node/virtual_document.ts",
     "distributed-orchestrator": "node --strip-types ./node/distributed_orchestrator.ts",

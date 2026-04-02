@@ -75,7 +75,7 @@ Pinned upstream at the time of writing:
 - `npm/tsgo_rs_node`: `napi-rs` native bindings and the `@tsgo-rs/node` TypeScript wrapper package
 - `npm/typescript_oxlint`: `typescript-eslint`-style compatibility layer for type-aware Oxlint JS plugins
 - `bench`: Vitest benchmark project for the Node binding
-- `examples`: executable Node binding samples plus `oxlint-plugin-typescript-go` rule/config examples
+- `examples`: curated Node, Rust, and `oxlint-plugin-typescript-go` examples from minimal start to real-project flows
 
 For a detailed architecture walkthrough, design strategy, and implementation tips, see [docs/project_guide.md](./docs/project_guide.md).
 For deployment-oriented defaults, supported scope, and release checks, see [docs/production_readiness.md](./docs/production_readiness.md).
@@ -106,7 +106,7 @@ still target Node `22+`.
 
 ## Examples
 
-The repository now ships executable examples for both `@tsgo-rs/node` and
+The repository now ships executable examples for Rust, `@tsgo-rs/node`, and
 `oxlint-plugin-typescript-go` under [`examples/`](./examples/README.md).
 
 Run the smoke-tested examples with:
@@ -115,13 +115,31 @@ Run the smoke-tested examples with:
 vp run -w examples_smoke
 ```
 
-Run the real pinned-`tsgo` snapshot example with:
+Run only the Rust smoke examples with:
+
+```bash
+vp run -w examples_rust_smoke
+```
+
+Run only the Node / TypeScript smoke examples with:
+
+```bash
+vp run -w examples_node_smoke
+```
+
+Run the real pinned-`tsgo` examples with:
 
 ```bash
 vp run -w sync_ref
 vp run -w verify_ref
 vp run -w build_tsgo
 vp run -w examples_real
+```
+
+Run the experimental distributed Rust example with:
+
+```bash
+vp run -w examples_rust_experimental
 ```
 
 ## Type-Aware Oxlint

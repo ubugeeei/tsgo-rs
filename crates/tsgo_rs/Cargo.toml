@@ -31,6 +31,11 @@ path = "src/bin/bench_real_tsgo/main.rs"
 name = "bench_tooling_compare"
 path = "src/bin/bench_tooling_compare/main.rs"
 
+[[example]]
+name = "distributed_orchestrator"
+path = "examples/distributed_orchestrator.rs"
+required-features = ["experimental-distributed"]
+
 [dependencies]
 base64 = "0.22"
 lsp-types = "0.97"
