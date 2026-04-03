@@ -2,14 +2,14 @@ mod support;
 
 use std::{sync::Arc, time::Duration};
 
-use serde_json::{Value, json};
-use tsgo_rs::{
+use corsa_bind_rs::{
     api::{ApiMode, ApiProfile, UpdateSnapshotParams},
     orchestrator::ApiOrchestrator,
     runtime::block_on,
 };
+use serde_json::{Value, json};
 
-fn main() -> Result<(), tsgo_rs::TsgoError> {
+fn main() -> Result<(), corsa_bind_rs::TsgoError> {
     let result = block_on(async {
         let orchestrator = ApiOrchestrator::default();
         let profile = ApiProfile::new(
@@ -51,12 +51,12 @@ fn main() -> Result<(), tsgo_rs::TsgoError> {
                 let echoed = client
                     .raw_json_request("echo", json!({ "value": value }))
                     .await?;
-                Ok::<_, tsgo_rs::TsgoError>(echoed["value"].as_u64().unwrap() as u32)
+                Ok::<_, corsa_bind_rs::TsgoError>(echoed["value"].as_u64().unwrap() as u32)
             })
             .await?;
         let stats = orchestrator.stats();
 
-        Ok::<_, tsgo_rs::TsgoError>(json!({
+        Ok::<_, corsa_bind_rs::TsgoError>(json!({
             "snapshotCacheHit": Arc::ptr_eq(&snapshot_a, &snapshot_b),
             "snapshotHandle": snapshot_a.handle,
             "cachedPing": ping,

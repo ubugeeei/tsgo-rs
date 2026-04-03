@@ -1,33 +1,33 @@
 # Release Guide
 
-This document is the operational release guide for `tsgo-rs`.
+This document is the operational release guide for `corsa-bind`.
 
 ## Distribution Decisions
 
 Public Rust crates:
 
-- `tsgo_rs_core`
-- `tsgo_rs_runtime`
-- `tsgo_rs_jsonrpc`
-- `tsgo_rs_client`
-- `tsgo_rs_lsp`
-- `tsgo_rs_orchestrator`
-- `tsgo_rs`
+- `corsa_bind_core`
+- `corsa_bind_runtime`
+- `corsa_bind_jsonrpc`
+- `corsa_bind_client`
+- `corsa_bind_lsp`
+- `corsa_bind_orchestrator`
+- `corsa_bind_rs`
 
 Internal Rust crates:
 
-- `tsgo_rs_ref`
-- `tsgo_rs_node`
+- `corsa_bind_ref`
+- `corsa_bind_node`
 
 Public npm packages:
 
-- `@tsgo-rs/node` (`npm/tsgo_rs_node`)
-- `oxlint-plugin-typescript-go` (`npm/typescript_oxlint`)
+- `@corsa-bind/node` (`npm/corsa_bind_node`)
+- `corsa-oxlint` (`npm/corsa_oxlint`)
 
 The npm packages do not bundle the `typescript-go` executable. Consumers must
 point them at a compatible `tsgo` binary at runtime.
 
-`@tsgo-rs/node` is built with `napi-rs`. The publish workflow now ships
+`@corsa-bind/node` is built with `napi-rs`. The publish workflow now ships
 the root package plus target-specific native binary packages for:
 
 - `darwin-arm64`
@@ -36,7 +36,7 @@ the root package plus target-specific native binary packages for:
 - `win32-x64-msvc`
 
 Trusted publishing must be configured for each of those target-specific native
-packages as well as the `@tsgo-rs/node` root package.
+packages as well as the `@corsa-bind/node` root package.
 
 The root package stays JS-only at publish time and resolves the correct native
 binding through optional dependencies.
@@ -45,20 +45,20 @@ binding through optional dependencies.
 
 Publish crates in dependency order:
 
-1. `tsgo_rs_core`
-2. `tsgo_rs_runtime`
-3. `tsgo_rs_jsonrpc`
-4. `tsgo_rs_client`
-5. `tsgo_rs_lsp`
-6. `tsgo_rs_orchestrator`
-7. `tsgo_rs`
+1. `corsa_bind_core`
+2. `corsa_bind_runtime`
+3. `corsa_bind_jsonrpc`
+4. `corsa_bind_client`
+5. `corsa_bind_lsp`
+6. `corsa_bind_orchestrator`
+7. `corsa_bind_rs`
 
 ## npm Publish Order
 
 Publish npm packages in dependency order:
 
-1. `@tsgo-rs/node`
-2. `oxlint-plugin-typescript-go`
+1. `@corsa-bind/node`
+2. `corsa-oxlint`
 
 ## Dry Run
 
@@ -72,7 +72,7 @@ This performs:
 
 - `cargo package` for every public Rust crate
 - a temporary workspace patch overlay so interdependent unpublished crates can be packaged before the first crates.io release
-- staging of the JS-only `@tsgo-rs/node` root package plus any locally available native binary packages
+- staging of the JS-only `@corsa-bind/node` root package plus any locally available native binary packages
 - `pnpm pack` for each publishable npm package so `workspace:*` ranges are rewritten exactly as they will be for publish
 - `npm publish --dry-run <tarball>` for the packed npm tarballs
 
@@ -93,7 +93,7 @@ Before publishing Rust crates:
 Before publishing npm packages, run the same gates plus a fresh `vp run -w build`.
 The GitHub publish workflow fan-outs native binding builds per target, downloads
 those `.node` artifacts into the publish job, and only then publishes the root
-package and `oxlint-plugin-typescript-go`.
+package and `corsa-oxlint`.
 
 ## Trusted Publishing
 
@@ -112,17 +112,17 @@ After the first manual publish of each npm package, configure npm Trusted
 Publishing for each package with:
 
 - GitHub organization or user: `ubugeeei`
-- repository: `tsgo-rs`
+- repository: `corsa-bind`
 - workflow filename: `publish-npm.yml`
 - environment: `release`
 
-For `@tsgo-rs/node`, also configure the same trusted publisher on each native
+For `@corsa-bind/node`, also configure the same trusted publisher on each native
 binary package:
 
-- `@tsgo-rs/node-darwin-arm64`
-- `@tsgo-rs/node-darwin-x64`
-- `@tsgo-rs/node-linux-x64-gnu`
-- `@tsgo-rs/node-win32-x64-msvc`
+- `@corsa-bind/node-darwin-arm64`
+- `@corsa-bind/node-darwin-x64`
+- `@corsa-bind/node-linux-x64-gnu`
+- `@corsa-bind/node-win32-x64-msvc`
 
 The npm workflow pins Node `24`, which satisfies npm's Trusted Publishing
 minimum (`Node >= 22.14.0`, `npm >= 11.5.1`).
@@ -150,7 +150,7 @@ waits until the reported retry time and continues automatically. If the process
 stops midway, resume from the first missing crate:
 
 ```bash
-CARGO_PUBLISH_START_AT=tsgo_rs node --strip-types ./scripts/publish_rust.ts
+CARGO_PUBLISH_START_AT=corsa_bind_rs node --strip-types ./scripts/publish_rust.ts
 ```
 
 ### npm
@@ -167,7 +167,7 @@ resulting tarballs with `npm publish`, so the packed manifest already contains
 real semver ranges instead of `workspace:*`.
 
 For production releases, the npm publish script now refuses to publish the
-`@tsgo-rs/node` root package unless every configured native binding target is
+`@corsa-bind/node` root package unless every configured native binding target is
 present. Stage the `.node` artifacts from the build matrix into `./artifacts`
 before running the first manual publish. `NAPI_REQUIRE_ALL_TARGETS=0` is still
 available for local experimentation, but it is not production-safe for a real
@@ -175,7 +175,7 @@ release.
 
 The trusted-publishing workflow follows the same order, but publishes the
 target-specific native binding packages first and the JS-only
-`@tsgo-rs/node` root package after every required artifact is present.
+`@corsa-bind/node` root package after every required artifact is present.
 
 If your npm account enforces 2FA, complete the interactive challenge during
 this first manual publish.
@@ -183,7 +183,7 @@ this first manual publish.
 If a publish partially succeeds, rerun from the first missing package:
 
 ```bash
-NPM_PUBLISH_START_AT=oxlint-plugin-typescript-go NAPI_ARTIFACTS_DIR=./artifacts node --strip-types ./scripts/publish_npm.ts
+NPM_PUBLISH_START_AT=corsa-oxlint NAPI_ARTIFACTS_DIR=./artifacts node --strip-types ./scripts/publish_npm.ts
 ```
 
 ## Changelog Expectations

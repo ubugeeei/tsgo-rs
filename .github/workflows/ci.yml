@@ -61,7 +61,7 @@ jobs:
         run: vp run -w test
 
       - name: Validate public facade without experimental features
-        run: cargo test -p tsgo_rs --no-default-features --test orchestrator
+        run: cargo test -p corsa_bind_rs --no-default-features --test orchestrator
 
   real-tsgo-smoke:
     name: Real tsgo Smoke (${{ matrix.os }})
@@ -106,7 +106,7 @@ jobs:
         run: vp run -w build_tsgo
 
       - name: Real tsgo smoke tests
-        run: cargo test -p tsgo_rs --no-default-features --test real_tsgo_regression --test real_tsgo_typecheck
+        run: cargo test -p corsa_bind_rs --no-default-features --test real_tsgo_regression --test real_tsgo_typecheck
 
       - name: Real examples
         run: vp run -w examples_real
@@ -147,7 +147,7 @@ jobs:
         run: vp run -w build_tsgo
 
       - name: Real tsgo baseline and regression tests
-        run: cargo test -p tsgo_rs --no-default-features --test real_tsgo_baseline --test real_tsgo_regression --test real_tsgo_typecheck
+        run: cargo test -p corsa_bind_rs --no-default-features --test real_tsgo_baseline --test real_tsgo_regression --test real_tsgo_typecheck
 
       - name: Benchmark guards
         run: vp run -w bench_verify

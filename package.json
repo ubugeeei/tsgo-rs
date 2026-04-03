@@ -1,14 +1,14 @@
 {
-  "name": "tsgo-rs-workspace",
+  "name": "corsa-bind-workspace",
   "private": true,
   "description": "Rust, Node, and orchestration tooling for production-style typescript-go workflows",
-  "homepage": "https://github.com/ubugeeei/tsgo-rs",
+  "homepage": "https://github.com/ubugeeei/corsa-bind",
   "bugs": {
-    "url": "https://github.com/ubugeeei/tsgo-rs/issues"
+    "url": "https://github.com/ubugeeei/corsa-bind/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ubugeeei/tsgo-rs.git"
+    "url": "https://github.com/ubugeeei/corsa-bind.git"
   },
   "type": "module",
   "devDependencies": {

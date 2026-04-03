@@ -81,6 +81,122 @@ dependencies = [
 ]
 
 [[package]]
+name = "corsa_bind_client"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "corsa_bind_core",
+ "corsa_bind_jsonrpc",
+ "corsa_bind_runtime",
+ "log",
+ "parking_lot",
+ "phf",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "corsa_bind_core"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "bumpalo",
+ "compact_str",
+ "memchr",
+ "rustc-hash",
+ "serde",
+ "serde_json",
+ "smallvec",
+ "thiserror",
+]
+
+[[package]]
+name = "corsa_bind_jsonrpc"
+version = "0.1.0"
+dependencies = [
+ "corsa_bind_core",
+ "corsa_bind_runtime",
+ "log",
+ "parking_lot",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "corsa_bind_lsp"
+version = "0.1.0"
+dependencies = [
+ "corsa_bind_core",
+ "corsa_bind_jsonrpc",
+ "corsa_bind_runtime",
+ "log",
+ "lsp-types",
+ "parking_lot",
+ "serde",
+]
+
+[[package]]
+name = "corsa_bind_node"
+version = "0.1.0"
+dependencies = [
+ "corsa_bind_rs",
+ "lsp-types",
+ "napi",
+ "napi-build",
+ "napi-derive",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "corsa_bind_orchestrator"
+version = "0.1.0"
+dependencies = [
+ "corsa_bind_client",
+ "corsa_bind_core",
+ "corsa_bind_lsp",
+ "corsa_bind_runtime",
+ "log",
+ "lsp-types",
+ "parking_lot",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "corsa_bind_ref"
+version = "0.1.0"
+dependencies = [
+ "corsa_bind_core",
+ "serde",
+ "tempfile",
+ "toml",
+]
+
+[[package]]
+name = "corsa_bind_rs"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "corsa_bind_client",
+ "corsa_bind_core",
+ "corsa_bind_jsonrpc",
+ "corsa_bind_lsp",
+ "corsa_bind_orchestrator",
+ "corsa_bind_runtime",
+ "lsp-types",
+ "serde_json",
+ "tempfile",
+]
+
+[[package]]
+name = "corsa_bind_runtime"
+version = "0.1.0"
+dependencies = [
+ "smallvec",
+]
+
+[[package]]
 name = "ctor"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -673,122 +789,6 @@ name = "toml_write"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5d99f8c9a7727884afe522e9bd5edbfc91a3312b36a77b5fb8926e4c31a41801"
-
-[[package]]
-name = "tsgo_rs"
-version = "0.1.0"
-dependencies = [
- "base64",
- "lsp-types",
- "serde_json",
- "tempfile",
- "tsgo_rs_client",
- "tsgo_rs_core",
- "tsgo_rs_jsonrpc",
- "tsgo_rs_lsp",
- "tsgo_rs_orchestrator",
- "tsgo_rs_runtime",
-]
-
-[[package]]
-name = "tsgo_rs_client"
-version = "0.1.0"
-dependencies = [
- "base64",
- "log",
- "parking_lot",
- "phf",
- "serde",
- "serde_json",
- "tsgo_rs_core",
- "tsgo_rs_jsonrpc",
- "tsgo_rs_runtime",
-]
-
-[[package]]
-name = "tsgo_rs_core"
-version = "0.1.0"
-dependencies = [
- "base64",
- "bumpalo",
- "compact_str",
- "memchr",
- "rustc-hash",
- "serde",
- "serde_json",
- "smallvec",
- "thiserror",
-]
-
-[[package]]
-name = "tsgo_rs_jsonrpc"
-version = "0.1.0"
-dependencies = [
- "log",
- "parking_lot",
- "serde",
- "serde_json",
- "tsgo_rs_core",
- "tsgo_rs_runtime",
-]
-
-[[package]]
-name = "tsgo_rs_lsp"
-version = "0.1.0"
-dependencies = [
- "log",
- "lsp-types",
- "parking_lot",
- "serde",
- "tsgo_rs_core",
- "tsgo_rs_jsonrpc",
- "tsgo_rs_runtime",
-]
-
-[[package]]
-name = "tsgo_rs_node"
-version = "0.1.0"
-dependencies = [
- "lsp-types",
- "napi",
- "napi-build",
- "napi-derive",
- "serde",
- "serde_json",
- "tsgo_rs",
-]
-
-[[package]]
-name = "tsgo_rs_orchestrator"
-version = "0.1.0"
-dependencies = [
- "log",
- "lsp-types",
- "parking_lot",
- "serde",
- "serde_json",
- "tsgo_rs_client",
- "tsgo_rs_core",
- "tsgo_rs_lsp",
- "tsgo_rs_runtime",
-]
-
-[[package]]
-name = "tsgo_rs_ref"
-version = "0.1.0"
-dependencies = [
- "serde",
- "tempfile",
- "toml",
- "tsgo_rs_core",
-]
-
-[[package]]
-name = "tsgo_rs_runtime"
-version = "0.1.0"
-dependencies = [
- "smallvec",
-]
 
 [[package]]
 name = "unicode-ident"

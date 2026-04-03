@@ -29,32 +29,32 @@ importers:
 
   bench:
     dependencies:
-      '@tsgo-rs/node':
+      '@corsa-bind/node':
         specifier: workspace:*
-        version: link:../npm/tsgo_rs_node
-      oxlint-plugin-typescript-go:
+        version: link:../npm/corsa_bind_node
+      corsa-oxlint:
         specifier: workspace:*
-        version: link:../npm/typescript_oxlint
+        version: link:../npm/corsa_oxlint
 
   examples:
     dependencies:
-      '@tsgo-rs/node':
+      '@corsa-bind/node':
         specifier: workspace:*
-        version: link:../npm/tsgo_rs_node
-      oxlint-plugin-typescript-go:
+        version: link:../npm/corsa_bind_node
+      corsa-oxlint:
         specifier: workspace:*
-        version: link:../npm/typescript_oxlint
+        version: link:../npm/corsa_oxlint
 
-  npm/tsgo_rs_node: {}
+  npm/corsa_bind_node: {}
 
-  npm/typescript_oxlint:
+  npm/corsa_oxlint:
     dependencies:
+      '@corsa-bind/node':
+        specifier: workspace:*
+        version: link:../corsa_bind_node
       '@oxlint/plugins':
         specifier: 1.57.0
         version: 1.57.0
-      '@tsgo-rs/node':
-        specifier: workspace:*
-        version: link:../tsgo_rs_node
       oxlint:
         specifier: 1.57.0
         version: 1.57.0(oxlint-tsgolint@0.17.3)

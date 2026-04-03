@@ -2,9 +2,14 @@
 
 These examples are split into three groups:
 
-- `examples/nodejs/*`: executable `@tsgo-rs/node` samples
+- `examples/nodejs/*`: executable `@corsa-bind/node` samples
 - `examples/rust/*`: executable Rust samples
-- `examples/typescript_oxlint/*`: reusable `oxlint-plugin-typescript-go` rule/plugin/config samples
+- `examples/corsa_oxlint/*`: reusable `corsa-oxlint` rule/plugin/config samples
+
+The `corsa_*` naming follows TypeScript's internal codenames as well:
+`Corsa` refers to the native TypeScript 7 effort, while `Strada` refers to the
+existing JS-based line. These examples are all oriented around the native
+`typescript-go` side of that split.
 
 ## Prerequisites
 
@@ -62,7 +67,7 @@ Run one of them directly with:
 
 ```bash
 pnpm --dir examples run minimal-start
-cargo run -p tsgo_rs --example minimal_start
+cargo run -p corsa_bind_rs --example minimal_start
 ```
 
 ## Mock Binary Workflows
@@ -82,21 +87,21 @@ Run one of them directly with:
 
 ```bash
 pnpm --dir examples run raw-calls
-cargo run -p tsgo_rs --example lsp_overlay
+cargo run -p corsa_bind_rs --example lsp_overlay
 ```
 
 ## Real Pinned `tsgo`
 
 These examples hit the exact upstream-pinned checkout under `ref/typescript-go`.
 
-- `examples/nodejs/real_snapshot.ts`: opens the pinned project through `@tsgo-rs/node` and fetches a real source file snapshot
+- `examples/nodejs/real_snapshot.ts`: opens the pinned project through `@corsa-bind/node` and fetches a real source file snapshot
 - `examples/rust/real_snapshot.rs`: the Rust-side equivalent using the msgpack-first API client
 
 Run one directly with:
 
 ```bash
 pnpm --dir examples run real-snapshot
-cargo run -p tsgo_rs --example real_snapshot
+cargo run -p corsa_bind_rs --example real_snapshot
 ```
 
 ## Experimental Distributed
@@ -108,14 +113,14 @@ This example is intentionally separated because it requires the cargo feature.
 Run it with:
 
 ```bash
-cargo run -p tsgo_rs --features experimental-distributed --example distributed_orchestrator
+cargo run -p corsa_bind_rs --features experimental-distributed --example distributed_orchestrator
 ```
 
-## `oxlint-plugin-typescript-go` Examples
+## `corsa-oxlint` Examples
 
-- `examples/typescript_oxlint/custom_rule.ts`: custom type-aware rule using `ESLintUtils.getParserServices()`
-- `examples/typescript_oxlint/custom_plugin.ts`: plugin wrapper around the custom rule
-- `examples/typescript_oxlint/custom_rules_config.ts`: flat config using the custom plugin
-- `examples/typescript_oxlint/native_rules_config.ts`: flat config using the built-in native rules
-- `examples/typescript_oxlint/rule_tester.ts`: executable `RuleTester` example against the real pinned `tsgo` binary
-- `examples/typescript_oxlint/native_rule_tester.ts`: executable `RuleTester` example for the built-in Rust-backed and TS-native rules
+- `examples/corsa_oxlint/custom_rule.ts`: custom type-aware rule using `ESLintUtils.getParserServices()`
+- `examples/corsa_oxlint/custom_plugin.ts`: plugin wrapper around the custom rule
+- `examples/corsa_oxlint/custom_rules_config.ts`: flat config using the custom plugin
+- `examples/corsa_oxlint/native_rules_config.ts`: flat config using the built-in native rules
+- `examples/corsa_oxlint/rule_tester.ts`: executable `RuleTester` example against the real pinned `tsgo` binary
+- `examples/corsa_oxlint/native_rule_tester.ts`: executable `RuleTester` example for the built-in Rust-backed and TS-native rules

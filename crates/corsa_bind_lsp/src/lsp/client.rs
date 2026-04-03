@@ -1,0 +1,225 @@
+use crate::{
+    Result, TsgoError,
+    jsonrpc::{InboundEvent, JsonRpcConnection, JsonRpcConnectionOptions, RequestId},
+    process::{AsyncChildGuard, TsgoCommand},
+};
+use corsa_bind_core::{
+    SharedObserver,
+    fast::{CompactString, SmallVec},
+};
+use corsa_bind_runtime::BroadcastReceiver;
+use lsp_types::{notification::Notification, request::Request};
+use serde::{Serialize, de::DeserializeOwned};
+use std::{io::BufReader, path::PathBuf, sync::Arc, time::Duration};
+
+use super::{
+    InitializeApiSessionParams, InitializeApiSessionRequest, InitializeApiSessionResult, LspOverlay,
+};
+
+/// LSP client backed by the `tsgo` stdio server.
+///
+/// `LspClient` is the transport-facing half of editor-style workflows. It owns
+/// the server process, provides typed request/notification helpers via
+/// [`lsp_types`], and can create an [`LspOverlay`] for mirrored in-memory
+/// document state.
+#[derive(Clone)]
+pub struct LspClient {
+    rpc: JsonRpcConnection,
+    process: Arc<AsyncChildGuard>,
+    shutdown_timeout: Duration,
+}
+
+/// Spawn-time options for [`LspClient`].
+///
+/// # Examples
+///
+/// ```
+/// use corsa_bind_lsp::LspSpawnConfig;
+///
+/// let config = LspSpawnConfig::new("/opt/bin/tsgo")
+///     .with_cwd("/workspace")
+///     .with_arg("--logToFile");
+///
+/// assert_eq!(config.extra_args.as_slice(), &["--logToFile"]);
+/// ```
+#[derive(Clone)]
+pub struct LspSpawnConfig {
+    /// Reusable command template used to launch `tsgo --lsp --stdio`.
+    pub command: TsgoCommand,
+    /// Additional CLI flags appended after `--lsp --stdio`.
+    pub extra_args: SmallVec<[CompactString; 4]>,
+    /// Maximum time to wait for a single request before surfacing a timeout.
+    pub request_timeout: Option<Duration>,
+    /// Maximum time to wait for process shutdown before force-killing the server.
+    pub shutdown_timeout: Duration,
+    /// Maximum number of queued outbound transport messages.
+    pub outbound_capacity: usize,
+    /// Optional observer for structured transport events.
+    pub observer: Option<SharedObserver>,
+}
+
+impl std::fmt::Debug for LspSpawnConfig {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("LspSpawnConfig")
+            .field("command", &self.command)
+            .field("extra_args", &self.extra_args)
+            .field("request_timeout", &self.request_timeout)
+            .field("shutdown_timeout", &self.shutdown_timeout)
+            .field("outbound_capacity", &self.outbound_capacity)
+            .field("observer", &self.observer.is_some())
+            .finish()
+    }
+}
+
+impl LspSpawnConfig {
+    /// Creates a new LSP spawn configuration.
+    pub fn new(executable: impl Into<PathBuf>) -> Self {
+        Self {
+            command: TsgoCommand::new(executable),
+            extra_args: SmallVec::new(),
+            request_timeout: Some(Duration::from_secs(30)),
+            shutdown_timeout: Duration::from_secs(2),
+            outbound_capacity: 256,
+            observer: None,
+        }
+    }
+
+    /// Sets the server working directory.
+    pub fn with_cwd(mut self, cwd: impl Into<PathBuf>) -> Self {
+        self.command = self.command.clone().with_cwd(cwd);
+        self
+    }
+
+    /// Appends an extra CLI argument passed to tsgo.
+    pub fn with_arg(mut self, arg: impl Into<CompactString>) -> Self {
+        self.extra_args.push(arg.into());
+        self
+    }
+
+    /// Sets the per-request timeout applied by the JSON-RPC transport.
+    pub fn with_request_timeout(mut self, timeout: Option<Duration>) -> Self {
+        self.request_timeout = timeout;
+        self
+    }
+
+    /// Sets the graceful shutdown timeout used when closing the server.
+    pub fn with_shutdown_timeout(mut self, timeout: Duration) -> Self {
+        self.shutdown_timeout = timeout;
+        self
+    }
+
+    /// Sets the maximum number of queued outbound transport messages.
+    pub fn with_outbound_capacity(mut self, capacity: usize) -> Self {
+        self.outbound_capacity = capacity.max(1);
+        self
+    }
+
+    /// Sets the observer used for structured transport events.
+    pub fn with_observer(mut self, observer: SharedObserver) -> Self {
+        self.observer = Some(observer);
+        self
+    }
+}
+
+impl LspClient {
+    /// Spawns a tsgo LSP server over stdio.
+    ///
+    /// The client owns the spawned process and will terminate it when
+    /// [`close`](Self::close) is called.
+    pub async fn spawn(config: LspSpawnConfig) -> Result<Self> {
+        let mut args = SmallVec::<[CompactString; 6]>::new();
+        args.push(CompactString::from("--lsp"));
+        args.push(CompactString::from("--stdio"));
+        args.extend(config.extra_args);
+        let mut child = config
+            .command
+            .spawn_async(args.iter().map(CompactString::as_str))?;
+        let stdin = child.stdin.take().ok_or(TsgoError::Closed("lsp stdin"))?;
+        let stdout = child.stdout.take().ok_or(TsgoError::Closed("lsp stdout"))?;
+        Ok(Self {
+            rpc: JsonRpcConnection::spawn_with_options(
+                BufReader::new(stdout),
+                stdin,
+                Default::default(),
+                JsonRpcConnectionOptions::new()
+                    .with_request_timeout(config.request_timeout)
+                    .with_outbound_capacity(config.outbound_capacity)
+                    .with_observer_if_some(config.observer.clone()),
+            ),
+            process: Arc::new(AsyncChildGuard::new(child)),
+            shutdown_timeout: config.shutdown_timeout,
+        })
+    }
+
+    /// Subscribes to inbound requests and notifications from the server.
+    ///
+    /// Only messages without a local handler are forwarded to subscribers.
+    pub fn subscribe(&self) -> BroadcastReceiver<InboundEvent> {
+        self.rpc.subscribe()
+    }
+
+    /// Creates a virtual-document overlay synchronized with this client.
+    ///
+    /// The overlay helps keep `didOpen`, `didChange`, and `didClose`
+    /// notifications consistent with local in-memory state.
+    pub fn overlay(&self) -> LspOverlay {
+        LspOverlay::new(self.clone())
+    }
+
+    /// Sends a typed LSP request.
+    ///
+    /// Request/response payloads are described by the [`lsp_types::request::Request`]
+    /// implementation supplied as `R`.
+    pub async fn request<R>(&self, params: R::Params) -> Result<R::Result>
+    where
+        R: Request,
+        R::Params: Serialize,
+        R::Result: DeserializeOwned,
+    {
+        self.rpc.request(R::METHOD, params).await
+    }
+
+    /// Sends a typed LSP notification.
+    ///
+    /// This is the preferred way to emit standard protocol notifications such
+    /// as `textDocument/didOpen`.
+    pub fn notify<N>(&self, params: N::Params) -> Result<()>
+    where
+        N: Notification,
+        N::Params: Serialize,
+    {
+        self.rpc.notify(N::METHOD, params)
+    }
+
+    /// Responds to an inbound request.
+    ///
+    /// Use this when consuming [`InboundEvent::Request`](crate::jsonrpc::InboundEvent::Request)
+    /// from [`subscribe`](Self::subscribe).
+    pub fn respond<ResultBody>(&self, id: RequestId, body: ResultBody) -> Result<()>
+    where
+        ResultBody: Serialize,
+    {
+        self.rpc.respond(id, body)
+    }
+
+    /// Calls the custom `initializeAPISession` request exposed by `tsgo`.
+    ///
+    /// This is useful when an LSP session needs to bootstrap a separate API
+    /// session and exchange its pipe information with another component.
+    pub async fn initialize_api_session(
+        &self,
+        params: InitializeApiSessionParams,
+    ) -> Result<InitializeApiSessionResult> {
+        self.request::<InitializeApiSessionRequest>(params).await
+    }
+
+    /// Closes the LSP transport and terminates the server process.
+    ///
+    /// The underlying process is shut down safely through [`AsyncChildGuard`],
+    /// which ensures the child is reaped even if it needs to be killed.
+    pub async fn close(&self) -> Result<()> {
+        self.rpc.close().await?;
+        self.process.shutdown(self.shutdown_timeout).await
+    }
+}

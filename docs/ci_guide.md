@@ -70,7 +70,7 @@ The important commands are:
 vp run -w sync_ref
 vp run -w verify_ref
 vp run -w build_tsgo
-cargo test -p tsgo_rs --no-default-features --test real_tsgo_regression --test real_tsgo_typecheck
+cargo test -p corsa_bind_rs --no-default-features --test real_tsgo_regression --test real_tsgo_typecheck
 ```
 
 ## `bench-tsgo-ref`
@@ -123,7 +123,7 @@ nix shell nixpkgs#nodejs_24 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w tes
 nix shell nixpkgs#nodejs_24 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w sync_ref'
 nix shell nixpkgs#nodejs_24 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w verify_ref'
 nix shell nixpkgs#nodejs_24 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w build_tsgo'
-cargo test -p tsgo_rs --test real_tsgo_baseline --test real_tsgo_regression
+cargo test -p corsa_bind_rs --test real_tsgo_baseline --test real_tsgo_regression
 nix shell nixpkgs#nodejs_24 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w bench_verify'
 ```
 
@@ -140,18 +140,18 @@ The CI work that made this path reliable fell into three buckets:
 
 ## 1. `vp check` Failed Before the Node Wrapper Was Built
 
-The first failure mode came from `typescript_oxlint`.
+The first failure mode came from `corsa_oxlint`.
 
-The original `tsconfig` path mapping for `@tsgo-rs/node` pointed at:
+The original `tsconfig` path mapping for `@corsa-bind/node` pointed at:
 
-- `../tsgo_rs_node/dist/index.d.mts`
+- `../corsa_bind_node/dist/index.d.mts`
 
 That works after the wrapper package has already been built.
 It is the wrong dependency edge for `vp check`, because `vp check` is supposed to validate source state before build artifacts exist.
 
 The fix was to map the package name to source instead:
 
-- [`../npm/typescript_oxlint/tsconfig.json`](../npm/typescript_oxlint/tsconfig.json)
+- [`../npm/corsa_oxlint/tsconfig.json`](../npm/corsa_oxlint/tsconfig.json)
 
 This makes `vp check` depend on the checked-in TypeScript source surface rather than on generated output.
 
@@ -162,9 +162,9 @@ That is an important distinction:
 
 If `check` depends on `dist/`, the repository can look broken even when the source is correct.
 
-## 2. `typescript_oxlint` Had Drifted from the Current Type Shape
+## 2. `corsa_oxlint` Had Drifted from the Current Type Shape
 
-After module resolution was fixed, several TypeScript errors remained in `typescript_oxlint`.
+After module resolution was fixed, several TypeScript errors remained in `corsa_oxlint`.
 
 The important ones were:
 
@@ -174,10 +174,10 @@ The important ones were:
 
 These were corrected in:
 
-- [`../npm/typescript_oxlint/ts/session.ts`](../npm/typescript_oxlint/ts/session.ts)
-- [`../npm/typescript_oxlint/ts/rules/type_utils.ts`](../npm/typescript_oxlint/ts/rules/type_utils.ts)
+- [`../npm/corsa_oxlint/ts/session.ts`](../npm/corsa_oxlint/ts/session.ts)
+- [`../npm/corsa_oxlint/ts/rules/type_utils.ts`](../npm/corsa_oxlint/ts/rules/type_utils.ts)
 
-The practical lesson is that `typescript_oxlint` is part compatibility layer and part consumer.
+The practical lesson is that `corsa_oxlint` is part compatibility layer and part consumer.
 It needs to follow the real wrapper API shape closely, otherwise CI fails long before runtime tests do.
 
 ## 3. The Pinned Upstream Checkout Requires Go 1.26
@@ -225,7 +225,7 @@ A relative path looks harmless but is rejected by the Go toolchain.
 
 ## 5. `verify_ref` Is Supposed to Be Strict
 
-The `tsgo_rs_ref` checks are intentionally unforgiving.
+The `corsa_bind_ref` checks are intentionally unforgiving.
 
 They enforce that `ref/typescript-go` is:
 
@@ -275,7 +275,7 @@ They reflect a few design rules.
 
 ## Source Checks Should Depend on Source, Not Generated Artifacts
 
-This was the core reason to change `typescript_oxlint`'s path mapping.
+This was the core reason to change `corsa_oxlint`'s path mapping.
 
 If `vp check` depends on a generated declaration file, then the logical order becomes:
 
@@ -309,16 +309,16 @@ The most important files for this CI stabilization work are:
 
 - [`../.github/workflows/ci.yml`](../.github/workflows/ci.yml)
 - [`../vite.config.ts`](../vite.config.ts)
-- [`../npm/typescript_oxlint/tsconfig.json`](../npm/typescript_oxlint/tsconfig.json)
-- [`../npm/typescript_oxlint/ts/session.ts`](../npm/typescript_oxlint/ts/session.ts)
-- [`../npm/typescript_oxlint/ts/rules/type_utils.ts`](../npm/typescript_oxlint/ts/rules/type_utils.ts)
+- [`../npm/corsa_oxlint/tsconfig.json`](../npm/corsa_oxlint/tsconfig.json)
+- [`../npm/corsa_oxlint/ts/session.ts`](../npm/corsa_oxlint/ts/session.ts)
+- [`../npm/corsa_oxlint/ts/rules/type_utils.ts`](../npm/corsa_oxlint/ts/rules/type_utils.ts)
 - [`../ref/typescript-go/go.mod`](../ref/typescript-go/go.mod)
 
 ## Troubleshooting
 
-## `vp check` says `@tsgo-rs/node` cannot be found
+## `vp check` says `@corsa-bind/node` cannot be found
 
-Check whether `typescript_oxlint` is resolving the package to source or to `dist/`.
+Check whether `corsa_oxlint` is resolving the package to source or to `dist/`.
 For source validation, it should resolve to the source TypeScript entrypoint, not to generated declarations.
 
 ## `build_tsgo` fails with a Go version error

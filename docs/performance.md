@@ -1,6 +1,6 @@
 # Performance
 
-`tsgo-rs` ships with two benchmark layers:
+`corsa-bind` ships with two benchmark layers:
 
 - Native real-tsgo benchmark: `vp run -w bench_native`
 - Native deep benchmark: `vp run -w bench_native_deep`
@@ -26,7 +26,7 @@ For the reasoning behind these benchmark layers, implementation notes, and exten
 The tooling benchmark is the `bench_tooling_compare` binary. It tracks two workloads:
 
 - `project_check`: `tsc`, `tsgo`, and `typescript-eslint` on the same dataset
-- `editor_workflow`: `tsgo-rs` msgpack cold and warm orchestration over a representative multi-query API flow
+- `editor_workflow`: `corsa-bind` msgpack cold and warm orchestration over a representative multi-query API flow
 
 Before running it for the first time, install the comparison dependencies:
 
@@ -37,7 +37,7 @@ vp run -w bench_tooling_setup
 Then run:
 
 ```bash
-cargo run --release -p tsgo_rs --bin bench_tooling_compare -- \
+cargo run --release -p corsa_bind_rs --bin bench_tooling_compare -- \
   --iterations 10 \
   --warmup-iterations 2 \
   --json-output .cache/bench_tooling_compare.json
@@ -53,7 +53,7 @@ The runner creates temporary overlay `tsconfig` files for CLI parity, enforces p
 The native benchmark runner is the `bench_real_tsgo` binary:
 
 ```bash
-cargo run --release -p tsgo_rs --bin bench_real_tsgo -- \
+cargo run --release -p corsa_bind_rs --bin bench_real_tsgo -- \
   --cold-iterations 5 \
   --warm-iterations 20 \
   --json-output .cache/bench_native.json
@@ -62,7 +62,7 @@ cargo run --release -p tsgo_rs --bin bench_real_tsgo -- \
 For a heavier pass that is better suited to before/after comparisons, use:
 
 ```bash
-cargo run --release -p tsgo_rs --bin bench_real_tsgo -- \
+cargo run --release -p corsa_bind_rs --bin bench_real_tsgo -- \
   --cold-iterations 10 \
   --warm-iterations 80 \
   --json-output .cache/bench_native_deep.json
@@ -113,15 +113,15 @@ vp run -w bench_tooling_compare
 ### Editor Workflow
 
 These rows are intentionally not the same workload as a full compiler CLI check.
-They model a `tsgo-rs` session that opens a project once and then runs a representative query flow (`default project` + `source file` + `symbol` + `type` + `typeToString`).
+They model a `corsa-bind` session that opens a project once and then runs a representative query flow (`default project` + `source file` + `symbol` + `type` + `typeToString`).
 
-| dataset      | `tsgo` CLI project check | `tsgo-rs` cold workflow | `tsgo-rs` warm workflow |
+| dataset      | `tsgo` CLI project check | `corsa-bind` cold workflow | `corsa-bind` warm workflow |
 | ------------ | -----------------------: | ----------------------: | ----------------------: |
 | `ast`        |                   23.995 |                  19.666 |                   0.376 |
 | `api`        |                   35.783 |                  30.049 |                   0.181 |
 | `_extension` |                   58.801 |                  45.811 |                   0.186 |
 
-The interesting part is not that `tsgo-rs` somehow beats the underlying engine on identical work.
+The interesting part is not that `corsa-bind` somehow beats the underlying engine on identical work.
 It does not.
 The interesting part is that orchestration plus session reuse can beat rerunning `tsgo --noEmit` when the workload is editor-like rather than a full project check.
 
@@ -154,5 +154,5 @@ The current Vitest bench summary is useful for relative ranking but the JSON fil
 - `ApiSpawnConfig::new()` defaults to `SyncMsgpackStdio`, because it is still consistently ahead on the measured real-tsgo paths.
 - `getSourceFile` benefits strongly from msgpack because async JSON-RPC has to carry binary payloads through JSON framing.
 - `bench/src/report_guard.test.ts` fails when benchmark samples go missing or when the measured hot paths drift past the configured budget.
-- `crates/tsgo_rs/tests/real_tsgo_baseline.rs` pins the real upstream API summary for the locked `tsgo` commit.
+- `crates/corsa_bind_rs/tests/real_tsgo_baseline.rs` pins the real upstream API summary for the locked `tsgo` commit.
 - `printNode` is intentionally excluded from the default native suite at the pinned upstream commit because the real `tsgo` server can still panic inside `internal/printer` on real project data.

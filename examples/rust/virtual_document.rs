@@ -1,10 +1,10 @@
 mod support;
 
+use corsa_bind_rs::lsp::{VirtualChange, VirtualDocument};
 use lsp_types::{Position, Range};
 use serde_json::json;
-use tsgo_rs::lsp::{VirtualChange, VirtualDocument};
 
-fn main() -> Result<(), tsgo_rs::TsgoError> {
+fn main() -> Result<(), corsa_bind_rs::TsgoError> {
     let mut document = VirtualDocument::in_memory(
         "overlay",
         "/main.ts",

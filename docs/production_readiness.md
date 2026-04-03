@@ -1,6 +1,6 @@
 # Production Readiness Guide
 
-This document is the short operational checklist for running `tsgo-rs` in production-style environments.
+This document is the short operational checklist for running `corsa-bind` in production-style environments.
 
 ## Scope
 
@@ -53,8 +53,8 @@ For editor-like integrations:
 - `vp check`
 - `cargo clippy --workspace --all-targets -- -D warnings`
 - `vp run -w test`
-- `cargo test -p tsgo_rs --no-default-features --test orchestrator`
-- `cargo test -p tsgo_rs --features experimental-distributed --test orchestrator`
+- `cargo test -p corsa_bind_rs --no-default-features --test orchestrator`
+- `cargo test -p corsa_bind_rs --features experimental-distributed --test orchestrator`
 - `vp run -w bench_verify`
 - `vp run -w verify_ref`
 - `cargo deny check advisories bans licenses sources`
@@ -78,7 +78,7 @@ Published Node prebuild coverage currently targets:
 - `linux-x64-gnu`
 - `win32-x64-msvc`
 
-Release safety rule: do not publish `@tsgo-rs/node` for a new version until all
+Release safety rule: do not publish `@corsa-bind/node` for a new version until all
 four native binding packages for that version are built and staged. The root
 package's optional dependencies are versioned, so a partial first publish would
 leave later platforms stranded until the next release.
