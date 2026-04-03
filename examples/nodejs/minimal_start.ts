@@ -1,4 +1,4 @@
-import { isUnsafeAssignment, isUnsafeReturn, TsgoVirtualDocument } from "@tsgo-rs/node";
+import { isUnsafeAssignment, isUnsafeReturn, TsgoVirtualDocument } from "@corsa-bind/node";
 
 import { isMain } from "../shared.ts";
 

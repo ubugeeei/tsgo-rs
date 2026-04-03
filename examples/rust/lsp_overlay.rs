@@ -2,12 +2,12 @@ mod support;
 
 use std::time::Duration;
 
-use serde_json::{Value, json};
-use tsgo_rs::{
+use corsa_bind_rs::{
     jsonrpc::InboundEvent,
     lsp::{InitializeApiSessionParams, LspClient, VirtualChange, VirtualDocument},
     runtime::block_on,
 };
+use serde_json::{Value, json};
 
 struct InitializeRequest;
 
@@ -25,13 +25,13 @@ impl lsp_types::request::Request for OverlayStateRequest {
     const METHOD: &'static str = "custom/overlayState";
 }
 
-fn main() -> Result<(), tsgo_rs::TsgoError> {
+fn main() -> Result<(), corsa_bind_rs::TsgoError> {
     let result = block_on(async {
         let client = LspClient::spawn(support::mock_lsp_config("lsp_overlay")?).await?;
         let events = client.subscribe();
         let initialize = client.request::<InitializeRequest>(json!({})).await?;
         let first_event = match events.recv_timeout(Duration::from_secs(1)).map_err(|err| {
-            tsgo_rs::TsgoError::Protocol(
+            corsa_bind_rs::TsgoError::Protocol(
                 format!("timed out waiting for first LSP event: {err}").into(),
             )
         })? {
@@ -64,7 +64,7 @@ fn main() -> Result<(), tsgo_rs::TsgoError> {
         let state = client.request::<OverlayStateRequest>(json!({})).await?;
         overlay.close(&document.uri)?;
         client.close().await?;
-        Ok::<_, tsgo_rs::TsgoError>(json!({
+        Ok::<_, corsa_bind_rs::TsgoError>(json!({
             "textDocumentSync": initialize["capabilities"]["textDocumentSync"],
             "firstEvent": first_event,
             "apiSessionId": session.session_id,

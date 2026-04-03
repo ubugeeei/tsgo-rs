@@ -83,17 +83,17 @@ interface BindingArtifact {
 }
 
 export const nodeBindingPackage: PublishablePackage = {
-  name: "@tsgo-rs/node",
-  path: resolve(rootDir, "npm/tsgo_rs_node"),
+  name: "@corsa-bind/node",
+  path: resolve(rootDir, "npm/corsa_bind_node"),
   access: "public",
 };
 
-export const typescriptOxlintPackage: PublishablePackage = {
-  name: "oxlint-plugin-typescript-go",
-  path: resolve(rootDir, "npm/typescript_oxlint"),
+export const corsaOxlintPackage: PublishablePackage = {
+  name: "corsa-oxlint",
+  path: resolve(rootDir, "npm/corsa_oxlint"),
 };
 
-export const npmPackages = [nodeBindingPackage, typescriptOxlintPackage];
+export const npmPackages = [nodeBindingPackage, corsaOxlintPackage];
 
 const defaultTargetTriples = [
   "x86_64-pc-windows-msvc",
@@ -425,8 +425,8 @@ export function stageNodeBindingPackages({
     throw new Error("No native binding artifacts were found for the Node release packages.");
   }
 
-  const stageDir = mkdtempSync(resolve(tmpdir(), "tsgo-rs-npm-stage-"));
-  const stageRootPackagePath = resolve(stageDir, "tsgo_rs_node");
+  const stageDir = mkdtempSync(resolve(tmpdir(), "corsa-bind-npm-stage-"));
+  const stageRootPackagePath = resolve(stageDir, "corsa_bind_node");
 
   copyRootBindingPackage(stageRootPackagePath);
 
@@ -492,7 +492,7 @@ export function withPackedTarball<T>(
   pkg: PublishablePackage,
   callback: (tarballPath: string) => T,
 ): T {
-  const packDir = mkdtempSync(resolve(tmpdir(), "tsgo-rs-npm-pack-"));
+  const packDir = mkdtempSync(resolve(tmpdir(), "corsa-bind-npm-pack-"));
   const packCommand = resolvePackCommand();
   try {
     runCommand(packCommand.command, [...packCommand.args, "pack", "--pack-destination", packDir], {

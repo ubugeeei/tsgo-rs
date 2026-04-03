@@ -2,8 +2,7 @@ mod support;
 
 use std::sync::Arc;
 
-use serde_json::json;
-use tsgo_rs::{
+use corsa_bind_rs::{
     api::{
         ApiClient, ApiFileSystem, ApiMode, DirectoryEntries, FileSystemCapabilities,
         ReadFileResult, callback_flag, callback_names,
@@ -11,6 +10,7 @@ use tsgo_rs::{
     fast::{CompactString, FastMap, SmallVec},
     runtime::block_on,
 };
+use serde_json::json;
 
 struct VirtualFs {
     files: FastMap<CompactString, CompactString>,
@@ -70,7 +70,7 @@ impl ApiFileSystem for VirtualFs {
     }
 }
 
-fn main() -> Result<(), tsgo_rs::TsgoError> {
+fn main() -> Result<(), corsa_bind_rs::TsgoError> {
     let result = block_on(async {
         let filesystem = Arc::new(VirtualFs::new(&[
             ("/virtual/tsconfig.json", "{}"),
@@ -89,7 +89,7 @@ fn main() -> Result<(), tsgo_rs::TsgoError> {
             "virtualOption": config.options["virtual"],
         });
         client.close().await?;
-        Ok::<_, tsgo_rs::TsgoError>(result)
+        Ok::<_, corsa_bind_rs::TsgoError>(result)
     })?;
 
     support::print_json(result);

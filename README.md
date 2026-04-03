@@ -1,4 +1,4 @@
-# tsgo-rs
+# corsa-bind
 
 Rust bindings, orchestration layers, and Node bindings for `typescript-go` over stdio.
 
@@ -9,14 +9,14 @@ Rust bindings, orchestration layers, and Node bindings for `typescript-go` over 
 > cargo feature and some upstream-facing endpoints remain explicitly experimental.
 
 > [!IMPORTANT]
-> `tsgo-rs` is intentionally built around upstream-supported `typescript-go`
+> `corsa-bind` is intentionally built around upstream-supported `typescript-go`
 > workflows. We follow `tsgo`'s recommended stdio/API/LSP integration points,
 > keep `ref/typescript-go` as an exact upstream checkout, and preserve a strict
 > `no forks, no patches` policy.
 
 ## What This Is
 
-`tsgo-rs` is a multi-crate workspace for talking to `typescript-go` from Rust and Node.js without patching upstream.
+`corsa-bind` is a multi-crate workspace for talking to `typescript-go` from Rust and Node.js without patching upstream.
 
 In practice, that means:
 
@@ -37,6 +37,11 @@ Current focus:
 - strict upstream pinning by exact `typescript-go` commit
 - regression tests and benchmarks against the real pinned upstream server
 
+## Naming
+
+The `corsa-*` names are intentional.
+Microsoft's TypeScript team uses `Corsa` as the codename for the native TypeScript 7 effort and `Strada` for the existing JS-based line, so this repository uses `corsa-bind` and `corsa-oxlint` to make it clear that the project is built around the native `typescript-go` side of that split rather than the older Strada toolchain surface.
+
 ## Current Status
 
 - License: MIT
@@ -46,7 +51,7 @@ Current focus:
 - Fast-path bias: `CompactString`, `SmallVec`, `bumpalo`, `memchr`, `phf`, `FxHash`
 - JS toolchain: `pnpm` + Vite+ (`vp`) with `oxfmt` / `oxlint`
 - Repo automation: `scripts/*.ts` executed directly through Node `24` with `--strip-types`
-- Node bindings: `@tsgo-rs/node` (`npm/tsgo_rs_node`) and `oxlint-plugin-typescript-go` (`npm/typescript_oxlint`) (public npm packages that still expect a caller-managed `typescript-go` executable)
+- Node bindings: `@corsa-bind/node` (`npm/corsa_bind_node`) and `corsa-oxlint` (`npm/corsa_oxlint`) (public npm packages that still expect a caller-managed `typescript-go` executable)
 - Distributed orchestration: `experimental-distributed` cargo feature
 - TS benchmark project: `bench`
 - Example workspace: `examples`
@@ -64,18 +69,18 @@ Pinned upstream at the time of writing:
 
 ## Workspace Layout
 
-- `tsgo_rs_core`: shared errors, process handles, and fast-path primitives
-- `tsgo_rs_jsonrpc`: stdio JSON-RPC framing and connection management
-- `tsgo_rs_client`: typed tsgo stdio client bindings for JSON-RPC and msgpack
-- `tsgo_rs_lsp`: LSP client support plus virtual-document overlays
-- `tsgo_rs_orchestrator`: local orchestration, caching, and experimental replicated state / Raft core
-- `tsgo_rs_runtime`: lightweight custom runtime and task primitives
-- `tsgo_rs_ref`: exact upstream pin, sync, and verification tooling
-- `tsgo_rs`: top-level facade crate, mock server, and native benchmark binaries
-- `npm/tsgo_rs_node`: `napi-rs` native bindings and the `@tsgo-rs/node` TypeScript wrapper package
-- `npm/typescript_oxlint`: `typescript-eslint`-style compatibility layer for type-aware Oxlint JS plugins
+- `corsa_bind_core`: shared errors, process handles, and fast-path primitives
+- `corsa_bind_jsonrpc`: stdio JSON-RPC framing and connection management
+- `corsa_bind_client`: typed tsgo stdio client bindings for JSON-RPC and msgpack
+- `corsa_bind_lsp`: LSP client support plus virtual-document overlays
+- `corsa_bind_orchestrator`: local orchestration, caching, and experimental replicated state / Raft core
+- `corsa_bind_runtime`: lightweight custom runtime and task primitives
+- `corsa_bind_ref`: exact upstream pin, sync, and verification tooling
+- `corsa_bind_rs`: top-level facade crate, mock server, and native benchmark binaries
+- `npm/corsa_bind_node`: `napi-rs` native bindings and the `@corsa-bind/node` TypeScript wrapper package
+- `npm/corsa_oxlint`: `typescript-eslint`-style compatibility layer for type-aware Oxlint JS plugins
 - `bench`: Vitest benchmark project for the Node binding
-- `examples`: curated `examples/nodejs`, `examples/rust`, and `examples/typescript_oxlint` flows from minimal start to real-project runs
+- `examples`: curated `examples/nodejs`, `examples/rust`, and `examples/corsa_oxlint` flows from minimal start to real-project runs
 
 For a detailed architecture walkthrough, design strategy, and implementation tips, see [docs/project_guide.md](./docs/project_guide.md).
 For deployment-oriented defaults, supported scope, and release checks, see [docs/production_readiness.md](./docs/production_readiness.md).
@@ -106,8 +111,8 @@ still target Node `22+`.
 
 ## Examples
 
-The repository now ships executable examples for Rust, `@tsgo-rs/node`, and
-`oxlint-plugin-typescript-go` under [`examples/`](./examples/README.md).
+The repository now ships executable examples for Rust, `@corsa-bind/node`, and
+`corsa-oxlint` under [`examples/`](./examples/README.md).
 
 Run the smoke-tested examples with:
 
@@ -144,14 +149,14 @@ vp run -w examples_rust_experimental
 
 ## Type-Aware Oxlint
 
-`oxlint-plugin-typescript-go` lets us write Oxlint JS plugins with a familiar
+`corsa-oxlint` lets us write Oxlint JS plugins with a familiar
 `typescript-eslint` authoring model while sourcing type information from the
 pinned `tsgo` binary. The heavy lifting stays in Rust, then `napi-rs` binds
 that implementation into JS so end users can keep writing custom plugins and
 custom rules in JS/TS.
 
 ```ts
-import { ESLintUtils } from "oxlint-plugin-typescript-go";
+import { ESLintUtils } from "corsa-oxlint";
 
 const createRule = ESLintUtils.RuleCreator((name) => `https://example.com/rules/${name}`);
 
@@ -195,18 +200,18 @@ export const noStringPlusNumber = createRule({
 });
 ```
 
-The rule-side type-aware config lives under `settings.typescriptOxlint`. Package
-details and caveats are documented in [`npm/typescript_oxlint/README.md`](./npm/typescript_oxlint/README.md).
+The rule-side type-aware config lives under `settings.corsaOxlint`. Package
+details and caveats are documented in [`npm/corsa_oxlint/README.md`](./npm/corsa_oxlint/README.md).
 
-`oxlint-plugin-typescript-go/rules` exposes a TS-native type-aware rule set and plugin:
+`corsa-oxlint/rules` exposes a TS-native type-aware rule set and plugin:
 
 ```ts
-import { typescriptOxlintPlugin } from "oxlint-plugin-typescript-go/rules";
+import { corsaOxlintPlugin } from "corsa-oxlint/rules";
 
 export default [
   {
     plugins: {
-      typescript: typescriptOxlintPlugin,
+      typescript: corsaOxlintPlugin,
     },
     rules: {
       "typescript/no-floating-promises": "error",
@@ -224,12 +229,12 @@ parity target and drift oracle rather than as a runtime bridge.
 ## Example
 
 ```rust
-use tsgo_rs::{
+use corsa_bind_rs::{
     api::{ApiClient, ApiSpawnConfig},
     runtime::block_on,
 };
 
-fn main() -> Result<(), tsgo_rs::TsgoError> {
+fn main() -> Result<(), corsa_bind_rs::TsgoError> {
     block_on(async {
         let client = ApiClient::spawn(
             ApiSpawnConfig::new(".cache/tsgo")
@@ -252,13 +257,13 @@ The repo ships two benchmark layers:
 
 - Native Rust benchmark: `vp run -w bench_native`
 - Node binding benchmark: `vp run -w bench_ts`
-- `oxlint-plugin-typescript-go` checker benchmark: `vp test bench --config ./vite.config.ts bench/src/typescript_oxlint.bench.ts`
-- `oxlint-plugin-typescript-go` native-rule benchmark: `vp test bench --config ./vite.config.ts bench/src/typescript_oxlint_rules.bench.ts`
+- `corsa-oxlint` checker benchmark: `vp test bench --config ./vite.config.ts bench/src/corsa_oxlint.bench.ts`
+- `corsa-oxlint` native-rule benchmark: `vp test bench --config ./vite.config.ts bench/src/corsa_oxlint_rules.bench.ts`
 - Combined benchmark + budget guard: `vp run -w bench`
 
 The TS benchmark writes machine-readable output to `.cache/bench_ts.json`.
 The native benchmark writes machine-readable output to `.cache/bench_native.json`.
-The native Rust benchmark uses the real pinned tsgo binary through [`bench_real_tsgo`](./crates/tsgo_rs/src/bin/bench_real_tsgo/main.rs).
+The native Rust benchmark uses the real pinned tsgo binary through [`bench_real_tsgo`](./crates/corsa_bind_rs/src/bin/bench_real_tsgo/main.rs).
 
 Latest native measurements are documented in [docs/performance.md](./docs/performance.md).
 Benchmarking rationale, implementation notes, and usage tips are documented in [docs/benchmarking_guide.md](./docs/benchmarking_guide.md).
@@ -270,12 +275,12 @@ On the pinned upstream commit and bundled datasets, `msgpack` was consistently f
 The repository is intentionally aggressive about change detection because `typescript-go` is still unstable.
 
 - `cargo test --workspace` includes mock-server integration tests, policy tests, and real-tsgo regression tests when `.cache/tsgo` is available
-- `crates/tsgo_rs/tests/real_tsgo_baseline.rs` locks a real-server API summary to the pinned upstream commit
-- `crates/tsgo_rs/tests/real_tsgo_regression.rs` checks both transports against the real pinned tsgo binary
+- `crates/corsa_bind_rs/tests/real_tsgo_baseline.rs` locks a real-server API summary to the pinned upstream commit
+- `crates/corsa_bind_rs/tests/real_tsgo_regression.rs` checks both transports against the real pinned tsgo binary
 - the real-tsgo regression suite includes a hot-path guard that fails if msgpack falls too far behind JSON-RPC on the same machine
 - `vp run -w bench_native` and `vp run -w bench_ts` give repeatable transport-level measurements for Rust and Node
 - `vp run -w bench_verify` regenerates both reports and fails if benchmark samples disappear or hot-path budgets regress
-- `tsgo_rs_ref` enforces detached-HEAD exact-commit verification for `ref/typescript-go`
+- `corsa_bind_ref` enforces detached-HEAD exact-commit verification for `ref/typescript-go`
 - CI structure and local reproduction notes live in [`docs/ci_guide.md`](./docs/ci_guide.md)
 
 ## Upstream Tracking

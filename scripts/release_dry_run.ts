@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 
 import {
   publishPackedTarball,
-  typescriptOxlintPackage,
+  corsaOxlintPackage,
   withStagedNodeBindingPackages,
 } from "./npm_release_utils.ts";
 import { fail, rootDir, runCommand } from "./shared.ts";
@@ -17,45 +17,45 @@ interface CrateSpec {
 
 const crates: CrateSpec[] = [
   {
-    name: "tsgo_rs_core",
-    path: resolve(rootDir, "crates/tsgo_rs_core"),
+    name: "corsa_bind_core",
+    path: resolve(rootDir, "crates/corsa_bind_core"),
     patches: [],
   },
   {
-    name: "tsgo_rs_runtime",
-    path: resolve(rootDir, "crates/tsgo_rs_runtime"),
+    name: "corsa_bind_runtime",
+    path: resolve(rootDir, "crates/corsa_bind_runtime"),
     patches: [],
   },
   {
-    name: "tsgo_rs_jsonrpc",
-    path: resolve(rootDir, "crates/tsgo_rs_jsonrpc"),
-    patches: ["tsgo_rs_core", "tsgo_rs_runtime"],
+    name: "corsa_bind_jsonrpc",
+    path: resolve(rootDir, "crates/corsa_bind_jsonrpc"),
+    patches: ["corsa_bind_core", "corsa_bind_runtime"],
   },
   {
-    name: "tsgo_rs_client",
-    path: resolve(rootDir, "crates/tsgo_rs_client"),
-    patches: ["tsgo_rs_core", "tsgo_rs_jsonrpc", "tsgo_rs_runtime"],
+    name: "corsa_bind_client",
+    path: resolve(rootDir, "crates/corsa_bind_client"),
+    patches: ["corsa_bind_core", "corsa_bind_jsonrpc", "corsa_bind_runtime"],
   },
   {
-    name: "tsgo_rs_lsp",
-    path: resolve(rootDir, "crates/tsgo_rs_lsp"),
-    patches: ["tsgo_rs_core", "tsgo_rs_jsonrpc", "tsgo_rs_runtime"],
+    name: "corsa_bind_lsp",
+    path: resolve(rootDir, "crates/corsa_bind_lsp"),
+    patches: ["corsa_bind_core", "corsa_bind_jsonrpc", "corsa_bind_runtime"],
   },
   {
-    name: "tsgo_rs_orchestrator",
-    path: resolve(rootDir, "crates/tsgo_rs_orchestrator"),
-    patches: ["tsgo_rs_client", "tsgo_rs_core", "tsgo_rs_lsp", "tsgo_rs_runtime"],
+    name: "corsa_bind_orchestrator",
+    path: resolve(rootDir, "crates/corsa_bind_orchestrator"),
+    patches: ["corsa_bind_client", "corsa_bind_core", "corsa_bind_lsp", "corsa_bind_runtime"],
   },
   {
-    name: "tsgo_rs",
-    path: resolve(rootDir, "crates/tsgo_rs"),
+    name: "corsa_bind_rs",
+    path: resolve(rootDir, "crates/corsa_bind_rs"),
     patches: [
-      "tsgo_rs_client",
-      "tsgo_rs_core",
-      "tsgo_rs_jsonrpc",
-      "tsgo_rs_lsp",
-      "tsgo_rs_orchestrator",
-      "tsgo_rs_runtime",
+      "corsa_bind_client",
+      "corsa_bind_core",
+      "corsa_bind_jsonrpc",
+      "corsa_bind_lsp",
+      "corsa_bind_orchestrator",
+      "corsa_bind_runtime",
     ],
   },
 ];
@@ -78,7 +78,7 @@ function patchConfigFor(crateName: string): { configDir: string; configPath: str
     return `${dependency.name} = { path = "${normalizePath(dependency.path)}" }`;
   });
 
-  const configDir = mkdtempSync(resolve(tmpdir(), "tsgo-rs-release-dry-run-"));
+  const configDir = mkdtempSync(resolve(tmpdir(), "corsa-bind-release-dry-run-"));
   const configPath = resolve(configDir, "cargo-config.toml");
   const configBody = patchLines.length === 0 ? "" : `[patch.crates-io]\n${patchLines.join("\n")}\n`;
   writeFileSync(configPath, configBody, "utf8");
@@ -102,7 +102,7 @@ async function main(): Promise<void> {
   await withStagedNodeBindingPackages(
     { requireAllTargets: false },
     async ({ binaryPackages, rootPackage }) => {
-      for (const npmPackage of [...binaryPackages, rootPackage, typescriptOxlintPackage]) {
+      for (const npmPackage of [...binaryPackages, rootPackage, corsaOxlintPackage]) {
         publishPackedTarball(npmPackage, { dryRun: true });
       }
     },

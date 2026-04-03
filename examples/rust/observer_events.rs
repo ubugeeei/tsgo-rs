@@ -5,13 +5,13 @@ use std::{
     time::Duration,
 };
 
-use serde_json::{Value, json};
-use tsgo_rs::{
+use corsa_bind_rs::{
     api::{ApiMode, ApiProfile, UpdateSnapshotParams},
     observability::{TsgoEvent, TsgoObserver},
     orchestrator::{ApiOrchestrator, ApiOrchestratorConfig},
     runtime::block_on,
 };
+use serde_json::{Value, json};
 
 #[derive(Default)]
 struct EventCollector {
@@ -36,7 +36,7 @@ fn event_to_value(event: &TsgoEvent) -> Value {
     }
 }
 
-fn main() -> Result<(), tsgo_rs::TsgoError> {
+fn main() -> Result<(), corsa_bind_rs::TsgoError> {
     let result = block_on(async {
         let observer = Arc::new(EventCollector::default());
         let orchestrator = ApiOrchestrator::new(
@@ -99,7 +99,7 @@ fn main() -> Result<(), tsgo_rs::TsgoError> {
             .map(event_to_value)
             .collect::<Vec<_>>();
 
-        Ok::<_, tsgo_rs::TsgoError>(json!({
+        Ok::<_, corsa_bind_rs::TsgoError>(json!({
             "events": events,
             "stats": {
                 "cachedSnapshotCount": stats.cached_snapshot_count,

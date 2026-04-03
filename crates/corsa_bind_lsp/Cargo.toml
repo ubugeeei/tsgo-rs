@@ -1,0 +1,25 @@
+[package]
+name = "corsa_bind_lsp"
+version = "0.1.0"
+edition = "2024"
+description = "LSP-focused clients, overlays, and virtual documents for typescript-go"
+publish = ["crates-io"]
+documentation.workspace = true
+homepage.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[lib]
+name = "corsa_bind_lsp"
+path = "src/lib.rs"
+
+[dependencies]
+log = { workspace = true }
+lsp-types = "0.97"
+parking_lot = "0.12"
+serde = { version = "1", features = ["derive"] }
+corsa_bind_core = { version = "0.1.0", path = "../corsa_bind_core" }
+corsa_bind_jsonrpc = { version = "0.1.0", path = "../corsa_bind_jsonrpc" }
+corsa_bind_runtime = { version = "0.1.0", path = "../corsa_bind_runtime" }

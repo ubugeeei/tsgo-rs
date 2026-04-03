@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./ts",
+    "outDir": "./dist",
+    "noEmit": false,
+    "paths": {
+      "@corsa-bind/node": ["../corsa_bind_node/ts/index.ts"]
+    }
+  },
+  "include": ["ts/**/*.ts"]
+}

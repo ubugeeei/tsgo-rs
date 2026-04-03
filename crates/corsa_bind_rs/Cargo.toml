@@ -1,0 +1,83 @@
+[package]
+name = "corsa_bind_rs"
+version = "0.1.0"
+edition = "2024"
+description = "Production-oriented Rust bindings, orchestration layers, and Node integration for typescript-go"
+publish = ["crates-io"]
+documentation.workspace = true
+homepage.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[lib]
+name = "corsa_bind_rs"
+path = "src/lib.rs"
+
+[features]
+default = []
+experimental-distributed = ["corsa_bind_orchestrator/experimental-distributed"]
+
+[[bin]]
+name = "mock_tsgo"
+path = "src/bin/mock_tsgo/main.rs"
+
+[[bin]]
+name = "bench_real_tsgo"
+path = "src/bin/bench_real_tsgo/main.rs"
+
+[[bin]]
+name = "bench_tooling_compare"
+path = "src/bin/bench_tooling_compare/main.rs"
+
+[[example]]
+name = "minimal_start"
+path = "../../examples/rust/minimal_start.rs"
+
+[[example]]
+name = "virtual_document"
+path = "../../examples/rust/virtual_document.rs"
+
+[[example]]
+name = "mock_client"
+path = "../../examples/rust/mock_client.rs"
+
+[[example]]
+name = "filesystem_callbacks"
+path = "../../examples/rust/filesystem_callbacks.rs"
+
+[[example]]
+name = "lsp_overlay"
+path = "../../examples/rust/lsp_overlay.rs"
+
+[[example]]
+name = "orchestrator_cache"
+path = "../../examples/rust/orchestrator_cache.rs"
+
+[[example]]
+name = "observer_events"
+path = "../../examples/rust/observer_events.rs"
+
+[[example]]
+name = "real_snapshot"
+path = "../../examples/rust/real_snapshot.rs"
+
+[[example]]
+name = "distributed_orchestrator"
+path = "../../examples/rust/distributed_orchestrator.rs"
+required-features = ["experimental-distributed"]
+
+[dependencies]
+base64 = "0.22"
+lsp-types = "0.97"
+serde_json = "1"
+corsa_bind_client = { version = "0.1.0", path = "../corsa_bind_client" }
+corsa_bind_core = { version = "0.1.0", path = "../corsa_bind_core" }
+corsa_bind_jsonrpc = { version = "0.1.0", path = "../corsa_bind_jsonrpc" }
+corsa_bind_lsp = { version = "0.1.0", path = "../corsa_bind_lsp" }
+corsa_bind_orchestrator = { version = "0.1.0", path = "../corsa_bind_orchestrator" }
+corsa_bind_runtime = { version = "0.1.0", path = "../corsa_bind_runtime" }
+
+[dev-dependencies]
+tempfile = "3"

@@ -1,5 +1,5 @@
 {
-  "name": "@tsgo-rs/cli-compare",
+  "name": "@corsa-bind/cli-compare",
   "private": true,
   "type": "module",
   "dependencies": {

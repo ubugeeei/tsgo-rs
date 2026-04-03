@@ -1,4 +1,4 @@
-import { TsgoApiClient } from "@tsgo-rs/node";
+import { TsgoApiClient } from "@corsa-bind/node";
 
 import { assertExists, isMain, realBinary, realDataset, workspaceRoot } from "../shared.ts";
 

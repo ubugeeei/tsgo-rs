@@ -4,7 +4,7 @@ import {
   isNpmPackageVersionPublished,
   publishPackedTarball,
   sleep,
-  typescriptOxlintPackage,
+  corsaOxlintPackage,
   withStagedNodeBindingPackages,
 } from "./npm_release_utils.ts";
 import { fail } from "./shared.ts";
@@ -19,7 +19,7 @@ async function main(): Promise<void> {
   await withStagedNodeBindingPackages(
     { artifactsDir, requireAllTargets },
     async ({ binaryPackages, rootPackage }) => {
-      const releasePackages = [...binaryPackages, rootPackage, typescriptOxlintPackage];
+      const releasePackages = [...binaryPackages, rootPackage, corsaOxlintPackage];
       if (startAt && !releasePackages.some((pkg) => pkg.name === startAt)) {
         throw new Error(`Unknown NPM_PUBLISH_START_AT package: ${startAt}`);
       }

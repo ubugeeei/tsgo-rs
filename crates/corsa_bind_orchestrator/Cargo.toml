@@ -1,0 +1,31 @@
+[package]
+name = "corsa_bind_orchestrator"
+version = "0.1.0"
+edition = "2024"
+description = "Worker pooling, caching, and experimental replicated orchestration for corsa-bind"
+publish = ["crates-io"]
+documentation.workspace = true
+homepage.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[lib]
+name = "corsa_bind_orchestrator"
+path = "src/lib.rs"
+
+[features]
+default = []
+experimental-distributed = []
+
+[dependencies]
+log = { workspace = true }
+lsp-types = "0.97"
+parking_lot = "0.12"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+corsa_bind_client = { version = "0.1.0", path = "../corsa_bind_client" }
+corsa_bind_core = { version = "0.1.0", path = "../corsa_bind_core" }
+corsa_bind_lsp = { version = "0.1.0", path = "../corsa_bind_lsp" }
+corsa_bind_runtime = { version = "0.1.0", path = "../corsa_bind_runtime" }

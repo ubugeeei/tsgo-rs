@@ -11,7 +11,7 @@ import {
 } from "../../scripts/npm_release_utils.ts";
 
 const nodeBindingManifest = JSON.parse(
-  readFileSync(resolve(process.cwd(), "npm/tsgo_rs_node/package.json"), "utf8"),
+  readFileSync(resolve(process.cwd(), "npm/corsa_bind_node/package.json"), "utf8"),
 ) as {
   files: string[];
   name: string;
@@ -51,13 +51,13 @@ describe("npm release utils", () => {
         nodeBindingManifest,
         nodeBindingManifest.version,
         target,
-        "tsgo_rs_node.linux-x64-gnu.node",
+        "corsa_bind_node.linux-x64-gnu.node",
       ),
     ).toMatchObject({
       cpu: ["x64"],
-      files: ["tsgo_rs_node.linux-x64-gnu.node"],
+      files: ["corsa_bind_node.linux-x64-gnu.node"],
       libc: ["glibc"],
-      main: "tsgo_rs_node.linux-x64-gnu.node",
+      main: "corsa_bind_node.linux-x64-gnu.node",
       name: `${nodeBindingManifest.name}-linux-x64-gnu`,
       os: ["linux"],
       version: "0.1.0",

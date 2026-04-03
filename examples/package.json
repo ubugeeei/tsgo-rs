@@ -1,5 +1,5 @@
 {
-  "name": "tsgo-rs-examples",
+  "name": "corsa-bind-examples",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,13 +11,13 @@
     "virtual-document": "node --strip-types ./nodejs/virtual_document.ts",
     "distributed-orchestrator": "node --strip-types ./nodejs/distributed_orchestrator.ts",
     "real-snapshot": "node --strip-types ./nodejs/real_snapshot.ts",
-    "rule-tester": "node --strip-types ./typescript_oxlint/rule_tester.ts",
-    "native-rule-tester": "node --strip-types ./typescript_oxlint/native_rule_tester.ts",
+    "rule-tester": "node --strip-types ./corsa_oxlint/rule_tester.ts",
+    "native-rule-tester": "node --strip-types ./corsa_oxlint/native_rule_tester.ts",
     "real": "pnpm run real-snapshot && pnpm run rule-tester && pnpm run native-rule-tester"
   },
   "dependencies": {
-    "@tsgo-rs/node": "workspace:*",
-    "oxlint-plugin-typescript-go": "workspace:*"
+    "@corsa-bind/node": "workspace:*",
+    "corsa-oxlint": "workspace:*"
   },
   "engines": {
     "node": ">=24"

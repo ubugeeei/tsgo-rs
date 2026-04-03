@@ -4,9 +4,9 @@
 
 Core policy:
 
-- `tsgo-rs` follows upstream-supported `typescript-go` integration points.
-- `tsgo-rs` does not maintain a fork of `typescript-go`.
-- `tsgo-rs` does not patch upstream `typescript-go`.
+- `corsa-bind` follows upstream-supported `typescript-go` integration points.
+- `corsa-bind` does not maintain a fork of `typescript-go`.
+- `corsa-bind` does not patch upstream `typescript-go`.
 - Upstream changes are adopted by updating the pinned commit and adapting our bindings around that exact revision.
 
 Rules:
@@ -19,8 +19,8 @@ Rules:
 
 Workflow:
 
-1. `cargo run -p tsgo_rs_ref -- sync`
-2. `cargo run -p tsgo_rs_ref -- verify`
-3. When intentionally updating upstream, move `ref/typescript-go` to the new commit and run `cargo run -p tsgo_rs_ref -- pin-current`
+1. `cargo run -p corsa_bind_ref -- sync`
+2. `cargo run -p corsa_bind_ref -- verify`
+3. When intentionally updating upstream, move `ref/typescript-go` to the new commit and run `cargo run -p corsa_bind_ref -- pin-current`
 
 This keeps reproduction commit-exact and leaves an auditable metadata trail for every upstream bump.

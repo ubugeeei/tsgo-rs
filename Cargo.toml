@@ -1,23 +1,23 @@
 [workspace]
 members = [
-  "crates/tsgo_rs_core",
-  "crates/tsgo_rs_jsonrpc",
-  "crates/tsgo_rs_client",
-  "crates/tsgo_rs_lsp",
-  "crates/tsgo_rs_orchestrator",
-  "crates/tsgo_rs_runtime",
-  "crates/tsgo_rs_ref",
-  "crates/tsgo_rs",
-  "npm/tsgo_rs_node",
+  "crates/corsa_bind_core",
+  "crates/corsa_bind_jsonrpc",
+  "crates/corsa_bind_client",
+  "crates/corsa_bind_lsp",
+  "crates/corsa_bind_orchestrator",
+  "crates/corsa_bind_runtime",
+  "crates/corsa_bind_ref",
+  "crates/corsa_bind_rs",
+  "npm/corsa_bind_node",
 ]
 resolver = "2"
 
 [workspace.package]
-documentation = "https://github.com/ubugeeei/tsgo-rs/tree/main/docs"
-homepage = "https://github.com/ubugeeei/tsgo-rs"
+documentation = "https://github.com/ubugeeei/corsa-bind/tree/main/docs"
+homepage = "https://github.com/ubugeeei/corsa-bind"
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/ubugeeei/tsgo-rs"
+repository = "https://github.com/ubugeeei/corsa-bind"
 rust-version = "1.85"
 
 [workspace.dependencies]
