@@ -1,6 +1,8 @@
 # Bun Binding
 
-Planned Bun-facing binding surface over the Rust core.
+The Bun binding is implemented as a Bun-friendly module that re-exports:
 
-This directory is reserved for Bun-specific packaging and runtime integration
-once a dedicated binding is introduced.
+- the native Node.js binding when Bun is running with Node-API support
+- the browser-style remote client for host-based deployments
+
+See [`index.ts`](./index.ts).

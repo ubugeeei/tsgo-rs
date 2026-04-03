@@ -1,6 +1,9 @@
 # Deno Binding
 
-Planned Deno-facing binding surface over the Rust core.
+The Deno binding is implemented as a remote-first module.
 
-This directory is reserved for Deno packaging, module entry points, and any
-runtime-specific adaptation needed beyond the Node.js binding.
+Deno does not rely on the local Node-API addon here; instead it reuses the
+browser transport/client abstraction so Deno code can talk to a Rust-backed
+`corsa-bind` host over fetch.
+
+See [`mod.ts`](./mod.ts).

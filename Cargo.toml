@@ -1,5 +1,6 @@
 [workspace]
 members = [
+  "src/bindings/c/corsa_bind_c",
   "src/core/corsa_bind_core",
   "src/core/corsa_bind_jsonrpc",
   "src/core/corsa_bind_client",

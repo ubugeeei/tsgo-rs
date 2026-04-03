@@ -81,6 +81,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "corsa_bind_c"
+version = "0.1.0"
+dependencies = [
+ "corsa_bind_rs",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "corsa_bind_client"
 version = "0.1.0"
 dependencies = [
