@@ -2,10 +2,12 @@ mod support;
 
 use serde_json::{Value, json};
 use std::{
+    future::Future,
     sync::{
         Arc, Mutex,
         atomic::{AtomicUsize, Ordering},
     },
+    thread,
     time::Duration,
 };
 #[cfg(feature = "experimental-distributed")]
@@ -30,9 +32,23 @@ impl TsgoObserver for EventCollector {
     }
 }
 
+fn run_async_test<F>(future: F)
+where
+    F: Future<Output = ()> + Send + 'static,
+{
+    let handle = thread::Builder::new()
+        .name("orchestrator-test".into())
+        .stack_size(8 * 1024 * 1024)
+        .spawn(move || block_on(future))
+        .unwrap();
+    if let Err(panic) = handle.join() {
+        std::panic::resume_unwind(panic);
+    }
+}
+
 #[test]
 fn orchestrator_caches_snapshots_and_results() {
-    block_on(async {
+    run_async_test(async {
         let orchestrator = ApiOrchestrator::default();
         let profile = support::api_profile("async-cache", ApiMode::AsyncJsonRpcStdio);
         let snapshot_a = orchestrator
@@ -88,7 +104,7 @@ fn orchestrator_caches_snapshots_and_results() {
 
 #[test]
 fn orchestrator_executes_parallel_batches() {
-    block_on(async {
+    run_async_test(async {
         let orchestrator = ApiOrchestrator::default();
         let profile = support::api_profile("async-batch", ApiMode::AsyncJsonRpcStdio);
         let values = orchestrator
@@ -106,7 +122,7 @@ fn orchestrator_executes_parallel_batches() {
 
 #[test]
 fn orchestrator_skips_worker_start_for_empty_batches() {
-    block_on(async {
+    run_async_test(async {
         let orchestrator = ApiOrchestrator::default();
         let profile = support::api_profile("async-empty-batch", ApiMode::AsyncJsonRpcStdio);
         let values = orchestrator
@@ -125,7 +141,7 @@ fn orchestrator_skips_worker_start_for_empty_batches() {
 
 #[test]
 fn orchestrator_recomputes_expired_cached_values() {
-    block_on(async {
+    run_async_test(async {
         let orchestrator = ApiOrchestrator::default();
         let profile = support::api_profile("async-expiring-cache", ApiMode::AsyncJsonRpcStdio);
         let calls = Arc::new(AtomicUsize::new(0));
@@ -202,7 +218,7 @@ fn raft_cluster_elects_a_leader_and_rejects_follower_writes() {
 #[test]
 #[cfg(feature = "experimental-distributed")]
 fn distributed_orchestrator_replicates_virtual_documents_and_results() {
-    block_on(async {
+    run_async_test(async {
         let orchestrator = DistributedApiOrchestrator::new(["n1", "n2", "n3"]);
         let profile = support::api_profile("dist-cache", ApiMode::AsyncJsonRpcStdio);
         let document =
@@ -267,7 +283,7 @@ fn distributed_orchestrator_replicates_virtual_documents_and_results() {
 #[test]
 #[cfg(feature = "experimental-distributed")]
 fn distributed_orchestrator_replicates_snapshot_records() {
-    block_on(async {
+    run_async_test(async {
         let orchestrator = DistributedApiOrchestrator::new(["leader", "follower-a", "follower-b"]);
         let profile = support::api_profile("dist-snapshot", ApiMode::AsyncJsonRpcStdio);
         orchestrator.campaign("leader").unwrap();
@@ -294,7 +310,7 @@ fn distributed_orchestrator_replicates_snapshot_records() {
 
 #[test]
 fn orchestrator_enforces_cache_limits() {
-    block_on(async {
+    run_async_test(async {
         let orchestrator = ApiOrchestrator::new(ApiOrchestratorConfig {
             max_workers_per_profile: 2,
             max_cached_snapshots: 1,
@@ -385,7 +401,7 @@ fn orchestrator_enforces_cache_limits() {
 
 #[test]
 fn orchestrator_emits_eviction_events() {
-    block_on(async {
+    run_async_test(async {
         let observer = Arc::new(EventCollector::default());
         let orchestrator = ApiOrchestrator::new(
             ApiOrchestratorConfig {
@@ -452,7 +468,7 @@ fn orchestrator_emits_eviction_events() {
 
 #[test]
 fn orchestrator_rejects_worker_requests_above_limit() {
-    block_on(async {
+    run_async_test(async {
         let orchestrator = ApiOrchestrator::new(ApiOrchestratorConfig {
             max_workers_per_profile: 1,
             max_cached_snapshots: 4,
