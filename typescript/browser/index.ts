@@ -1,7 +1,9 @@
-export * from "../nodejs/corsa_bind_node/ts/index.ts";
 export {
   BrowserTsgoApiClient,
   createFetchTransport,
+  RemoteTsgoApiClient,
   type FetchTransportOptions,
   type TsgoRemoteTransport,
-} from "../browser/ts/client.ts";
+} from "../typescript/index.ts";
+
+export type * from "../typescript/types.ts";

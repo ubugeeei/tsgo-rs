@@ -85,7 +85,7 @@ Before publishing Rust crates:
 - `vp check`
 - `cargo clippy --workspace --all-targets -- -D warnings`
 - `vp run -w test`
-- `vp run -w verify_ref`
+- `vp run -w verify_origin`
 - `vp run -w bench_verify`
 - `cargo deny check advisories bans licenses sources`
 - `vp run -w release_dry_run`

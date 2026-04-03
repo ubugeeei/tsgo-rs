@@ -22,7 +22,7 @@ fn run() -> corsa_bind_core::Result<()> {
     let lock_path = args
         .get(1)
         .map(|path| PathBuf::from(path.as_str()))
-        .unwrap_or_else(|| PathBuf::from("tsgo_ref.lock.toml"));
+        .unwrap_or_else(|| PathBuf::from("tsgo_origin.lock.toml"));
     let manager = TsgoRefManager::new(lock_path);
     match command {
         "status" => {
@@ -34,7 +34,7 @@ fn run() -> corsa_bind_core::Result<()> {
         "sync" => manager.sync(),
         "pin-current" => manager.pin_current(),
         other => Err(corsa_bind_core::TsgoError::Protocol(compact_format(
-            format_args!("unknown tsgo_ref command: {other}"),
+            format_args!("unknown tsgo_origin command: {other}"),
         ))),
     }
 }

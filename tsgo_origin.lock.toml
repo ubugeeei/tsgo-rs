@@ -1,7 +1,7 @@
 version = 1
 
 [typescript_go]
-path = "ref/typescript-go"
+path = "origin/typescript-go"
 repository = "https://github.com/microsoft/typescript-go.git"
 commit = "281b3d0720ab3de6d330d211705cb0383b47500b"
 tree = "e624c99ffd955098a9ed838797c4870794e66064"

@@ -15,7 +15,7 @@ const workspaceRoot = resolve(import.meta.dirname, "../../..");
 const executableSuffix = process.platform === "win32" ? ".exe" : "";
 const mockBinary = resolve(workspaceRoot, `target/debug/mock_tsgo${executableSuffix}`);
 const realBinary = resolve(workspaceRoot, `.cache/tsgo${executableSuffix}`);
-const realDataset = resolve(workspaceRoot, "ref/typescript-go/_packages/api/tsconfig.json");
+const realDataset = resolve(workspaceRoot, "origin/typescript-go/_packages/api/tsconfig.json");
 const realTsgoReady = existsSync(realBinary) && existsSync(realDataset);
 
 describe("TsgoApiClient", () => {

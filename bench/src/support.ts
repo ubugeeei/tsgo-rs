@@ -9,7 +9,10 @@ export const tsgoPath = resolve(
   workspaceRoot,
   process.platform === "win32" ? ".cache/tsgo.exe" : ".cache/tsgo",
 );
-export const datasetPath = resolve(workspaceRoot, "ref/typescript-go/_packages/api/tsconfig.json");
+export const datasetPath = resolve(
+  workspaceRoot,
+  "origin/typescript-go/_packages/api/tsconfig.json",
+);
 export const corsaOxlintFixtureDir = resolve(workspaceRoot, "bench/fixtures/corsa_oxlint");
 export const corsaOxlintConfigPath = resolve(corsaOxlintFixtureDir, "tsconfig.json");
 export const corsaOxlintFilePath = resolve(corsaOxlintFixtureDir, "index.ts");
@@ -30,7 +33,7 @@ export function ensureBenchInputs(): void {
     );
   }
   if (!existsSync(datasetPath)) {
-    throw new Error("missing pinned tsgo dataset under ref/typescript-go");
+    throw new Error("missing pinned tsgo dataset under origin/typescript-go");
   }
   if (!existsSync(corsaOxlintConfigPath)) {
     throw new Error("missing corsa-oxlint fixture tsconfig");

@@ -41,8 +41,8 @@ vp run -w examples_rust_smoke
 Build the real pinned `tsgo` binary before running the real-snapshot examples:
 
 ```bash
-vp run -w sync_ref
-vp run -w verify_ref
+vp run -w sync_origin
+vp run -w verify_origin
 vp run -w build_tsgo
 vp run -w examples_real
 ```
@@ -92,7 +92,7 @@ cargo run -p corsa_bind_rs --example lsp_overlay
 
 ## Real Pinned `tsgo`
 
-These examples hit the exact upstream-pinned checkout under `ref/typescript-go`.
+These examples hit the exact upstream-pinned checkout under `origin/typescript-go`.
 
 - `examples/nodejs/real_snapshot.ts`: opens the pinned project through `@corsa-bind/node` and fetches a real source file snapshot
 - `examples/rust/real_snapshot.rs`: the Rust-side equivalent using the msgpack-first API client

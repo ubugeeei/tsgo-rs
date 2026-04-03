@@ -45,7 +45,7 @@ That means:
 - benchmark wins have to come from transport and orchestration, not private engine modifications
 - upgrading upstream is work, but it is honest work
 
-This policy is enforced through `ref/typescript-go`, `tsgo_ref.lock.toml`, and `corsa_bind_ref`.
+This policy is enforced through `origin/typescript-go`, `tsgo_origin.lock.toml`, and `corsa_bind_ref`.
 
 ### 2. Reproducibility Beats Convenience
 
@@ -259,7 +259,7 @@ Why it exists:
 Touch this crate when:
 
 - the upstream pinning policy changes
-- CI or local reproduction around `ref/typescript-go` needs stronger guarantees
+- CI or local reproduction around `origin/typescript-go` needs stronger guarantees
 
 ### `corsa_bind_rs`
 
@@ -422,7 +422,7 @@ The repository should decode more only when a real consumer and a stable value c
 
 ### Why the Ref Verification Is Strict
 
-`verify_ref` insists on:
+`verify_origin` insists on:
 
 - exact pinned commit
 - detached `HEAD`
@@ -601,7 +601,7 @@ If you are debugging CI or environment issues:
 1. [ci_guide.md](./ci_guide.md)
 2. `vite.config.ts`
 3. `corsa_bind_ref`
-4. the managed upstream checkout under `ref/typescript-go`
+4. the managed upstream checkout under `origin/typescript-go`
 
 ## Final Mental Model
 

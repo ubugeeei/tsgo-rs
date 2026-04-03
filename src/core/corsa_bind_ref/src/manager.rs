@@ -4,7 +4,7 @@ use crate::{CommitMetadata, LockedRepository, RepositoryStatus, TsgoRefLock};
 use corsa_bind_core::{Result, TsgoError, fast::compact_format};
 use std::path::{Path, PathBuf};
 
-/// High-level manager for the pinned `ref/typescript-go` checkout.
+/// High-level manager for the pinned `origin/typescript-go` checkout.
 ///
 /// The manager reads [`TsgoRefLock`](crate::TsgoRefLock), locates the managed
 /// repository relative to that lockfile, and provides the small set of
@@ -26,7 +26,7 @@ impl TsgoRefManager {
         }
     }
 
-    /// Computes the current status of the managed reference.
+    /// Computes the current status of the managed checkout.
     ///
     /// The returned [`RepositoryStatus`] describes both the live repository
     /// snapshot and any problems relative to the lockfile pin.
@@ -36,7 +36,7 @@ impl TsgoRefManager {
         let repo_path = self.repository_path(repository);
         if !repo_path.exists() {
             return Err(TsgoError::Protocol(compact_format(format_args!(
-                "managed ref is missing: {}",
+                "managed origin is missing: {}",
                 repo_path.display()
             ))));
         }
@@ -46,7 +46,7 @@ impl TsgoRefManager {
         ))
     }
 
-    /// Verifies that the managed reference matches the lockfile exactly.
+    /// Verifies that the managed checkout matches the lockfile exactly.
     ///
     /// This requires the expected repository, commit, detached HEAD, and a
     /// clean worktree.
@@ -58,7 +58,7 @@ impl TsgoRefManager {
         Err(TsgoError::Protocol(status.describe()))
     }
 
-    /// Synchronizes the managed reference to the lockfile pin.
+    /// Synchronizes the managed checkout to the lockfile pin.
     ///
     /// Existing tracked drift is rejected unless the worktree is clean and the
     /// repository identity still matches the expected upstream.
@@ -72,7 +72,7 @@ impl TsgoRefManager {
             let status = self.status()?;
             if status.snapshot.dirty {
                 return Err(TsgoError::Protocol(compact_format(format_args!(
-                    "managed ref is dirty: {}",
+                    "managed origin is dirty: {}",
                     repo_path.display()
                 ))));
             }
@@ -98,7 +98,7 @@ impl TsgoRefManager {
         let path = existing
             .as_ref()
             .map(|lock| lock.typescript_go.path.clone())
-            .unwrap_or_else(|| "ref/typescript-go".into());
+            .unwrap_or_else(|| "origin/typescript-go".into());
         let repository_path = self.absolute_path(&path);
         let snapshot = snapshot(&repository_path)?;
         let metadata = CommitMetadata {
@@ -166,7 +166,7 @@ mod tests {
     #[test]
     fn pin_current_writes_lockfile_from_existing_ref() {
         let root = tempdir().unwrap();
-        let repo = root.path().join("ref/typescript-go");
+        let repo = root.path().join("origin/typescript-go");
         init_repo(&repo);
         fs::write(repo.join("README.md"), "hello").unwrap();
         std::process::Command::new("git")
@@ -189,10 +189,10 @@ mod tests {
             .current_dir(&repo)
             .output()
             .unwrap();
-        let lock_path = root.path().join("tsgo_ref.lock.toml");
+        let lock_path = root.path().join("tsgo_origin.lock.toml");
         TsgoRefManager::new(&lock_path).pin_current().unwrap();
         let lock = TsgoRefLock::load(&lock_path).unwrap();
-        assert_eq!(lock.typescript_go.path, "ref/typescript-go");
+        assert_eq!(lock.typescript_go.path, "origin/typescript-go");
         assert_eq!(
             lock.typescript_go.repository,
             "https://github.com/microsoft/typescript-go.git"
@@ -203,11 +203,11 @@ mod tests {
     #[test]
     fn status_errors_when_the_managed_ref_is_missing() {
         let root = tempdir().unwrap();
-        let lock_path = root.path().join("tsgo_ref.lock.toml");
+        let lock_path = root.path().join("tsgo_origin.lock.toml");
         TsgoRefLock {
             version: 1,
             typescript_go: LockedRepository {
-                path: "ref/typescript-go".into(),
+                path: "origin/typescript-go".into(),
                 repository: "https://github.com/microsoft/typescript-go.git".into(),
                 commit: "abc".into(),
                 tree: "tree".into(),
@@ -220,14 +220,14 @@ mod tests {
         .unwrap();
         let err = TsgoRefManager::new(&lock_path).status().unwrap_err();
         assert!(
-            matches!(err, TsgoError::Protocol(message) if message.contains("managed ref is missing"))
+            matches!(err, TsgoError::Protocol(message) if message.contains("managed origin is missing"))
         );
     }
 
     #[test]
     fn verify_reports_dirty_worktree() {
         let root = tempdir().unwrap();
-        let repo = root.path().join("ref/typescript-go");
+        let repo = root.path().join("origin/typescript-go");
         init_repo(&repo);
         fs::write(repo.join("README.md"), "hello").unwrap();
         std::process::Command::new("git")
@@ -250,7 +250,7 @@ mod tests {
             .current_dir(&repo)
             .output()
             .unwrap();
-        let lock_path = root.path().join("tsgo_ref.lock.toml");
+        let lock_path = root.path().join("tsgo_origin.lock.toml");
         TsgoRefManager::new(&lock_path).pin_current().unwrap();
         fs::write(repo.join("README.md"), "dirty").unwrap();
 

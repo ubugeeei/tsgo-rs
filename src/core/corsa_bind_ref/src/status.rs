@@ -1,7 +1,7 @@
 use crate::{LockedRepository, RepositorySnapshot, canonical_repository_id};
 use corsa_bind_core::fast::{CompactString, SmallVec, compact_format};
 
-/// Specific kinds of drift that can make the managed ref invalid.
+/// Specific kinds of drift that can make the managed checkout invalid.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum RepositoryProblem {
     /// The lockfile and checkout point at different upstream repositories.
@@ -27,7 +27,7 @@ pub enum RepositoryProblem {
     DirtyWorktree,
 }
 
-/// Combined live snapshot and drift diagnostics for the managed ref.
+/// Combined live snapshot and drift diagnostics for the managed checkout.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RepositoryStatus {
     /// Whether the checkout matches the lockfile exactly.
@@ -111,7 +111,7 @@ mod tests {
 
     fn lock() -> LockedRepository {
         LockedRepository {
-            path: "ref/typescript-go".into(),
+            path: "origin/typescript-go".into(),
             repository: "https://github.com/microsoft/typescript-go.git".into(),
             commit: "abc".into(),
             tree: "tree".into(),

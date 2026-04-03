@@ -6,7 +6,12 @@
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true,
     "paths": {
+      "@corsa-bind/browser": ["./typescript/browser/index.ts"],
+      "@corsa-bind/bun": ["./typescript/bun/index.ts"],
+      "@corsa-bind/deno": ["./typescript/deno/mod.ts"],
       "@corsa-bind/node": ["./src/bindings/nodejs/corsa_bind_node/ts/index.ts"],
+      "@corsa-bind/nodejs": ["./typescript/nodejs/index.ts"],
+      "@corsa-bind/typescript": ["./typescript/typescript/index.ts"],
       "corsa-oxlint": ["./src/bindings/nodejs/corsa_oxlint/ts/index.ts"],
       "corsa-oxlint/ast-utils": ["./src/bindings/nodejs/corsa_oxlint/ts/ast_utils.ts"],
       "corsa-oxlint/eslint-utils": ["./src/bindings/nodejs/corsa_oxlint/ts/eslint_utils.ts"],
@@ -26,14 +31,12 @@
   "include": [
     "bench/**/*.ts",
     "examples/**/*.ts",
-    "src/bindings/browser/**/*.ts",
-    "src/bindings/bun/**/*.ts",
-    "src/bindings/deno/**/*.ts",
     "src/bindings/nodejs/corsa_oxlint/ts/**/*.ts",
     "src/bindings/nodejs/corsa_oxlint/tsconfig.json",
     "src/bindings/nodejs/corsa_bind_node/index.d.ts",
     "src/bindings/nodejs/corsa_bind_node/ts/**/*.ts",
     "scripts/**/*.ts",
+    "typescript/**/*.ts",
     "vite.config.ts"
   ]
 }

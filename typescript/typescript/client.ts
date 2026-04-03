@@ -4,7 +4,7 @@ import type {
   TypeResponse,
   UpdateSnapshotParams,
   UpdateSnapshotResponse,
-} from "../../nodejs/corsa_bind_node/ts/types.ts";
+} from "./types.ts";
 
 export interface TsgoRemoteTransport {
   requestBinary(method: string, params?: unknown): Promise<Uint8Array | null>;
@@ -28,7 +28,15 @@ function decodeBase64(value: string): Uint8Array {
     const decoded = atobLike(value);
     return Uint8Array.from(decoded, (char) => char.charCodeAt(0));
   }
-  return Uint8Array.from(Buffer.from(value, "base64"));
+
+  const bufferLike = globalThis as {
+    Buffer?: { from(input: string, encoding: string): Uint8Array };
+  };
+  if (bufferLike.Buffer) {
+    return Uint8Array.from(bufferLike.Buffer.from(value, "base64"));
+  }
+
+  throw new Error("base64 decoding is not available in this runtime");
 }
 
 async function parseEnvelope<T>(response: Response): Promise<JsonEnvelope<T>> {
@@ -85,7 +93,7 @@ export function createFetchTransport(options: FetchTransportOptions): TsgoRemote
   };
 }
 
-export class BrowserTsgoApiClient {
+export class RemoteTsgoApiClient {
   readonly #transport: TsgoRemoteTransport;
 
   constructor(transport: TsgoRemoteTransport) {
@@ -144,3 +152,5 @@ export class BrowserTsgoApiClient {
     await this.#transport.close?.();
   }
 }
+
+export { RemoteTsgoApiClient as BrowserTsgoApiClient };

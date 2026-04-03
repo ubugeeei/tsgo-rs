@@ -88,11 +88,11 @@ Default native scenarios now cover both transport and type-query hot paths:
 
 ## Datasets
 
-| dataset      | files |   bytes |  lines | config                                          |
-| ------------ | ----: | ------: | -----: | ----------------------------------------------- |
-| `ast`        |    29 | 630,429 | 14,653 | `ref/typescript-go/_packages/ast/tsconfig.json` |
-| `api`        |    31 | 278,806 |  7,097 | `ref/typescript-go/_packages/api/tsconfig.json` |
-| `_extension` |    13 |  78,255 |  2,022 | `ref/typescript-go/_extension/tsconfig.json`    |
+| dataset      | files |   bytes |  lines | config                                             |
+| ------------ | ----: | ------: | -----: | -------------------------------------------------- |
+| `ast`        |    29 | 630,429 | 14,653 | `origin/typescript-go/_packages/ast/tsconfig.json` |
+| `api`        |    31 | 278,806 |  7,097 | `origin/typescript-go/_packages/api/tsconfig.json` |
+| `_extension` |    13 |  78,255 |  2,022 | `origin/typescript-go/_extension/tsconfig.json`    |
 
 ## 2026-03-31 Tooling Compare
 

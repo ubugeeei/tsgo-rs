@@ -7,8 +7,8 @@ dist
 /npm/corsa_bind_node/ts/*.js
 /npm/corsa_bind_node/ts/*.js.map
 
-/ref/tsgo-rs-upstream/
-/ref/corsa-bind-upstream/
-/ref/typescript-go/
+/origin/tsgo-rs-upstream/
+/origin/corsa-bind-upstream/
+/origin/typescript-go/
 .DS_Store
 .cache

@@ -68,7 +68,7 @@ mod tests {
         let lock = TsgoRefLock {
             version: 1,
             typescript_go: LockedRepository {
-                path: "ref/typescript-go".into(),
+                path: "origin/typescript-go".into(),
                 repository: "https://github.com/microsoft/typescript-go.git".into(),
                 commit: "abc".into(),
                 tree: "def".into(),

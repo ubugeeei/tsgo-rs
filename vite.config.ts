@@ -46,7 +46,12 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      "@corsa-bind/browser": resolve(rootDir, "typescript/browser/index.ts"),
+      "@corsa-bind/bun": resolve(rootDir, "typescript/bun/index.ts"),
+      "@corsa-bind/deno": resolve(rootDir, "typescript/deno/mod.ts"),
       "@corsa-bind/node": resolve(nodePackageDir, "ts/index.ts"),
+      "@corsa-bind/nodejs": resolve(rootDir, "typescript/nodejs/index.ts"),
+      "@corsa-bind/typescript": resolve(rootDir, "typescript/typescript/index.ts"),
       "corsa-oxlint/ast-utils": resolve(corsaOxlintDir, "ts/ast_utils.ts"),
       "corsa-oxlint/eslint-utils": resolve(corsaOxlintDir, "ts/eslint_utils.ts"),
       "corsa-oxlint/json-schema": resolve(corsaOxlintDir, "ts/json_schema.ts"),
@@ -66,10 +71,10 @@ export default defineConfig({
   },
   run: {
     tasks: {
-      sync_ref: {
+      sync_origin: {
         command: "cargo run -p corsa_bind_ref -- sync",
       },
-      verify_ref: {
+      verify_origin: {
         command: "cargo run -p corsa_bind_ref -- verify",
       },
       build: {
@@ -164,11 +169,11 @@ export default defineConfig({
       },
       bench_tooling_setup: {
         command: noopCommand,
-        dependsOn: ["bench_tooling_setup_ref", "bench_tooling_setup_cli_compare"],
+        dependsOn: ["bench_tooling_setup_origin", "bench_tooling_setup_cli_compare"],
       },
-      bench_tooling_setup_ref: {
+      bench_tooling_setup_origin: {
         command: "npm install --no-fund --no-audit",
-        cwd: "ref/typescript-go",
+        cwd: "origin/typescript-go",
       },
       bench_tooling_setup_cli_compare: {
         command: "npm install --no-fund --no-audit",
@@ -200,7 +205,7 @@ export default defineConfig({
       examples_node_real: {
         command: "pnpm run real",
         cwd: "examples",
-        dependsOn: ["build", "sync_ref", "verify_ref", "build_tsgo"],
+        dependsOn: ["build", "sync_origin", "verify_origin", "build_tsgo"],
       },
       examples_rust_smoke: {
         command: "node --strip-types ./scripts/run_rust_examples.ts smoke",
@@ -208,7 +213,7 @@ export default defineConfig({
       },
       examples_rust_real: {
         command: "node --strip-types ./scripts/run_rust_examples.ts real",
-        dependsOn: ["sync_ref", "verify_ref", "build_tsgo"],
+        dependsOn: ["sync_origin", "verify_origin", "build_tsgo"],
       },
       examples_rust_experimental: {
         command: "node --strip-types ./scripts/run_rust_examples.ts experimental",
@@ -229,7 +234,7 @@ export default defineConfig({
     include: ["bench/src/**/*.test.ts", "src/bindings/nodejs/**/ts/**/*.test.ts"],
     benchmark: {
       include: ["bench/src/**/*.bench.ts"],
-      exclude: ["ref/**"],
+      exclude: ["origin/**"],
       includeSamples: true,
     },
   },

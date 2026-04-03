@@ -1,6 +1,6 @@
 # tsgo Dependency Management
 
-`typescript-go` is managed as a pinned git dependency via [tsgo_ref.lock.toml](../tsgo_ref.lock.toml).
+`typescript-go` is managed as a pinned git dependency via [tsgo_origin.lock.toml](../tsgo_origin.lock.toml).
 
 Core policy:
 
@@ -11,9 +11,9 @@ Core policy:
 
 Rules:
 
-- The authoritative upstream is `ref/typescript-go`.
+- The authoritative upstream is `origin/typescript-go`.
 - The lock file records repository, exact commit hash, tree hash, committer timestamp, author, and subject.
-- `ref/typescript-go` must remain on a detached `HEAD` at the exact locked commit.
+- `origin/typescript-go` must remain on a detached `HEAD` at the exact locked commit.
 - A dirty worktree fails verification.
 - `sync` refuses to touch an existing checkout when the configured remote does not match the locked upstream.
 
@@ -21,6 +21,6 @@ Workflow:
 
 1. `cargo run -p corsa_bind_ref -- sync`
 2. `cargo run -p corsa_bind_ref -- verify`
-3. When intentionally updating upstream, move `ref/typescript-go` to the new commit and run `cargo run -p corsa_bind_ref -- pin-current`
+3. When intentionally updating upstream, move `origin/typescript-go` to the new commit and run `cargo run -p corsa_bind_ref -- pin-current`
 
 This keeps reproduction commit-exact and leaves an auditable metadata trail for every upstream bump.

@@ -1,6 +1,7 @@
 # corsa-bind
 
-Rust and Node bindings for `typescript-go` over stdio.
+Rust core, Node bindings, and TypeScript runtime layers for `typescript-go`
+over stdio.
 
 `corsa-bind` gives this repository a small, focused goal:
 
@@ -16,8 +17,8 @@ Rust and Node bindings for `typescript-go` over stdio.
 
 > [!IMPORTANT]
 > This repository does not maintain a fork of `typescript-go`.
-> `ref/typescript-go` is treated as a managed upstream checkout and verified
-> against [`tsgo_ref.lock.toml`](./tsgo_ref.lock.toml).
+> `origin/typescript-go` is treated as a managed upstream checkout and verified
+> against [`tsgo_origin.lock.toml`](./tsgo_origin.lock.toml).
 
 ## What You Get
 
@@ -25,6 +26,8 @@ Rust and Node bindings for `typescript-go` over stdio.
 - `corsa_bind_lsp`: Rust LSP client with virtual-document support
 - `corsa_bind_orchestrator`: local worker pooling and cache reuse
 - `@corsa-bind/node`: native Node bindings built with `napi-rs`
+- `typescript/typescript`: shared TypeScript transport and response layer
+- `typescript/nodejs`, `typescript/bun`, `typescript/deno`, `typescript/browser`: runtime-specific TypeScript entrypoints
 - `corsa-oxlint`: type-aware Oxlint helpers powered by `tsgo`
 - `corsa_bind_ref`: tooling for syncing and verifying the pinned upstream repo
 
@@ -36,13 +39,13 @@ Requirements:
 
 - Rust toolchain
 - Node `24`
-- Go version compatible with [`ref/typescript-go/go.mod`](./ref/typescript-go/go.mod)
+- Go version compatible with [`origin/typescript-go/go.mod`](./origin/typescript-go/go.mod)
 
 Sync the pinned upstream checkout:
 
 ```bash
-vp run -w sync_ref
-vp run -w verify_ref
+vp run -w sync_origin
+vp run -w verify_origin
 ```
 
 Install dependencies, build, and run tests:
@@ -82,8 +85,8 @@ Examples live in [`examples/`](./examples/README.md).
 
 `typescript-go` moves quickly, so this repo treats upstream tracking as a first-class part of development.
 
-- exact pin metadata lives in [`tsgo_ref.lock.toml`](./tsgo_ref.lock.toml)
-- managed checkout lives in `ref/typescript-go`
+- exact pin metadata lives in [`tsgo_origin.lock.toml`](./tsgo_origin.lock.toml)
+- managed checkout lives in `origin/typescript-go`
 - dirty or branch-attached upstream state fails verification
 - update workflow and policy are documented in [`docs/tsgo_dependency.md`](./docs/tsgo_dependency.md)
 
@@ -105,4 +108,6 @@ Examples live in [`examples/`](./examples/README.md).
 - release workflow: [`docs/release_guide.md`](./docs/release_guide.md)
 - supply-chain policy: [`docs/supply_chain_policy.md`](./docs/supply_chain_policy.md)
 - Node package details: [`src/bindings/nodejs/corsa_bind_node/README.md`](./src/bindings/nodejs/corsa_bind_node/README.md)
+- TypeScript runtime layer: [`typescript/typescript/README.md`](./typescript/typescript/README.md)
+- Browser runtime layer: [`typescript/browser/README.md`](./typescript/browser/README.md)
 - `corsa-oxlint` details: [`src/bindings/nodejs/corsa_oxlint/README.md`](./src/bindings/nodejs/corsa_oxlint/README.md)

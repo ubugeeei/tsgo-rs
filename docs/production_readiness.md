@@ -56,7 +56,7 @@ For editor-like integrations:
 - `cargo test -p corsa_bind_rs --no-default-features --test orchestrator`
 - `cargo test -p corsa_bind_rs --features experimental-distributed --test orchestrator`
 - `vp run -w bench_verify`
-- `vp run -w verify_ref`
+- `vp run -w verify_origin`
 - `cargo deny check advisories bans licenses sources`
 - `vp run -w release_dry_run`
 

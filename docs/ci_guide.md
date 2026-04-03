@@ -12,7 +12,7 @@ This repository has a slightly unusual shape:
 - Rust crates
 - Node bindings through `napi-rs`
 - JS and TS code checked through Vite+ and Oxlint
-- a pinned upstream `typescript-go` checkout under `ref/typescript-go`
+- a pinned upstream `typescript-go` checkout under `origin/typescript-go`
 - regression tests and benchmarks that talk to the real pinned upstream binary
 
 That means "CI is green" is not just one compiler succeeding.
@@ -33,7 +33,7 @@ It currently has three CI jobs in the main workflow:
 
 - `quality`
 - `real-tsgo-smoke`
-- `bench-tsgo-ref`
+- `bench-tsgo-origin`
 
 ## `quality`
 
@@ -67,15 +67,15 @@ The `real-tsgo-smoke` job answers:
 The important commands are:
 
 ```bash
-vp run -w sync_ref
-vp run -w verify_ref
+vp run -w sync_origin
+vp run -w verify_origin
 vp run -w build_tsgo
 cargo test -p corsa_bind_rs --no-default-features --test real_tsgo_regression --test real_tsgo_typecheck
 ```
 
-## `bench-tsgo-ref`
+## `bench-tsgo-origin`
 
-The `bench-tsgo-ref` job keeps the heavier Ubuntu-only path:
+The `bench-tsgo-origin` job keeps the heavier Ubuntu-only path:
 
 - baseline validation against the pinned upstream server
 - benchmark report regeneration
@@ -120,8 +120,8 @@ nix shell nixpkgs#nodejs_24 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'cargo fmt --a
 nix shell nixpkgs#nodejs_24 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'cargo clippy --workspace --all-targets -- -D warnings'
 nix shell nixpkgs#nodejs_24 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w build'
 nix shell nixpkgs#nodejs_24 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w test'
-nix shell nixpkgs#nodejs_24 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w sync_ref'
-nix shell nixpkgs#nodejs_24 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w verify_ref'
+nix shell nixpkgs#nodejs_24 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w sync_origin'
+nix shell nixpkgs#nodejs_24 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w verify_origin'
 nix shell nixpkgs#nodejs_24 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w build_tsgo'
 cargo test -p corsa_bind_rs --test real_tsgo_baseline --test real_tsgo_regression
 nix shell nixpkgs#nodejs_24 nixpkgs#pnpm nixpkgs#go_1_26 -c sh -c 'vp run -w bench_verify'
@@ -188,7 +188,7 @@ The pinned upstream ref now declares:
 
 in:
 
-- [`../ref/typescript-go/go.mod`](../ref/typescript-go/go.mod)
+- [`../origin/typescript-go/go.mod`](../origin/typescript-go/go.mod)
 
 That means CI cannot rely on whatever `go` version happens to be preinstalled on a runner.
 Without an explicit setup step, `vp run -w build_tsgo` can fail even if the repository itself is otherwise correct.
@@ -197,7 +197,7 @@ The workflow now sets Go explicitly through:
 
 - [`../.github/workflows/ci.yml`](../.github/workflows/ci.yml)
 
-using `actions/setup-go` and `go-version-file: ref/typescript-go/go.mod`.
+using `actions/setup-go` and `go-version-file: origin/typescript-go/go.mod`.
 
 This keeps the workflow aligned with the actual upstream requirement instead of duplicating a version string elsewhere.
 
@@ -223,11 +223,11 @@ That matters for two reasons:
 One subtle detail here is that `GOCACHE` must be absolute.
 A relative path looks harmless but is rejected by the Go toolchain.
 
-## 5. `verify_ref` Is Supposed to Be Strict
+## 5. `verify_origin` Is Supposed to Be Strict
 
 The `corsa_bind_ref` checks are intentionally unforgiving.
 
-They enforce that `ref/typescript-go` is:
+They enforce that `origin/typescript-go` is:
 
 - on the exact pinned commit
 - detached at `HEAD`
@@ -236,17 +236,17 @@ They enforce that `ref/typescript-go` is:
 This is not overkill.
 It is what makes real regression tests and performance claims auditable.
 
-While reproducing CI locally, `verify_ref` briefly failed because a tracked file inside the managed ref had drifted:
+While reproducing CI locally, `verify_origin` briefly failed because a tracked file inside the managed ref had drifted:
 
-- `ref/typescript-go/package-lock.json`
+- `origin/typescript-go/package-lock.json`
 
 That drift came from local package-manager behavior, not from intended upstream changes.
 The correct response was to restore the tracked file, not to weaken verification.
 
 Ignored files such as these are fine:
 
-- `ref/typescript-go/.cache/`
-- `ref/typescript-go/node_modules/`
+- `origin/typescript-go/.cache/`
+- `origin/typescript-go/node_modules/`
 - generated `*.tsbuildinfo`
 
 Tracked changes are not.
@@ -312,7 +312,7 @@ The most important files for this CI stabilization work are:
 - [`../src/bindings/nodejs/corsa_oxlint/tsconfig.json`](../src/bindings/nodejs/corsa_oxlint/tsconfig.json)
 - [`../src/bindings/nodejs/corsa_oxlint/ts/session.ts`](../src/bindings/nodejs/corsa_oxlint/ts/session.ts)
 - [`../src/bindings/nodejs/corsa_oxlint/ts/rules/type_utils.ts`](../src/bindings/nodejs/corsa_oxlint/ts/rules/type_utils.ts)
-- [`../ref/typescript-go/go.mod`](../ref/typescript-go/go.mod)
+- [`../origin/typescript-go/go.mod`](../origin/typescript-go/go.mod)
 
 ## Troubleshooting
 
@@ -327,7 +327,7 @@ Check:
 
 - `go version`
 - whether the shell actually exposes Go 1.26
-- whether CI is using `actions/setup-go` with `ref/typescript-go/go.mod`
+- whether CI is using `actions/setup-go` with `origin/typescript-go/go.mod`
 
 If a login shell is overriding the toolchain, prefer the `nix shell ... -c sh -c '...'` pattern.
 
@@ -341,13 +341,13 @@ Check whether `GOCACHE` is:
 
 This repository now uses `.cache/go-build` under the workspace for that reason.
 
-## `verify_ref` fails even though `sync_ref` just ran
+## `verify_origin` fails even though `sync_origin` just ran
 
-Look specifically for tracked file drift inside `ref/typescript-go`:
+Look specifically for tracked file drift inside `origin/typescript-go`:
 
 ```bash
-git -C ref/typescript-go status --short
-git -C ref/typescript-go diff --stat
+git -C origin/typescript-go status --short
+git -C origin/typescript-go diff --stat
 ```
 
 Ignored files are usually not the problem.
@@ -366,7 +366,7 @@ The slowest part is usually rebuilding or rerunning the real pinned upstream bin
 ## Practical Tips
 
 - Run CI repro commands in a non-login shell when you need deterministic tool resolution.
-- Treat `ref/typescript-go` as managed state, not as a normal workspace directory.
+- Treat `origin/typescript-go` as managed state, not as a normal workspace directory.
 - Keep generated outputs out of source-time type checking.
 - Use repo-local caches when external cache directories may be sandboxed or permission-sensitive.
 - If benchmark jobs pass but leave child processes behind, treat that as a bug, not as cleanup debt.

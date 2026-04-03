@@ -101,10 +101,10 @@ fn default_tsgo_path(root_dir: &std::path::Path) -> PathBuf {
     let candidates = [
         root_dir.join(".cache/tsgo"),
         root_dir.join(".cache/tsgo.exe"),
-        root_dir.join("ref/typescript-go/.cache/tsgo"),
-        root_dir.join("ref/typescript-go/.cache/tsgo.exe"),
-        root_dir.join("ref/typescript-go/built/local/tsgo"),
-        root_dir.join("ref/typescript-go/built/local/tsgo.exe"),
+        root_dir.join("origin/typescript-go/.cache/tsgo"),
+        root_dir.join("origin/typescript-go/.cache/tsgo.exe"),
+        root_dir.join("origin/typescript-go/built/local/tsgo"),
+        root_dir.join("origin/typescript-go/built/local/tsgo.exe"),
     ];
     for candidate in candidates {
         if candidate.exists() {
@@ -119,7 +119,7 @@ fn default_tsgo_path(root_dir: &std::path::Path) -> PathBuf {
 }
 
 fn default_datasets(root_dir: &std::path::Path) -> SmallVec<[PathBuf; 4]> {
-    let base = root_dir.join("ref/typescript-go");
+    let base = root_dir.join("origin/typescript-go");
     let candidates = [
         base.join("_packages/ast/tsconfig.json"),
         base.join("_packages/api/tsconfig.json"),

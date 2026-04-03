@@ -23,7 +23,7 @@ We want to answer different questions with different tools instead of forcing on
 
 - use upstream-supported `tsgo` entry points
 - pin an exact upstream commit
-- do not patch `ref/typescript-go`
+- do not patch `origin/typescript-go`
 
 That matters for benchmarking.
 If we changed upstream locally, every performance claim would become harder to trust.
@@ -165,7 +165,7 @@ The overlays are used to:
 
 There is one subtle but important implementation detail:
 
-- the overlays are created under `ref/typescript-go/.cache/...`, not under the repository root `.cache`
+- the overlays are created under `origin/typescript-go/.cache/...`, not under the repository root `.cache`
 
 This keeps TypeScript's node module resolution behavior aligned with the upstream workspace, especially for packages like `@types/node`.
 

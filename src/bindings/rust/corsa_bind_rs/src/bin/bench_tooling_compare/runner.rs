@@ -395,11 +395,11 @@ fn is_noise_identifier(token: &str) -> bool {
 impl ToolSupport {
     fn discover(cli: &Cli) -> Result<Self> {
         let workspace_root = cli.root_dir.clone();
-        let typescript_go_root = workspace_root.join("ref/typescript-go");
+        let typescript_go_root = workspace_root.join("origin/typescript-go");
         let tsc_script = typescript_go_root.join("node_modules/typescript/bin/tsc");
         if !tsc_script.exists() {
             return Err(TsgoError::Protocol(CompactString::from(
-                "missing ref/typescript-go/node_modules/typescript/bin/tsc; run `vp run -w bench_tooling_setup` first",
+                "missing origin/typescript-go/node_modules/typescript/bin/tsc; run `vp run -w bench_tooling_setup` first",
             )));
         }
         let cli_compare_root = workspace_root.join("bench/cli_compare");
@@ -446,7 +446,7 @@ impl OverlayDir {
             .map(|elapsed| elapsed.as_nanos())
             .unwrap_or(0);
         let path = root_dir
-            .join("ref/typescript-go/.cache/bench_tooling_compare")
+            .join("origin/typescript-go/.cache/bench_tooling_compare")
             .join(format!("overlay-{}-{suffix}", std::process::id()));
         fs::create_dir_all(&path)?;
         Ok(Self { path })

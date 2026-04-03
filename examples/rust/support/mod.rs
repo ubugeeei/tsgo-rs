@@ -44,11 +44,11 @@ pub fn resolved_real_binary() -> Option<PathBuf> {
     [
         workspace_root().join(format!(".cache/tsgo{}", executable_suffix())),
         workspace_root().join(format!(
-            "ref/typescript-go/.cache/tsgo{}",
+            "origin/typescript-go/.cache/tsgo{}",
             executable_suffix()
         )),
         workspace_root().join(format!(
-            "ref/typescript-go/built/local/tsgo{}",
+            "origin/typescript-go/built/local/tsgo{}",
             executable_suffix()
         )),
     ]
@@ -57,7 +57,7 @@ pub fn resolved_real_binary() -> Option<PathBuf> {
 }
 
 pub fn real_dataset() -> PathBuf {
-    workspace_root().join("ref/typescript-go/_packages/api/tsconfig.json")
+    workspace_root().join("origin/typescript-go/_packages/api/tsconfig.json")
 }
 
 pub fn require_path(path: &Path, label: &str, hint: &str) -> Result<(), TsgoError> {
@@ -100,7 +100,7 @@ pub fn real_api_config(_example_name: &str, mode: ApiMode) -> Result<ApiSpawnCon
     require_path(
         &dataset,
         "pinned tsgo dataset",
-        "run `vp run -w sync_ref` and `vp run -w verify_ref` first",
+        "run `vp run -w sync_origin` and `vp run -w verify_origin` first",
     )?;
     Ok(ApiSpawnConfig::new(binary)
         .with_mode(mode)

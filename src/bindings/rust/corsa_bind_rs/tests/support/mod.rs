@@ -76,10 +76,10 @@ pub fn resolved_real_tsgo_binary() -> Option<PathBuf> {
     [
         workspace_root().join(".cache/tsgo"),
         workspace_root().join(".cache/tsgo.exe"),
-        workspace_root().join("ref/typescript-go/.cache/tsgo"),
-        workspace_root().join("ref/typescript-go/.cache/tsgo.exe"),
-        workspace_root().join("ref/typescript-go/built/local/tsgo"),
-        workspace_root().join("ref/typescript-go/built/local/tsgo.exe"),
+        workspace_root().join("origin/typescript-go/.cache/tsgo"),
+        workspace_root().join("origin/typescript-go/.cache/tsgo.exe"),
+        workspace_root().join("origin/typescript-go/built/local/tsgo"),
+        workspace_root().join("origin/typescript-go/built/local/tsgo.exe"),
     ]
     .into_iter()
     .find(|path| path.exists())
@@ -96,7 +96,7 @@ pub fn real_tsgo_binary() -> PathBuf {
 }
 
 pub fn real_dataset() -> PathBuf {
-    workspace_root().join("ref/typescript-go/_packages/api/tsconfig.json")
+    workspace_root().join("origin/typescript-go/_packages/api/tsconfig.json")
 }
 
 pub fn real_api_config(mode: ApiMode) -> Option<ApiSpawnConfig> {
