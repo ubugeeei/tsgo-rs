@@ -1,4 +1,4 @@
-use super::{MSG_CALL, MSG_RESPONSE, CorsaError, read_tuple, write_tuple};
+use super::{CorsaError, MSG_CALL, MSG_RESPONSE, read_tuple, write_tuple};
 use std::io::Cursor;
 
 #[test]
@@ -53,7 +53,9 @@ fn rejects_invalid_uint_marker() {
 fn rejects_invalid_bin_marker() {
     let bytes = [0x93_u8, MSG_CALL, 0xa1, b'x', 0xc4, 0];
     let err = read_tuple(&mut Cursor::new(bytes)).unwrap_err();
-    assert!(matches!(err, CorsaError::Protocol(message) if message.contains("expected bin marker")));
+    assert!(
+        matches!(err, CorsaError::Protocol(message) if message.contains("expected bin marker"))
+    );
 }
 
 #[test]

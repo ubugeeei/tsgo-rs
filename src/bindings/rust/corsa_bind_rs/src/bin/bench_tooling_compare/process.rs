@@ -5,7 +5,7 @@ use std::{
 };
 
 use corsa_bind_core::terminate_child_process;
-use corsa_bind_rs::{Result, CorsaError, fast::CompactString};
+use corsa_bind_rs::{CorsaError, Result, fast::CompactString};
 
 pub fn run_command(
     command: &mut Command,

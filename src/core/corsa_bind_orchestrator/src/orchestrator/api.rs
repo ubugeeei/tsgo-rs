@@ -1,7 +1,7 @@
 use crate::Result;
 use crate::api::{ApiClient, ApiProfile, ManagedSnapshot, UpdateSnapshotParams};
 use corsa_bind_core::{
-    SharedObserver, CorsaEvent,
+    CorsaEvent, SharedObserver,
     fast::{CompactString, FastMap, SmallVec, compact_format},
     observe,
 };

@@ -26,10 +26,10 @@ pub mod process {
 
 /// Re-exports structured operational events used by the LSP configs.
 pub mod observability {
-    pub use corsa_bind_core::{SharedObserver, CorsaEvent, CorsaObserver};
+    pub use corsa_bind_core::{CorsaEvent, CorsaObserver, SharedObserver};
 }
 
-pub use corsa_bind_core::{Result, SharedObserver, CorsaError, CorsaEvent, CorsaObserver};
+pub use corsa_bind_core::{CorsaError, CorsaEvent, CorsaObserver, Result, SharedObserver};
 
 #[path = "lsp/mod.rs"]
 /// LSP client, overlay, and custom-request types.

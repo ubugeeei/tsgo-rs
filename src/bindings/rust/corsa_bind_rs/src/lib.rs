@@ -39,7 +39,7 @@ pub mod api {
 
 /// Re-exports shared error types.
 pub mod error {
-    pub use corsa_bind_core::{Result, RpcResponseError, CorsaError};
+    pub use corsa_bind_core::{CorsaError, Result, RpcResponseError};
 }
 
 /// Re-exports performance-oriented building blocks such as `CompactString`.
@@ -64,7 +64,7 @@ pub mod lsp {
 
 /// Re-exports structured operational events used across the workspace.
 pub mod observability {
-    pub use corsa_bind_core::{SharedObserver, CorsaEvent, CorsaObserver};
+    pub use corsa_bind_core::{CorsaEvent, CorsaObserver, SharedObserver};
 }
 
 /// Re-exports client orchestration and replicated-state helpers.
@@ -90,5 +90,5 @@ pub mod runtime {
 }
 
 pub use corsa_bind_core::{
-    CorsaUtils, Result, SharedObserver, CorsaError, CorsaEvent, CorsaObserver, UnsafeTypeFlowInput,
+    CorsaError, CorsaEvent, CorsaObserver, CorsaUtils, Result, SharedObserver, UnsafeTypeFlowInput,
 };

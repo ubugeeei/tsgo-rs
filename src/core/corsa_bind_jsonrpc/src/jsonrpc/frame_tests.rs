@@ -68,7 +68,9 @@ fn rejects_oversized_headers() {
     let header = vec![b'a'; MAX_HEADER_BYTES + 1];
     let mut reader = BufReader::new(header.as_slice());
     let err = read_frame(&mut reader).unwrap_err();
-    assert!(matches!(err, CorsaError::Protocol(message) if message.contains("header is too large")));
+    assert!(
+        matches!(err, CorsaError::Protocol(message) if message.contains("header is too large"))
+    );
 }
 
 #[test]

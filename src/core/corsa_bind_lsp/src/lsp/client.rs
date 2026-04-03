@@ -1,5 +1,5 @@
 use crate::{
-    Result, CorsaError,
+    CorsaError, Result,
     jsonrpc::{InboundEvent, JsonRpcConnection, JsonRpcConnectionOptions, RequestId},
     process::{AsyncChildGuard, CorsaCommand},
 };
@@ -136,7 +136,10 @@ impl LspClient {
             .command
             .spawn_async(args.iter().map(CompactString::as_str))?;
         let stdin = child.stdin.take().ok_or(CorsaError::Closed("lsp stdin"))?;
-        let stdout = child.stdout.take().ok_or(CorsaError::Closed("lsp stdout"))?;
+        let stdout = child
+            .stdout
+            .take()
+            .ok_or(CorsaError::Closed("lsp stdout"))?;
         Ok(Self {
             rpc: JsonRpcConnection::spawn_with_options(
                 BufReader::new(stdout),

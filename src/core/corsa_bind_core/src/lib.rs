@@ -16,9 +16,9 @@ mod observability;
 mod process;
 mod rpc;
 
-pub use error::{Result, CorsaError};
 pub use binding_utils::{CorsaUtils, UnsafeTypeFlowInput};
-pub use observability::{SharedObserver, CorsaEvent, CorsaObserver, observe};
+pub use error::{CorsaError, Result};
+pub use observability::{CorsaEvent, CorsaObserver, SharedObserver, observe};
 /// Child-process guard and reusable command template for `tsgo`.
 pub use process::{AsyncChildGuard, CorsaCommand, terminate_child_process, wait_for_child_exit};
 pub use rpc::RpcResponseError;

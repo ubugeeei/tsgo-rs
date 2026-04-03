@@ -10,11 +10,11 @@
 //! need to work at the protocol boundary directly.
 
 pub mod observability {
-    pub use corsa_bind_core::{SharedObserver, CorsaEvent, CorsaObserver};
+    pub use corsa_bind_core::{CorsaEvent, CorsaObserver, SharedObserver};
 }
 
 pub use corsa_bind_core::{
-    Result, RpcResponseError, SharedObserver, CorsaError, CorsaEvent, CorsaObserver,
+    CorsaError, CorsaEvent, CorsaObserver, Result, RpcResponseError, SharedObserver,
 };
 
 #[path = "jsonrpc/mod.rs"]

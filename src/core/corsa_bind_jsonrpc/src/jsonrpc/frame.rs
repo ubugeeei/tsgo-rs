@@ -5,7 +5,7 @@
 //! bytes. The helpers in this module focus on that framing layer only; they do
 //! not parse or validate the JSON payload itself.
 
-use crate::{Result, CorsaError};
+use crate::{CorsaError, Result};
 use corsa_bind_core::fast::{SmallVec, memchr, memmem};
 use std::io::{BufRead, Write};
 

@@ -1,5 +1,5 @@
 use crate::{
-    Result, CorsaError,
+    CorsaError, Result,
     api::{ManagedSnapshot, ProjectResponse, SnapshotChanges, SnapshotHandle},
     lsp::{VirtualChange, VirtualDocument},
 };

@@ -5,9 +5,9 @@
 //! wraps that blocking interaction in a worker thread so the public API can stay
 //! async-friendly without pulling in a full async runtime.
 
-use crate::{Result, CorsaError};
+use crate::{CorsaError, Result};
 use corsa_bind_core::{
-    SharedObserver, CorsaEvent,
+    CorsaEvent, SharedObserver,
     fast::{CompactString, compact_format},
     observe, terminate_child_process,
 };

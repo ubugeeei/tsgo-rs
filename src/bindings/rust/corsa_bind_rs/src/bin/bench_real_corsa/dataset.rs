@@ -5,7 +5,7 @@ use std::{
 };
 
 use corsa_bind_rs::{
-    Result, CorsaError,
+    CorsaError, Result,
     api::{ApiClient, ApiMode, ApiSpawnConfig},
     fast::{CompactString, SmallVec},
 };

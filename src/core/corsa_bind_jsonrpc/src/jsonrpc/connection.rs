@@ -1,6 +1,6 @@
-use crate::{Result, CorsaError};
+use crate::{CorsaError, Result};
 use corsa_bind_core::fast::{CompactString, FastMap};
-use corsa_bind_core::{SharedObserver, CorsaEvent, fast::compact_format, observe};
+use corsa_bind_core::{CorsaEvent, SharedObserver, fast::compact_format, observe};
 use corsa_bind_runtime::{BroadcastReceiver, BroadcastSender, broadcast};
 use log::warn;
 use parking_lot::Mutex;
@@ -241,7 +241,8 @@ impl JsonRpcConnection {
                 )
             })?;
         }
-        rx.recv().map_err(|_| CorsaError::Closed("jsonrpc waiter"))?
+        rx.recv()
+            .map_err(|_| CorsaError::Closed("jsonrpc waiter"))?
     }
 
     /// Sends a JSON-RPC notification.
@@ -381,7 +382,9 @@ impl Inner {
             Ok(()) => Ok(()),
             Err(TrySendError::Full(_)) => {
                 observe(self.observer.as_ref(), CorsaEvent::JsonRpcOutboundQueueFull);
-                Err(CorsaError::Protocol("jsonrpc outbound queue is full".into()))
+                Err(CorsaError::Protocol(
+                    "jsonrpc outbound queue is full".into(),
+                ))
             }
             Err(TrySendError::Disconnected(_)) => Err(CorsaError::Closed("jsonrpc writer")),
         }

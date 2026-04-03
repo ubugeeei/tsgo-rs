@@ -22,7 +22,7 @@ pub use git::{
     CommitMetadata, RepositorySnapshot, canonical_repository_id, canonical_repository_url,
 };
 /// Lockfile structures describing the pinned upstream repository.
-pub use lockfile::{LockedRepository, CorsaRefLock};
+pub use lockfile::{CorsaRefLock, LockedRepository};
 /// High-level entry point for syncing and verifying the managed checkout.
 pub use manager::CorsaRefManager;
 /// Drift diagnostics emitted when the managed checkout diverges from the lockfile.

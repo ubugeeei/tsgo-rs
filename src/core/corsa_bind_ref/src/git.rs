@@ -1,5 +1,5 @@
 use corsa_bind_core::{
-    Result, CorsaError,
+    CorsaError, Result,
     fast::{CompactString, compact_format},
 };
 use std::{path::Path, process::Command};

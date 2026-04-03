@@ -245,9 +245,7 @@ pub unsafe extern "C" fn corsa_bind_is_unsafe_return(input_json: *const c_char) 
 }
 
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn corsa_bind_utils_is_unsafe_assignment(
-    input_json: *const c_char,
-) -> c_int {
+pub unsafe extern "C" fn corsa_bind_utils_is_unsafe_assignment(input_json: *const c_char) -> c_int {
     corsa_bind_is_unsafe_assignment(input_json)
 }
 

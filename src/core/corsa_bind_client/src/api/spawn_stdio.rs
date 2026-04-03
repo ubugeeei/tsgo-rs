@@ -10,7 +10,7 @@ use super::{
     driver::ClientDriver,
 };
 use crate::{
-    Result, CorsaError,
+    CorsaError, Result,
     jsonrpc::{JsonRpcConnection, JsonRpcConnectionOptions},
     process::{AsyncChildGuard, CorsaCommand},
 };
@@ -34,7 +34,10 @@ pub(super) async fn spawn_jsonrpc_stdio(
     let args = stdio_args(command, filesystem.as_deref(), true);
     let mut child = command.spawn_async(args.iter().map(CompactString::as_str))?;
     let stdin = child.stdin.take().ok_or(CorsaError::Closed("api stdin"))?;
-    let stdout = child.stdout.take().ok_or(CorsaError::Closed("api stdout"))?;
+    let stdout = child
+        .stdout
+        .take()
+        .ok_or(CorsaError::Closed("api stdout"))?;
     let handlers = filesystem.map(jsonrpc_handlers).unwrap_or_default();
     let rpc = JsonRpcConnection::spawn_with_options(
         BufReader::new(stdout),

@@ -1,5 +1,5 @@
 use super::{LspClient, VirtualChange, VirtualDocument};
-use crate::{Result, CorsaError};
+use crate::{CorsaError, Result};
 use corsa_bind_core::fast::{CompactString, FastMap, SmallVec, compact_format};
 use lsp_types::{
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams, Uri,

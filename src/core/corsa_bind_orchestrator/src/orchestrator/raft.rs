@@ -1,5 +1,5 @@
 use super::state::{ReplicatedCommand, ReplicatedState};
-use crate::{Result, CorsaError};
+use crate::{CorsaError, Result};
 use corsa_bind_core::fast::{CompactString, FastMap, SmallVec, compact_format};
 use parking_lot::RwLock;
 use std::sync::Arc;

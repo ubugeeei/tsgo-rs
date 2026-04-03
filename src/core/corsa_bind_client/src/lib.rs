@@ -25,7 +25,7 @@
 
 /// Re-exports shared error types used by the client APIs.
 pub mod error {
-    pub use corsa_bind_core::{Result, RpcResponseError, CorsaError};
+    pub use corsa_bind_core::{CorsaError, Result, RpcResponseError};
 }
 
 /// Re-exports low-level JSON-RPC helpers used by the stdio client transport.
@@ -40,10 +40,10 @@ pub mod process {
 
 /// Re-exports structured operational events used by the client configs.
 pub mod observability {
-    pub use corsa_bind_core::{SharedObserver, CorsaEvent, CorsaObserver};
+    pub use corsa_bind_core::{CorsaEvent, CorsaObserver, SharedObserver};
 }
 
-pub use corsa_bind_core::{Result, SharedObserver, CorsaError, CorsaEvent, CorsaObserver};
+pub use corsa_bind_core::{CorsaError, CorsaEvent, CorsaObserver, Result, SharedObserver};
 
 #[path = "api/mod.rs"]
 /// Typed bindings for the `tsgo` stdio API surface.

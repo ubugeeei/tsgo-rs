@@ -1,4 +1,4 @@
-use crate::{Result, CorsaError};
+use crate::{CorsaError, Result};
 use corsa_bind_core::fast::compact_format;
 use std::io::{Read, Write};
 

@@ -1,4 +1,4 @@
-use crate::{Result, CorsaError};
+use crate::{CorsaError, Result};
 use parking_lot::Mutex;
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::{Value, json};

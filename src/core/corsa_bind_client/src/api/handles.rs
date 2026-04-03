@@ -1,4 +1,4 @@
-use crate::{Result, CorsaError};
+use crate::{CorsaError, Result};
 use corsa_bind_core::fast::CompactString;
 use serde::{Deserialize, Serialize};
 

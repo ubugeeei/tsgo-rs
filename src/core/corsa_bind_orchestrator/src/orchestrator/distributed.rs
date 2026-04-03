@@ -4,7 +4,7 @@ use super::{
     state::{ReplicatedCacheEntry, ReplicatedCommand, ReplicatedSnapshot, ReplicatedState},
 };
 use crate::{
-    Result, CorsaError,
+    CorsaError, Result,
     api::{ApiClient, ApiProfile, ManagedSnapshot, UpdateSnapshotParams},
     lsp::{VirtualChange, VirtualDocument},
 };

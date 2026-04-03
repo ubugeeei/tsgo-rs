@@ -1,5 +1,5 @@
 pub use crate::RpcResponseError;
-use crate::{Result, CorsaError};
+use crate::{CorsaError, Result};
 use corsa_bind_core::fast::{CompactString, compact_format};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;

@@ -1,4 +1,4 @@
-use crate::{Result, CorsaError};
+use crate::{CorsaError, Result};
 use corsa_bind_core::fast::{CompactString, SmallVec, compact_format};
 use lsp_types::{
     Position, Range, TextDocumentContentChangeEvent, TextDocumentIdentifier, TextDocumentItem, Uri,
