@@ -22,7 +22,7 @@ export declare function isErrorLikeTypeTexts(typeTexts: Array<string>, propertyN
  * # Examples
  *
  * ```
- * assert_eq!(tsgo_rs_node::version(), env!("CARGO_PKG_VERSION"));
+ * assert_eq!(corsa_node::version(), env!("CARGO_PKG_VERSION"));
  * ```
  */
 export declare function version(): string
