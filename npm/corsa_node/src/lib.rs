@@ -1,4 +1,4 @@
-//! `napi-rs` bindings for the `tsgo-rs` workspace.
+//! `napi-rs` bindings for the `corsa` workspace.
 //!
 //! The module intentionally stays thin: JSON is used at the N-API boundary so
 //! the Rust side can keep its typed transport and orchestration layers intact.
@@ -17,7 +17,7 @@ use napi_derive::napi;
 /// # Examples
 ///
 /// ```
-/// assert_eq!(tsgo_rs_node::version(), env!("CARGO_PKG_VERSION"));
+/// assert_eq!(corsa_node::version(), env!("CARGO_PKG_VERSION"));
 /// ```
 #[napi]
 pub fn version() -> &'static str {
