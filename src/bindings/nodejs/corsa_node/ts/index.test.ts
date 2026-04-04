@@ -18,7 +18,7 @@ import {
   isUnsafeReturn,
 } from "./index";
 
-const workspaceRoot = resolve(import.meta.dirname, "../../..");
+const workspaceRoot = resolve(import.meta.dirname, "../../../../..");
 const executableSuffix = process.platform === "win32" ? ".exe" : "";
 const mockBinary = resolve(workspaceRoot, `target/debug/mock_tsgo${executableSuffix}`);
 const realBinary = resolve(workspaceRoot, `.cache/tsgo${executableSuffix}`);

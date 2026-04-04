@@ -7,7 +7,7 @@ import { defaultTsgoExecutable } from "./context";
 import { RuleTester } from "./rule_tester";
 import { typescriptOxlintRules } from "./rules";
 
-const workspaceRoot = resolve(import.meta.dirname, "../../..");
+const workspaceRoot = resolve(import.meta.dirname, "../../../../..");
 const realTsgoBinary = defaultTsgoExecutable(workspaceRoot);
 const integrationCase = existsSync(realTsgoBinary) ? it : it.skip;
 

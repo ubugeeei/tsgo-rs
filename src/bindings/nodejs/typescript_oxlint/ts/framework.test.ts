@@ -8,7 +8,7 @@ import { ESLintUtils } from "./eslint_utils";
 import { decorateRule, definePlugin } from "./plugin";
 import { RuleTester } from "./rule_tester";
 
-const workspaceRoot = resolve(import.meta.dirname, "../../..");
+const workspaceRoot = resolve(import.meta.dirname, "../../../../..");
 const realTsgoBinary = defaultTsgoExecutable(workspaceRoot);
 
 describe("oxlint-plugin-typescript-go", () => {
