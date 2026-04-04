@@ -97,7 +97,7 @@ fn real_tsgo_api_summary_matches_pinned_baseline() {
 
 fn load_baseline() -> Value {
     let path =
-        support::workspace_root().join("crates/corsa/tests/data/real_tsgo_api_baseline.json");
+        support::workspace_root().join("src/bindings/rust/corsa/tests/data/real_tsgo_api_baseline.json");
     serde_json::from_str(std::fs::read_to_string(path).unwrap().as_str()).unwrap()
 }
 

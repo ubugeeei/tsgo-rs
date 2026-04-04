@@ -6,15 +6,29 @@
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true,
     "paths": {
-      "@corsa/node": ["./npm/corsa_node/ts/index.ts"],
-      "oxlint-plugin-typescript-go": ["./npm/typescript_oxlint/ts/index.ts"],
-      "oxlint-plugin-typescript-go/ast-utils": ["./npm/typescript_oxlint/ts/ast_utils.ts"],
-      "oxlint-plugin-typescript-go/eslint-utils": ["./npm/typescript_oxlint/ts/eslint_utils.ts"],
-      "oxlint-plugin-typescript-go/json-schema": ["./npm/typescript_oxlint/ts/json_schema.ts"],
-      "oxlint-plugin-typescript-go/rule-tester": ["./npm/typescript_oxlint/ts/rule_tester.ts"],
-      "oxlint-plugin-typescript-go/rules": ["./npm/typescript_oxlint/ts/rules/index.ts"],
-      "oxlint-plugin-typescript-go/ts-eslint": ["./npm/typescript_oxlint/ts/ts_eslint.ts"],
-      "oxlint-plugin-typescript-go/ts-estree": ["./npm/typescript_oxlint/ts/ts_estree.ts"]
+      "@corsa/node": ["./src/bindings/nodejs/corsa_node/ts/index.ts"],
+      "oxlint-plugin-typescript-go": ["./src/bindings/nodejs/typescript_oxlint/ts/index.ts"],
+      "oxlint-plugin-typescript-go/ast-utils": [
+        "./src/bindings/nodejs/typescript_oxlint/ts/ast_utils.ts"
+      ],
+      "oxlint-plugin-typescript-go/eslint-utils": [
+        "./src/bindings/nodejs/typescript_oxlint/ts/eslint_utils.ts"
+      ],
+      "oxlint-plugin-typescript-go/json-schema": [
+        "./src/bindings/nodejs/typescript_oxlint/ts/json_schema.ts"
+      ],
+      "oxlint-plugin-typescript-go/rule-tester": [
+        "./src/bindings/nodejs/typescript_oxlint/ts/rule_tester.ts"
+      ],
+      "oxlint-plugin-typescript-go/rules": [
+        "./src/bindings/nodejs/typescript_oxlint/ts/rules/index.ts"
+      ],
+      "oxlint-plugin-typescript-go/ts-eslint": [
+        "./src/bindings/nodejs/typescript_oxlint/ts/ts_eslint.ts"
+      ],
+      "oxlint-plugin-typescript-go/ts-estree": [
+        "./src/bindings/nodejs/typescript_oxlint/ts/ts_estree.ts"
+      ]
     },
     "strict": true,
     "declaration": true,
@@ -26,10 +40,10 @@
   "include": [
     "bench/**/*.ts",
     "examples/**/*.ts",
-    "npm/typescript_oxlint/ts/**/*.ts",
-    "npm/typescript_oxlint/tsconfig.json",
-    "npm/corsa_node/index.d.ts",
-    "npm/corsa_node/ts/**/*.ts",
+    "src/bindings/nodejs/typescript_oxlint/ts/**/*.ts",
+    "src/bindings/nodejs/typescript_oxlint/tsconfig.json",
+    "src/bindings/nodejs/corsa_node/index.d.ts",
+    "src/bindings/nodejs/corsa_node/ts/**/*.ts",
     "scripts/**/*.ts",
     "vite.config.ts"
   ]

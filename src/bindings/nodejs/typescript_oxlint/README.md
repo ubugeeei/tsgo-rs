@@ -162,7 +162,7 @@ vp run -w build_typescript_oxlint
 vp fmt
 vp lint
 vp check
-vp test run --config ./vite.config.ts npm/typescript_oxlint/ts/**/*.test.ts
+vp test run --config ./vite.config.ts src/bindings/nodejs/typescript_oxlint/ts/**/*.test.ts
 vp test bench --config ./vite.config.ts bench/src/typescript_oxlint.bench.ts
 vp test bench --config ./vite.config.ts bench/src/typescript_oxlint_rules.bench.ts
 ```

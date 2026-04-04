@@ -31,23 +31,23 @@ importers:
     dependencies:
       '@corsa/node':
         specifier: workspace:*
-        version: link:../npm/corsa_node
+        version: link:../src/bindings/nodejs/corsa_node
       oxlint-plugin-typescript-go:
         specifier: workspace:*
-        version: link:../npm/typescript_oxlint
+        version: link:../src/bindings/nodejs/typescript_oxlint
 
   examples:
     dependencies:
       '@corsa/node':
         specifier: workspace:*
-        version: link:../npm/corsa_node
+        version: link:../src/bindings/nodejs/corsa_node
       oxlint-plugin-typescript-go:
         specifier: workspace:*
-        version: link:../npm/typescript_oxlint
+        version: link:../src/bindings/nodejs/typescript_oxlint
 
-  npm/corsa_node: {}
+  src/bindings/nodejs/corsa_node: {}
 
-  npm/typescript_oxlint:
+  src/bindings/nodejs/typescript_oxlint:
     dependencies:
       '@oxlint/plugins':
         specifier: 1.57.0

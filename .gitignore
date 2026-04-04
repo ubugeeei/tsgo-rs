@@ -2,10 +2,10 @@ target
 node_modules
 dist
 **/*.node
-/npm/*/index.js
-/npm/corsa_node/ts/*.d.ts
-/npm/corsa_node/ts/*.js
-/npm/corsa_node/ts/*.js.map
+/src/bindings/nodejs/corsa_node/index.js
+/src/bindings/nodejs/corsa_node/ts/*.d.ts
+/src/bindings/nodejs/corsa_node/ts/*.js
+/src/bindings/nodejs/corsa_node/ts/*.js.map
 
 /ref/corsa-upstream/
 /ref/typescript-go/

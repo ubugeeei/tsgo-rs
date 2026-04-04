@@ -154,5 +154,5 @@ The current Vitest bench summary is useful for relative ranking but the JSON fil
 - `ApiSpawnConfig::new()` defaults to `SyncMsgpackStdio`, because it is still consistently ahead on the measured real-tsgo paths.
 - `getSourceFile` benefits strongly from msgpack because async JSON-RPC has to carry binary payloads through JSON framing.
 - `bench/src/report_guard.test.ts` fails when benchmark samples go missing or when the measured hot paths drift past the configured budget.
-- `crates/corsa/tests/real_tsgo_baseline.rs` pins the real upstream API summary for the locked `tsgo` commit.
+- `src/bindings/rust/corsa/tests/real_tsgo_baseline.rs` pins the real upstream API summary for the locked `tsgo` commit.
 - `printNode` is intentionally excluded from the default native suite at the pinned upstream commit because the real `tsgo` server can still panic inside `internal/printer` on real project data.

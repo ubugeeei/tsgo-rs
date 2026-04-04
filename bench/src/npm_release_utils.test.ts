@@ -11,7 +11,7 @@ import {
 } from "../../scripts/npm_release_utils.ts";
 
 const nodeBindingManifest = JSON.parse(
-  readFileSync(resolve(process.cwd(), "npm/corsa_node/package.json"), "utf8"),
+  readFileSync(resolve(process.cwd(), "src/bindings/nodejs/corsa_node/package.json"), "utf8"),
 ) as {
   files: string[];
   name: string;

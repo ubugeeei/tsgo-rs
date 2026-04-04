@@ -46,7 +46,7 @@ Current focus:
 - Fast-path bias: `CompactString`, `SmallVec`, `bumpalo`, `memchr`, `phf`, `FxHash`
 - JS toolchain: `pnpm` + Vite+ (`vp`) with `oxfmt` / `oxlint`
 - Repo automation: `scripts/*.ts` executed directly through Node `24` with `--strip-types`
-- Node bindings: `@corsa/node` (`npm/corsa_node`) and `oxlint-plugin-typescript-go` (`npm/typescript_oxlint`) (public npm packages that still expect a caller-managed `typescript-go` executable)
+- Node bindings: `@corsa/node` (`src/bindings/nodejs/corsa_node`) and `oxlint-plugin-typescript-go` (`src/bindings/nodejs/typescript_oxlint`) (public npm packages that still expect a caller-managed `typescript-go` executable)
 - Distributed orchestration: `experimental-distributed` cargo feature
 - TS benchmark project: `bench`
 - Example workspace: `examples`
@@ -72,8 +72,8 @@ Pinned upstream at the time of writing:
 - `corsa_runtime`: lightweight custom runtime and task primitives
 - `corsa_ref`: exact upstream pin, sync, and verification tooling
 - `corsa`: top-level facade crate, mock server, and native benchmark binaries
-- `npm/corsa_node`: `napi-rs` native bindings and the `@corsa/node` TypeScript wrapper package
-- `npm/typescript_oxlint`: `typescript-eslint`-style compatibility layer for type-aware Oxlint JS plugins
+- `src/bindings/nodejs/corsa_node`: `napi-rs` native bindings and the `@corsa/node` TypeScript wrapper package
+- `src/bindings/nodejs/typescript_oxlint`: `typescript-eslint`-style compatibility layer for type-aware Oxlint JS plugins
 - `bench`: Vitest benchmark project for the Node binding
 - `examples`: curated `examples/nodejs`, `examples/rust`, and `examples/typescript_oxlint` flows from minimal start to real-project runs
 
@@ -198,7 +198,7 @@ export const noStringPlusNumber = createRule({
 ```
 
 The rule-side type-aware config lives under `settings.typescriptOxlint`. Package
-details and caveats are documented in [`npm/typescript_oxlint/README.md`](./npm/typescript_oxlint/README.md).
+details and caveats are documented in [`src/bindings/nodejs/typescript_oxlint/README.md`](./src/bindings/nodejs/typescript_oxlint/README.md).
 
 `oxlint-plugin-typescript-go/rules` exposes a TS-native type-aware rule set and plugin:
 
@@ -260,7 +260,7 @@ The repo ships two benchmark layers:
 
 The TS benchmark writes machine-readable output to `.cache/bench_ts.json`.
 The native benchmark writes machine-readable output to `.cache/bench_native.json`.
-The native Rust benchmark uses the real pinned tsgo binary through [`bench_real_tsgo`](./crates/corsa/src/bin/bench_real_tsgo/main.rs).
+The native Rust benchmark uses the real pinned tsgo binary through [`bench_real_tsgo`](./src/bindings/rust/corsa/src/bin/bench_real_tsgo/main.rs).
 
 Latest native measurements are documented in [docs/performance.md](./docs/performance.md).
 Benchmarking rationale, implementation notes, and usage tips are documented in [docs/benchmarking_guide.md](./docs/benchmarking_guide.md).
@@ -272,8 +272,8 @@ On the pinned upstream commit and bundled datasets, `msgpack` was consistently f
 The repository is intentionally aggressive about change detection because `typescript-go` is still unstable.
 
 - `cargo test --workspace` includes mock-server integration tests, policy tests, and real-tsgo regression tests when `.cache/tsgo` is available
-- `crates/corsa/tests/real_tsgo_baseline.rs` locks a real-server API summary to the pinned upstream commit
-- `crates/corsa/tests/real_tsgo_regression.rs` checks both transports against the real pinned tsgo binary
+- `src/bindings/rust/corsa/tests/real_tsgo_baseline.rs` locks a real-server API summary to the pinned upstream commit
+- `src/bindings/rust/corsa/tests/real_tsgo_regression.rs` checks both transports against the real pinned tsgo binary
 - the real-tsgo regression suite includes a hot-path guard that fails if msgpack falls too far behind JSON-RPC on the same machine
 - `vp run -w bench_native` and `vp run -w bench_ts` give repeatable transport-level measurements for Rust and Node
 - `vp run -w bench_verify` regenerates both reports and fails if benchmark samples disappear or hot-path budgets regress

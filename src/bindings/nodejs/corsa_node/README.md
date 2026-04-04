@@ -19,7 +19,7 @@ pass its path through `TsgoApiClient.spawn({ executable: "/path/to/tsgo" })`.
 ```bash
 vp install
 vp run -w build_wrapper
-vp test run --config ./vite.config.ts npm/corsa_node/ts/**/*.test.ts
+vp test run --config ./vite.config.ts src/bindings/nodejs/corsa_node/ts/**/*.test.ts
 ```
 
 Repository-level executable examples live under [`examples/`](../../examples/README.md),

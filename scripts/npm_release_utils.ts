@@ -84,13 +84,13 @@ interface BindingArtifact {
 
 export const nodeBindingPackage: PublishablePackage = {
   name: "@corsa/node",
-  path: resolve(rootDir, "npm/corsa_node"),
+  path: resolve(rootDir, "src/bindings/nodejs/corsa_node"),
   access: "public",
 };
 
 export const typescriptOxlintPackage: PublishablePackage = {
   name: "oxlint-plugin-typescript-go",
-  path: resolve(rootDir, "npm/typescript_oxlint"),
+  path: resolve(rootDir, "src/bindings/nodejs/typescript_oxlint"),
 };
 
 export const npmPackages = [nodeBindingPackage, typescriptOxlintPackage];
@@ -403,9 +403,6 @@ function copyRootBindingPackage(stagePath: string): void {
       }
 
       const relativePath = relative(nodeBindingPackage.path, sourcePath).replaceAll("\\", "/");
-      if (relativePath.startsWith("npm/")) {
-        return false;
-      }
       if (relativePath.endsWith(".node")) {
         return false;
       }

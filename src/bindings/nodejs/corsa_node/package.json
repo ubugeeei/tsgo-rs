@@ -2,7 +2,7 @@
   "name": "@corsa/node",
   "version": "0.1.0",
   "description": "Native Node.js bindings for corsa and typescript-go stdio workflows",
-  "homepage": "https://github.com/ubugeeei/corsa-bind/tree/main/npm/corsa_node",
+  "homepage": "https://github.com/ubugeeei/corsa-bind/tree/main/src/bindings/nodejs/corsa_node",
   "bugs": {
     "url": "https://github.com/ubugeeei/corsa-bind/issues"
   },
@@ -10,7 +10,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ubugeeei/corsa-bind.git",
-    "directory": "npm/corsa_node"
+    "directory": "src/bindings/nodejs/corsa_node"
   },
   "files": [
     "dist",

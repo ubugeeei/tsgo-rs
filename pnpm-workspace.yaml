@@ -1,4 +1,4 @@
 packages:
   - examples
   - bench
-  - npm/*
+  - src/bindings/nodejs/*

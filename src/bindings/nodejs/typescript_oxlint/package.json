@@ -2,7 +2,7 @@
   "name": "oxlint-plugin-typescript-go",
   "version": "0.1.0",
   "description": "typescript-eslint-style Oxlint helpers powered by corsa and typescript-go",
-  "homepage": "https://github.com/ubugeeei/corsa-bind/tree/main/npm/typescript_oxlint",
+  "homepage": "https://github.com/ubugeeei/corsa-bind/tree/main/src/bindings/nodejs/typescript_oxlint",
   "bugs": {
     "url": "https://github.com/ubugeeei/corsa-bind/issues"
   },
@@ -10,7 +10,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ubugeeei/corsa-bind.git",
-    "directory": "npm/typescript_oxlint"
+    "directory": "src/bindings/nodejs/typescript_oxlint"
   },
   "files": [
     "dist",

@@ -151,7 +151,7 @@ It is the wrong dependency edge for `vp check`, because `vp check` is supposed t
 
 The fix was to map the package name to source instead:
 
-- [`../npm/typescript_oxlint/tsconfig.json`](../npm/typescript_oxlint/tsconfig.json)
+- [`../src/bindings/nodejs/typescript_oxlint/tsconfig.json`](../src/bindings/nodejs/typescript_oxlint/tsconfig.json)
 
 This makes `vp check` depend on the checked-in TypeScript source surface rather than on generated output.
 
@@ -174,8 +174,8 @@ The important ones were:
 
 These were corrected in:
 
-- [`../npm/typescript_oxlint/ts/session.ts`](../npm/typescript_oxlint/ts/session.ts)
-- [`../npm/typescript_oxlint/ts/rules/type_utils.ts`](../npm/typescript_oxlint/ts/rules/type_utils.ts)
+- [`../src/bindings/nodejs/typescript_oxlint/ts/session.ts`](../src/bindings/nodejs/typescript_oxlint/ts/session.ts)
+- [`../src/bindings/nodejs/typescript_oxlint/ts/rules/type_utils.ts`](../src/bindings/nodejs/typescript_oxlint/ts/rules/type_utils.ts)
 
 The practical lesson is that `typescript_oxlint` is part compatibility layer and part consumer.
 It needs to follow the real wrapper API shape closely, otherwise CI fails long before runtime tests do.
@@ -309,9 +309,9 @@ The most important files for this CI stabilization work are:
 
 - [`../.github/workflows/ci.yml`](../.github/workflows/ci.yml)
 - [`../vite.config.ts`](../vite.config.ts)
-- [`../npm/typescript_oxlint/tsconfig.json`](../npm/typescript_oxlint/tsconfig.json)
-- [`../npm/typescript_oxlint/ts/session.ts`](../npm/typescript_oxlint/ts/session.ts)
-- [`../npm/typescript_oxlint/ts/rules/type_utils.ts`](../npm/typescript_oxlint/ts/rules/type_utils.ts)
+- [`../src/bindings/nodejs/typescript_oxlint/tsconfig.json`](../src/bindings/nodejs/typescript_oxlint/tsconfig.json)
+- [`../src/bindings/nodejs/typescript_oxlint/ts/session.ts`](../src/bindings/nodejs/typescript_oxlint/ts/session.ts)
+- [`../src/bindings/nodejs/typescript_oxlint/ts/rules/type_utils.ts`](../src/bindings/nodejs/typescript_oxlint/ts/rules/type_utils.ts)
 - [`../ref/typescript-go/go.mod`](../ref/typescript-go/go.mod)
 
 ## Troubleshooting

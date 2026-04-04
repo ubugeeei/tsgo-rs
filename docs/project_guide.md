@@ -269,7 +269,7 @@ Why it exists:
 - consumers often want one import surface
 - repo-level tests and benchmark runners need a home
 
-### `npm/corsa_node`
+### `src/bindings/nodejs/corsa_node`
 
 Role:
 
@@ -284,7 +284,7 @@ Touch this package when:
 - a Rust capability needs to be surfaced to JS
 - the JS wrapper API shape should change
 
-### `npm/typescript_oxlint`
+### `src/bindings/nodejs/typescript_oxlint`
 
 Role:
 
@@ -577,11 +577,11 @@ If you are new to the codebase, this reading order works well:
 
 1. [README.md](../README.md)
 2. this guide
-3. crate roots under `crates/*/src/lib.rs`
+3. crate roots under `src/core/*/src/lib.rs` plus `src/bindings/rust/corsa/src/lib.rs`
 4. `corsa_client` methods and response types
 5. `corsa_lsp` overlay and virtual document logic
 6. `corsa_orchestrator` pooling, state, and Raft code
-7. benchmark runners under `crates/corsa/src/bin`
+7. benchmark runners under `src/bindings/rust/corsa/src/bin`
 
 If you are debugging performance:
 

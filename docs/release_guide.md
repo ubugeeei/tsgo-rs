@@ -21,8 +21,8 @@ Internal Rust crates:
 
 Public npm packages:
 
-- `@corsa/node` (`npm/corsa_node`)
-- `oxlint-plugin-typescript-go` (`npm/typescript_oxlint`)
+- `@corsa/node` (`src/bindings/nodejs/corsa_node`)
+- `oxlint-plugin-typescript-go` (`src/bindings/nodejs/typescript_oxlint`)
 
 The npm packages do not bundle the `typescript-go` executable. Consumers must
 point them at a compatible `tsgo` binary at runtime.

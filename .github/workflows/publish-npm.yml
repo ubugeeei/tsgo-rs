@@ -115,14 +115,14 @@ jobs:
           run-install: true
 
       - name: Build native binding
-        working-directory: npm/corsa_node
+        working-directory: src/bindings/nodejs/corsa_node
         run: node ../../node_modules/@napi-rs/cli/scripts/index.js build --platform --release --target ${{ matrix.target }}
 
       - name: Upload native binding artifact
         uses: actions/upload-artifact@v4
         with:
           name: native-binding-${{ matrix.target }}
-          path: npm/corsa_node/*.node
+          path: src/bindings/nodejs/corsa_node/*.node
           if-no-files-found: error
 
   publish:

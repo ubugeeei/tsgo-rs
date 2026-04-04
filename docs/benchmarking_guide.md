@@ -73,7 +73,7 @@ This repository therefore treats process cleanup as part of benchmark correctnes
 
 ## Native Runner
 
-The native runner is [`bench_real_tsgo`](../crates/corsa/src/bin/bench_real_tsgo/main.rs).
+The native runner is [`bench_real_tsgo`](../src/bindings/rust/corsa/src/bin/bench_real_tsgo/main.rs).
 
 Its purpose:
 
@@ -85,7 +85,7 @@ This is the main source of truth for transport-level questions.
 
 ## Tooling Runner
 
-The tooling runner is [`bench_tooling_compare`](../crates/corsa/src/bin/bench_tooling_compare/main.rs).
+The tooling runner is [`bench_tooling_compare`](../src/bindings/rust/corsa/src/bin/bench_tooling_compare/main.rs).
 
 It has two workloads:
 
@@ -175,12 +175,12 @@ This keeps TypeScript's node module resolution behavior aligned with the upstrea
 
 Main files:
 
-- [`args.rs`](../crates/corsa/src/bin/bench_real_tsgo/args.rs)
-- [`dataset.rs`](../crates/corsa/src/bin/bench_real_tsgo/dataset.rs)
-- [`scenario.rs`](../crates/corsa/src/bin/bench_real_tsgo/scenario.rs)
-- [`measure.rs`](../crates/corsa/src/bin/bench_real_tsgo/measure.rs)
-- [`stats.rs`](../crates/corsa/src/bin/bench_real_tsgo/stats.rs)
-- [`report.rs`](../crates/corsa/src/bin/bench_real_tsgo/report.rs)
+- [`args.rs`](../src/bindings/rust/corsa/src/bin/bench_real_tsgo/args.rs)
+- [`dataset.rs`](../src/bindings/rust/corsa/src/bin/bench_real_tsgo/dataset.rs)
+- [`scenario.rs`](../src/bindings/rust/corsa/src/bin/bench_real_tsgo/scenario.rs)
+- [`measure.rs`](../src/bindings/rust/corsa/src/bin/bench_real_tsgo/measure.rs)
+- [`stats.rs`](../src/bindings/rust/corsa/src/bin/bench_real_tsgo/stats.rs)
+- [`report.rs`](../src/bindings/rust/corsa/src/bin/bench_real_tsgo/report.rs)
 
 Flow:
 
@@ -200,13 +200,13 @@ Important design choices:
 
 Main files:
 
-- [`args.rs`](../crates/corsa/src/bin/bench_tooling_compare/args.rs)
-- [`dataset.rs`](../crates/corsa/src/bin/bench_tooling_compare/dataset.rs)
-- [`runner.rs`](../crates/corsa/src/bin/bench_tooling_compare/runner.rs)
-- [`process.rs`](../crates/corsa/src/bin/bench_tooling_compare/process.rs)
-- [`measure.rs`](../crates/corsa/src/bin/bench_tooling_compare/measure.rs)
-- [`stats.rs`](../crates/corsa/src/bin/bench_tooling_compare/stats.rs)
-- [`report.rs`](../crates/corsa/src/bin/bench_tooling_compare/report.rs)
+- [`args.rs`](../src/bindings/rust/corsa/src/bin/bench_tooling_compare/args.rs)
+- [`dataset.rs`](../src/bindings/rust/corsa/src/bin/bench_tooling_compare/dataset.rs)
+- [`runner.rs`](../src/bindings/rust/corsa/src/bin/bench_tooling_compare/runner.rs)
+- [`process.rs`](../src/bindings/rust/corsa/src/bin/bench_tooling_compare/process.rs)
+- [`measure.rs`](../src/bindings/rust/corsa/src/bin/bench_tooling_compare/measure.rs)
+- [`stats.rs`](../src/bindings/rust/corsa/src/bin/bench_tooling_compare/stats.rs)
+- [`report.rs`](../src/bindings/rust/corsa/src/bin/bench_tooling_compare/report.rs)
 
 Flow:
 
@@ -224,7 +224,7 @@ Important design choices:
 
 ## Process Cleanup and Safety
 
-The core cleanup utilities live in [`process.rs`](../crates/corsa_core/src/process.rs).
+The core cleanup utilities live in [`process.rs`](../src/core/corsa_core/src/process.rs).
 
 Key helpers:
 
@@ -240,7 +240,7 @@ The cleanup policy is:
 
 This avoids leaving zombie processes behind.
 
-The msgpack worker also follows the same policy via [`msgpack_worker.rs`](../crates/corsa_client/src/api/msgpack_worker.rs).
+The msgpack worker also follows the same policy via [`msgpack_worker.rs`](../src/core/corsa_client/src/api/msgpack_worker.rs).
 
 ## Tips
 

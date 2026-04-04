@@ -1,14 +1,14 @@
 [workspace]
 members = [
-  "crates/corsa_core",
-  "crates/corsa_jsonrpc",
-  "crates/corsa_client",
-  "crates/corsa_lsp",
-  "crates/corsa_orchestrator",
-  "crates/corsa_runtime",
-  "crates/corsa_ref",
-  "crates/corsa",
-  "npm/corsa_node",
+  "src/core/corsa_core",
+  "src/core/corsa_jsonrpc",
+  "src/core/corsa_client",
+  "src/core/corsa_lsp",
+  "src/core/corsa_orchestrator",
+  "src/core/corsa_runtime",
+  "src/core/corsa_ref",
+  "src/bindings/rust/corsa",
+  "src/bindings/nodejs/corsa_node",
 ]
 resolver = "2"
 
