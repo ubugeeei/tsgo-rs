@@ -3,6 +3,8 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 
 import {
+  getPackageVersion,
+  isNpmPackageVersionPublished,
   publishPackedTarball,
   typescriptOxlintPackage,
   withStagedNodeBindingPackages,
@@ -65,6 +67,13 @@ async function main(): Promise<void> {
     { requireAllTargets: false },
     async ({ binaryPackages, rootPackage }) => {
       for (const npmPackage of [...binaryPackages, rootPackage, typescriptOxlintPackage]) {
+        const version = getPackageVersion(npmPackage);
+        if (await isNpmPackageVersionPublished(npmPackage, version)) {
+          console.log(
+            `npm package ${npmPackage.name}@${version} already exists; skipping dry-run publish`,
+          );
+          continue;
+        }
         publishPackedTarball(npmPackage, { dryRun: true });
       }
     },
