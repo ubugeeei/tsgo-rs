@@ -1,7 +1,7 @@
 {
   "name": "corsa-oxlint",
   "version": "0.1.0",
-  "description": "typescript-eslint-style Oxlint helpers powered by corsa and typescript-go",
+  "description": "Type-aware Oxlint helpers powered by corsa and typescript-go",
   "homepage": "https://github.com/ubugeeei/corsa-bind/tree/main/src/bindings/nodejs/typescript_oxlint",
   "bugs": {
     "url": "https://github.com/ubugeeei/corsa-bind/issues"
@@ -28,9 +28,9 @@
       "types": "./dist/ast_utils.d.ts",
       "import": "./dist/ast_utils.js"
     },
-    "./eslint-utils": {
-      "types": "./dist/eslint_utils.d.ts",
-      "import": "./dist/eslint_utils.js"
+    "./oxlint-utils": {
+      "types": "./dist/oxlint_utils.d.ts",
+      "import": "./dist/oxlint_utils.js"
     },
     "./json-schema": {
       "types": "./dist/json_schema.d.ts",
@@ -48,9 +48,9 @@
       "types": "./dist/rules/index.d.ts",
       "import": "./dist/rules/index.js"
     },
-    "./ts-eslint": {
-      "types": "./dist/ts_eslint.d.ts",
-      "import": "./dist/ts_eslint.js"
+    "./compat": {
+      "types": "./dist/oxlint_compat.d.ts",
+      "import": "./dist/oxlint_compat.js"
     },
     "./ts-estree": {
       "types": "./dist/ts_estree.d.ts",

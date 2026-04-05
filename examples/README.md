@@ -140,7 +140,7 @@ cargo run -p corsa --features experimental-distributed --example distributed_orc
 
 ## `corsa-oxlint` Examples
 
-- `examples/typescript_oxlint/custom_rule.ts`: custom type-aware rule using `ESLintUtils.getParserServices()`
+- `examples/typescript_oxlint/custom_rule.ts`: custom type-aware rule using `OxlintUtils.getParserServices()`
 - `examples/typescript_oxlint/custom_plugin.ts`: plugin wrapper around the custom rule
 - `examples/typescript_oxlint/custom_rules_config.ts`: flat config using the custom plugin
 - `examples/typescript_oxlint/native_rules_config.ts`: flat config using the built-in native rules

@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { defaultTsgoExecutable } from "./context";
-import { ESLintUtils } from "./eslint_utils";
+import { OxlintUtils } from "./oxlint_utils";
 import { decorateRule, definePlugin } from "./plugin";
 import { RuleTester } from "./rule_tester";
 
@@ -12,8 +12,8 @@ const workspaceRoot = resolve(import.meta.dirname, "../../../../..");
 const realTsgoBinary = defaultTsgoExecutable(workspaceRoot);
 
 describe("corsa-oxlint", () => {
-  it("creates docs URLs through the typescript-eslint-compatible RuleCreator", () => {
-    const createRule = ESLintUtils.RuleCreator((name) => `https://example.com/rules/${name}`);
+  it("creates docs URLs through the Oxlint RuleCreator", () => {
+    const createRule = OxlintUtils.RuleCreator((name) => `https://example.com/rules/${name}`);
     const rule = createRule({
       name: "no-demo",
       meta: {
@@ -151,7 +151,7 @@ describe("corsa-oxlint", () => {
   const integrationCase = existsSync(realTsgoBinary) ? it : it.skip;
 
   integrationCase("runs a type-aware custom rule through oxlint RuleTester", () => {
-    const createRule = ESLintUtils.RuleCreator((name) => `https://example.com/rules/${name}`);
+    const createRule = OxlintUtils.RuleCreator((name) => `https://example.com/rules/${name}`);
     const rule = createRule({
       name: "no-string-plus-number",
       meta: {
@@ -168,7 +168,7 @@ describe("corsa-oxlint", () => {
       },
       defaultOptions: [],
       create(context: any) {
-        const services = ESLintUtils.getParserServices(context);
+        const services = OxlintUtils.getParserServices(context);
         const checker = services.program.getTypeChecker();
         return {
           BinaryExpression(node: any) {

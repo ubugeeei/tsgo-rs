@@ -1,6 +1,6 @@
-import { ESLintUtils } from "corsa-oxlint";
+import { OxlintUtils } from "corsa-oxlint";
 
-const createRule = ESLintUtils.RuleCreator(
+const createRule = OxlintUtils.RuleCreator(
   (name) =>
     `https://github.com/ubugeeei/corsa-bind/tree/main/examples/typescript_oxlint/${name}.ts`,
 );
@@ -20,7 +20,7 @@ export const noStringPlusNumberRule = createRule({
   },
   defaultOptions: [],
   create(context: any) {
-    const services = ESLintUtils.getParserServices(context);
+    const services = OxlintUtils.getParserServices(context);
     const checker = services.program.getTypeChecker();
 
     return {

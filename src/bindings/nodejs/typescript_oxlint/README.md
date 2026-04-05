@@ -1,7 +1,7 @@
 # corsa-oxlint
 
-`corsa-oxlint` is a self-hosted `typescript-eslint`-style framework for
-building Oxlint JS plugins with real type information powered by `tsgo`.
+`corsa-oxlint` is a self-hosted type-aware framework for building Oxlint JS
+plugins with real type information powered by `tsgo`.
 
 > [!WARNING]
 > This package is still an early WIP.
@@ -11,8 +11,8 @@ building Oxlint JS plugins with real type information powered by `tsgo`.
 
 ## What It Does
 
-- exposes `ESLintUtils.RuleCreator()` and `getParserServices()` backed by `tsgo`
-- preserves the familiar subpath layout without depending on `@typescript-eslint`
+- exposes `OxlintUtils.RuleCreator()` and `getParserServices()` backed by `tsgo`
+- keeps a compact self-hosted helper surface with no extra lint-framework dependency
 - binds Rust-implemented hot paths into JS through `napi-rs`
 - lets custom Oxlint rules query types and symbols from JS or TS
 - ships a `RuleTester` wrapper that injects temp projects and type-aware config
@@ -25,13 +25,12 @@ custom rules in plain JS/TS.
 ## Configuration
 
 Oxlint does not expose arbitrary parser options at runtime, so
-`corsa-oxlint` reads its type-aware settings from
-`settings.typescriptOxlint`.
+`corsa-oxlint` reads its type-aware settings from `settings.typescriptOxlint`.
 
 ```ts
-import { ESLintUtils } from "corsa-oxlint";
+import { OxlintUtils } from "corsa-oxlint";
 
-const createRule = ESLintUtils.RuleCreator((name) => `https://example.com/rules/${name}`);
+const createRule = OxlintUtils.RuleCreator((name) => `https://example.com/rules/${name}`);
 
 export const noStringPlusNumber = createRule({
   name: "no-string-plus-number",
@@ -48,7 +47,7 @@ export const noStringPlusNumber = createRule({
   },
   defaultOptions: [],
   create(context) {
-    const services = ESLintUtils.getParserServices(context);
+    const services = OxlintUtils.getParserServices(context);
     const checker = services.program.getTypeChecker();
 
     return {

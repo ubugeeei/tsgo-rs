@@ -76,7 +76,7 @@ Pinned upstream at the time of writing:
 - `src/bindings/c/corsa_ffi`: shared C ABI over the Rust `corsa_client::ApiClient`, `corsa_core::utils`, and `corsa_lsp::VirtualDocument` surfaces
 - `src/bindings/cpp`, `src/bindings/go`, `src/bindings/zig`, `src/bindings/csharp`, `src/bindings/swift`, `src/bindings/moonbit`: thin language bindings layered on top of `corsa_ffi`
 - `src/bindings/nodejs/corsa_node`: `napi-rs` native bindings and the `@corsa-bind/napi` TypeScript wrapper package
-- `src/bindings/nodejs/typescript_oxlint`: `typescript-eslint`-style compatibility layer for type-aware Oxlint JS plugins
+- `src/bindings/nodejs/typescript_oxlint`: type-aware Oxlint rule framework powered by `tsgo`
 - `bench`: Vitest benchmark project for the Node binding
 - `examples`: curated `examples/nodejs`, `examples/rust`, and `examples/typescript_oxlint` flows from minimal start to real-project runs
 
@@ -155,16 +155,16 @@ vp run -w examples_rust_experimental
 
 ## Type-Aware Oxlint
 
-`corsa-oxlint` lets us write Oxlint JS plugins with a familiar
-`typescript-eslint` authoring model while sourcing type information from the
-pinned `tsgo` binary. The heavy lifting stays in Rust, then `napi-rs` binds
+`corsa-oxlint` lets us write Oxlint JS plugins with a compact, self-hosted
+type-aware authoring model while sourcing type information from the pinned
+`tsgo` binary. The heavy lifting stays in Rust, then `napi-rs` binds
 that implementation into JS so end users can keep writing custom plugins and
 custom rules in JS/TS.
 
 ```ts
-import { ESLintUtils } from "corsa-oxlint";
+import { OxlintUtils } from "corsa-oxlint";
 
-const createRule = ESLintUtils.RuleCreator((name) => `https://example.com/rules/${name}`);
+const createRule = OxlintUtils.RuleCreator((name) => `https://example.com/rules/${name}`);
 
 export const noStringPlusNumber = createRule({
   name: "no-string-plus-number",
@@ -181,7 +181,7 @@ export const noStringPlusNumber = createRule({
   },
   defaultOptions: [],
   create(context) {
-    const services = ESLintUtils.getParserServices(context);
+    const services = OxlintUtils.getParserServices(context);
     const checker = services.program.getTypeChecker();
 
     return {
@@ -228,9 +228,9 @@ export default [
 ];
 ```
 
-The compatibility layer is self-hosted and does not depend on
-`@typescript-eslint`. Upstream `tsgolint/internal/rules` is now used as a
-parity target and drift oracle rather than as a runtime bridge.
+The rule framework is self-hosted and does not depend on third-party
+TypeScript lint helper packages. Upstream `tsgolint/internal/rules` is now
+used as a parity target and drift oracle rather than as a runtime bridge.
 
 ## Example
 

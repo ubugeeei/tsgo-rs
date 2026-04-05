@@ -1,6 +1,4 @@
-export const TSESLint = Object.freeze({});
-
-export const tseslint = Object.freeze({
+export const oxlintCompat = Object.freeze({
   config(...configs: readonly unknown[]) {
     return configs.flat();
   },
@@ -10,9 +8,9 @@ export const tseslint = Object.freeze({
       name: "oxlint-plugin-corsa/parser",
       version: "0.1.0",
     },
-    parseForESLint() {
+    parse() {
       throw new Error(
-        "oxlint-plugin-corsa relies on oxlint for parsing; use it as a JS plugin, not as an ESLint parser",
+        "oxlint-plugin-corsa relies on oxlint for parsing; use it as a JS plugin package instead of a standalone parser",
       );
     },
   }),

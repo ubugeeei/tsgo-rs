@@ -9,7 +9,7 @@ import type {
 const parserServices = new WeakMap<object, ParserServices>();
 
 /**
- * Returns `typescript-eslint`-style parser services backed by tsgo.
+ * Returns type-aware parser services backed by tsgo.
  *
  * @example
  * ```ts

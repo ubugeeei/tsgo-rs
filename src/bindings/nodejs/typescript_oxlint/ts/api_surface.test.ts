@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import * as main from "./index";
+import * as compatEntry from "./oxlint_compat";
 import * as rules from "./rules";
-import * as tseslintEntry from "./ts_eslint";
 import * as tsestreeEntry from "./ts_estree";
 
 describe("api surface", () => {
-  it("re-exports the ts-eslint compatibility entrypoint", () => {
-    expect(typeof tseslintEntry.tseslint.config).toBe("function");
-    expect(tseslintEntry.tseslint.parser.meta.name).toBe("oxlint-plugin-corsa/parser");
+  it("re-exports the compatibility entrypoint", () => {
+    expect(typeof compatEntry.oxlintCompat.config).toBe("function");
+    expect(compatEntry.oxlintCompat.parser.meta.name).toBe("oxlint-plugin-corsa/parser");
   });
 
   it("re-exports ts-estree helpers from the root entry", () => {

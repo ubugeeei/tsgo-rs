@@ -3,10 +3,9 @@ import { decorateRule } from "./plugin";
 import type { ContextWithParserOptions } from "./types";
 
 /**
- * Self-hosted `typescript-eslint`-style utility surface that swaps parser
- * service access over to tsgo-backed implementations.
+ * Self-hosted type-aware utilities for Oxlint rules backed by tsgo.
  */
-export const ESLintUtils = Object.freeze({
+export const OxlintUtils = Object.freeze({
   RuleCreator(urlCreator: (ruleName: string) => string) {
     return (rule: any) => {
       const docs = rule.meta?.docs;
@@ -28,7 +27,7 @@ export const ESLintUtils = Object.freeze({
   },
 });
 
-export const RuleCreator = ESLintUtils.RuleCreator;
+export const RuleCreator = OxlintUtils.RuleCreator;
 export { getParserServices } from "./parser_services";
 
 export function applyDefault<

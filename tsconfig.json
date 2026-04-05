@@ -9,11 +9,11 @@
       "@corsa-bind/napi": ["./src/bindings/nodejs/corsa_node/ts/index.ts"],
       "corsa-oxlint": ["./src/bindings/nodejs/typescript_oxlint/ts/index.ts"],
       "corsa-oxlint/ast-utils": ["./src/bindings/nodejs/typescript_oxlint/ts/ast_utils.ts"],
-      "corsa-oxlint/eslint-utils": ["./src/bindings/nodejs/typescript_oxlint/ts/eslint_utils.ts"],
+      "corsa-oxlint/compat": ["./src/bindings/nodejs/typescript_oxlint/ts/oxlint_compat.ts"],
       "corsa-oxlint/json-schema": ["./src/bindings/nodejs/typescript_oxlint/ts/json_schema.ts"],
+      "corsa-oxlint/oxlint-utils": ["./src/bindings/nodejs/typescript_oxlint/ts/oxlint_utils.ts"],
       "corsa-oxlint/rule-tester": ["./src/bindings/nodejs/typescript_oxlint/ts/rule_tester.ts"],
       "corsa-oxlint/rules": ["./src/bindings/nodejs/typescript_oxlint/ts/rules/index.ts"],
-      "corsa-oxlint/ts-eslint": ["./src/bindings/nodejs/typescript_oxlint/ts/ts_eslint.ts"],
       "corsa-oxlint/ts-estree": ["./src/bindings/nodejs/typescript_oxlint/ts/ts_estree.ts"]
     },
     "strict": true,
