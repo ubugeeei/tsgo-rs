@@ -83,6 +83,12 @@ For support guarantees, compatibility, and semver expectations, see [docs/suppor
 For distribution decisions and release dry-runs, see [docs/release_guide.md](./docs/release_guide.md).
 For dependency-policy and release-hardening expectations, see [docs/supply_chain_policy.md](./docs/supply_chain_policy.md).
 
+Once trusted publishing is bootstrapped, a release is cut from `main` with:
+
+```bash
+vp run -w release minor
+```
+
 ## Quick Start
 
 Sync and verify the pinned upstream checkout:

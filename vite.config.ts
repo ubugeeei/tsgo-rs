@@ -195,6 +195,10 @@ export default defineConfig({
         command: "node --strip-types ./scripts/release_dry_run.ts",
         dependsOn: ["build"],
       },
+      release: {
+        cache: false,
+        command: "node --strip-types ./scripts/release.ts",
+      },
       examples_node_smoke: {
         command: "pnpm run smoke",
         cwd: "examples",

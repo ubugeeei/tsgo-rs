@@ -1,12 +1,23 @@
 name: Publish Rust
 
 on:
+  push:
+    tags:
+      - "v*.*.*"
   workflow_dispatch:
     inputs:
       confirm:
         description: Type `publish-rust` to continue
         required: true
         type: string
+      auth_mode:
+        description: Authentication mode for manual runs
+        required: true
+        default: trusted
+        type: choice
+        options:
+          - trusted
+          - token
 
 permissions:
   contents: read
@@ -20,7 +31,7 @@ env:
 
 jobs:
   release-gates:
-    if: ${{ inputs.confirm == 'publish-rust' }}
+    if: ${{ github.event_name == 'push' || inputs.confirm == 'publish-rust' }}
     name: Release Gates
     runs-on: ubuntu-latest
     steps:
@@ -47,6 +58,12 @@ jobs:
           node-version: "24"
           cache: true
           run-install: true
+
+      - name: Validate release tag
+        if: ${{ github.event_name == 'push' }}
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node --strip-types ./scripts/assert_release_tag.ts
 
       - name: Check JS and TS
         run: vp check
@@ -78,7 +95,7 @@ jobs:
         run: vp run -w release_dry_run
 
   publish:
-    if: ${{ inputs.confirm == 'publish-rust' }}
+    if: ${{ github.event_name == 'push' || inputs.confirm == 'publish-rust' }}
     name: Publish Rust Crates
     needs:
       - release-gates
@@ -98,10 +115,18 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Exchange OIDC token for crates.io token
+        if: ${{ github.event_name == 'push' || inputs.auth_mode == 'trusted' }}
         id: auth
         uses: rust-lang/crates-io-auth-action@v1
 
-      - name: Publish ordered crates
+      - name: Publish ordered crates with trusted publishing
+        if: ${{ github.event_name == 'push' || inputs.auth_mode == 'trusted' }}
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+        run: node --strip-types ./scripts/publish_rust.ts
+
+      - name: Publish ordered crates with token bootstrap
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.auth_mode == 'token' }}
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
         run: node --strip-types ./scripts/publish_rust.ts

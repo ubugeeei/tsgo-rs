@@ -64,6 +64,29 @@ Publish npm packages in dependency order:
 5. `@corsa/node`
 6. `oxlint-plugin-typescript-go`
 
+## Tag Release Flow
+
+After the initial bootstrap is done, the normal release path is:
+
+```bash
+git switch main
+git pull --ff-only
+vp run -w release minor
+```
+
+`vp run -w release <patch|minor|major>` now:
+
+- requires a clean checkout
+- expects `main` by default
+- bumps every Rust and npm package version together
+- runs the local release gates
+- creates `release: vX.Y.Z`
+- creates an annotated `vX.Y.Z` tag
+- pushes the branch and the tag
+
+Pushing the tag triggers both publish workflows. Rust and npm publish from the
+tagged commit through GitHub Actions trusted publishing.
+
 ## Dry Run
 
 Local dry run:
@@ -140,64 +163,84 @@ Once npm Trusted Publishing is working, update each package's npm settings to
 Both registries require an initial manual publish before OIDC-only trusted
 publishing can take over.
 
-### crates.io
+The repository now supports doing this bootstrap from CI with temporary tokens.
+That keeps the first publish reproducible and still avoids local multi-platform
+artifact assembly.
+
+### 1. Add Temporary Bootstrap Secrets
+
+Create these temporary secrets in the GitHub `release` environment:
+
+- `CRATES_IO_TOKEN`
+- `NPM_TOKEN`
+
+These are only for the first bootstrap publish. Remove them after trusted
+publishing is configured and verified.
+
+### 2. Bootstrap Rust from CI
 
 ```bash
-cargo login
-node --strip-types ./scripts/publish_rust.ts
+GitHub Actions -> Publish Rust -> Run workflow
+confirm=publish-rust
+auth_mode=token
 ```
 
-This publishes the public crates in dependency order with the same sequencing
-used by CI.
+This publishes the public crates in dependency order from CI using the same
+script as the trusted path, but authenticates with `CRATES_IO_TOKEN` once.
 
-If crates.io rate-limits the first burst of new crates, the publish script now
-waits until the reported retry time and continues automatically. If the process
-stops midway, resume from the first missing crate:
+### 3. Bootstrap npm from CI
 
 ```bash
-CARGO_PUBLISH_START_AT=corsa node --strip-types ./scripts/publish_rust.ts
+GitHub Actions -> Publish npm -> Run workflow
+confirm=publish-npm
+auth_mode=token
 ```
 
-### npm
+This manual CI run still builds every supported native artifact through the
+matrix, then publishes the binary packages first, the JS-only `@corsa/node`
+root package second, and `oxlint-plugin-typescript-go` last.
+
+### 4. Attach the Trusted Publishers
+
+Once the packages exist, configure the trusted publishers:
+
+- crates.io: trust this repository and [`publish-rust.yml`](../.github/workflows/publish-rust.yml)
+- npm: run the setup helper below, or use the npm package settings UI
 
 ```bash
-npm login
-vp install
-vp run -w build
-NAPI_ARTIFACTS_DIR=./artifacts node --strip-types ./scripts/publish_npm.ts
-```
-
-This packs each workspace package through `pnpm pack`, then publishes the
-resulting tarballs with `npm publish`, so the packed manifest already contains
-real semver ranges instead of `workspace:*`.
-
-For production releases, the npm publish script now refuses to publish the
-`@corsa/node` root package unless every configured native binding target is
-present. Stage the `.node` artifacts from the build matrix into `./artifacts`
-before running the first manual publish. `NAPI_REQUIRE_ALL_TARGETS=0` is still
-available for local experimentation, but it is not production-safe for a real
-release.
-
-The trusted-publishing workflow follows the same order, but publishes the
-target-specific native binding packages first and the JS-only
-`@corsa/node` root package after every required artifact is present.
-
-If your npm account enforces 2FA, complete the interactive challenge during
-this first manual publish.
-
-Once the packages exist on npm, attach the GitHub Actions trusted publisher to
-every npm package with:
-
-```bash
+vp exec node --strip-types ./scripts/setup_npm_trusted_publish.ts --dry-run
 vp exec node --strip-types ./scripts/setup_npm_trusted_publish.ts
 ```
 
-Use `--dry-run` first if you want the exact `npm trust github ...` commands
-without making any changes.
+The npm trusted publisher must match:
 
-If a publish partially succeeds, rerun from the first missing package:
+- GitHub organization or user: `ubugeeei`
+- repository: `corsa-bind`
+- workflow filename: `publish-npm.yml`
+- environment: `release`
+
+### 5. Remove the Bootstrap Tokens
+
+After both trusted publish paths are confirmed working:
+
+- remove `CRATES_IO_TOKEN`
+- remove `NPM_TOKEN`
+- keep using tag-triggered CI publishes only
+
+### 6. Normal Releases After Bootstrap
+
+After that first bootstrap, releases become:
 
 ```bash
+git switch main
+git pull --ff-only
+vp run -w release patch
+```
+
+If a bootstrap publish partially succeeds, rerun from the first missing target:
+
+```bash
+CARGO_PUBLISH_START_AT=corsa node --strip-types ./scripts/publish_rust.ts
 NPM_PUBLISH_START_AT=oxlint-plugin-typescript-go NAPI_ARTIFACTS_DIR=./artifacts node --strip-types ./scripts/publish_npm.ts
 ```
 
@@ -216,8 +259,8 @@ Workflows:
 
 - `CI`: quality, experimental-surface validation, real-`tsgo` smoke, and benchmark verification
 - `Release Dry Run`: validates publishable artifacts without publishing them
-- `Publish Rust`: crates.io trusted publish path for the public Rust crates after the initial manual release
-- `Publish npm`: npm trusted publish path for the public npm packages after the initial manual release
+- `Publish Rust`: tag-triggered trusted publish path, plus one-time token bootstrap mode
+- `Publish npm`: tag-triggered trusted publish path, plus one-time token bootstrap mode
 - `Supply Chain`: runs dependency policy checks
 
 The publish workflows are intentionally separate from the dry run so that

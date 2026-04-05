@@ -1,12 +1,23 @@
 name: Publish npm
 
 on:
+  push:
+    tags:
+      - "v*.*.*"
   workflow_dispatch:
     inputs:
       confirm:
         description: Type `publish-npm` to continue
         required: true
         type: string
+      auth_mode:
+        description: Authentication mode for manual runs
+        required: true
+        default: trusted
+        type: choice
+        options:
+          - trusted
+          - token
 
 permissions:
   contents: read
@@ -20,7 +31,7 @@ env:
 
 jobs:
   release-gates:
-    if: ${{ inputs.confirm == 'publish-npm' }}
+    if: ${{ github.event_name == 'push' || inputs.confirm == 'publish-npm' }}
     name: Release Gates
     runs-on: ubuntu-latest
     steps:
@@ -47,6 +58,12 @@ jobs:
           node-version: "24"
           cache: true
           run-install: true
+
+      - name: Validate release tag
+        if: ${{ github.event_name == 'push' }}
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node --strip-types ./scripts/assert_release_tag.ts
 
       - name: Check JS and TS
         run: vp check
@@ -78,7 +95,7 @@ jobs:
         run: vp run -w release_dry_run
 
   build-native-bindings:
-    if: ${{ inputs.confirm == 'publish-npm' }}
+    if: ${{ github.event_name == 'push' || inputs.confirm == 'publish-npm' }}
     name: Build native binding (${{ matrix.target }})
     needs:
       - release-gates
@@ -116,7 +133,7 @@ jobs:
 
       - name: Build native binding
         working-directory: src/bindings/nodejs/corsa_node
-        run: node ../../node_modules/@napi-rs/cli/scripts/index.js build --platform --release --target ${{ matrix.target }}
+        run: node ../../../../node_modules/@napi-rs/cli/scripts/index.js build --platform --release --target ${{ matrix.target }}
 
       - name: Upload native binding artifact
         uses: actions/upload-artifact@v4
@@ -126,7 +143,7 @@ jobs:
           if-no-files-found: error
 
   publish:
-    if: ${{ inputs.confirm == 'publish-npm' }}
+    if: ${{ github.event_name == 'push' || inputs.confirm == 'publish-npm' }}
     name: Publish npm packages
     needs:
       - release-gates
@@ -170,9 +187,19 @@ jobs:
         run: vp run -w build
 
       - name: Publish packed tarballs with npm trusted publishing
+        if: ${{ github.event_name == 'push' || inputs.auth_mode == 'trusted' }}
         env:
           NAPI_ARTIFACTS_DIR: artifacts
           NAPI_REQUIRE_ALL_TARGETS: "1"
           NPM_CONFIG_PROVENANCE: "true"
           NPM_TRUSTED_PUBLISH: "1"
+        run: node --strip-types ./scripts/publish_npm.ts
+
+      - name: Publish packed tarballs with npm token bootstrap
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.auth_mode == 'token' }}
+        env:
+          NAPI_ARTIFACTS_DIR: artifacts
+          NAPI_REQUIRE_ALL_TARGETS: "1"
+          NPM_CONFIG_PROVENANCE: "true"
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: node --strip-types ./scripts/publish_npm.ts
