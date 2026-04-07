@@ -4,6 +4,8 @@ use super::ApiFileSystem;
 use crate::process::TsgoCommand;
 use corsa_core::{SharedObserver, fast::CompactString};
 
+use super::profiling::SharedProfiler;
+
 /// Transport mode used to talk to the tsgo API.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum ApiMode {
@@ -52,6 +54,8 @@ pub struct ApiSpawnConfig {
     pub allow_unstable_upstream_calls: bool,
     /// Optional observer for structured transport events.
     pub observer: Option<SharedObserver>,
+    /// Optional profiler for fine-grained request phase samples.
+    pub profiler: Option<SharedProfiler>,
 }
 
 impl ApiSpawnConfig {
@@ -69,6 +73,7 @@ impl ApiSpawnConfig {
             outbound_capacity: 256,
             allow_unstable_upstream_calls: false,
             observer: None,
+            profiler: None,
         }
     }
 
@@ -117,6 +122,12 @@ impl ApiSpawnConfig {
     /// Sets the observer used for structured transport events.
     pub fn with_observer(mut self, observer: SharedObserver) -> Self {
         self.observer = Some(observer);
+        self
+    }
+
+    /// Sets the profiler used for fine-grained request phase samples.
+    pub fn with_profiler(mut self, profiler: SharedProfiler) -> Self {
+        self.profiler = Some(profiler);
         self
     }
 }

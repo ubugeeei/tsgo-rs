@@ -8,7 +8,7 @@
 use crate::{Result, TsgoError};
 use corsa_core::{
     SharedObserver, TsgoEvent,
-    fast::{CompactString, compact_format},
+    fast::{CompactString, SmallVec, compact_format},
     observe, terminate_child_process,
 };
 use log::warn;
@@ -49,7 +49,7 @@ pub(crate) struct WorkerResponse {
 /// Commands sent to the worker thread.
 enum WorkerCommand {
     Request {
-        method: CompactString,
+        method: SmallVec<[u8; 32]>,
         payload: Vec<u8>,
         reply: mpsc::SyncSender<Result<WorkerResponse>>,
     },
@@ -85,10 +85,6 @@ impl MsgpackWorker {
                         payload,
                         reply,
                     } => {
-                        // The wire protocol expects method names as raw bytes in
-                        // the tuple header, so keep the encoded form around for
-                        // both the outbound request and response matching.
-                        let method = method.as_bytes().to_vec();
                         let result = write_tuple(&mut writer, MSG_REQUEST, &method, &payload)
                             .and_then(|_| {
                                 read_response(
@@ -128,7 +124,7 @@ impl MsgpackWorker {
             .clone()
             .ok_or(TsgoError::Closed("msgpack worker"))?;
         match sender.try_send(WorkerCommand::Request {
-            method: CompactString::from(method),
+            method: SmallVec::from_slice(method.as_bytes()),
             payload,
             reply: reply_tx,
         }) {

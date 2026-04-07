@@ -195,6 +195,7 @@ Important design choices:
 - warm scenarios perform one untimed call before sampling
 - datasets are measured against real `tsconfig` files from the pinned upstream checkout
 - symbol/type benchmarks discover a real identifier from the dataset instead of relying on a fake fixture
+- `--run-mode profiling` adds per-method phase samples for `serialize_params`, `transport`, `deserialize_response`, and binary decoding so transport-vs-wrapper costs can be separated quickly
 
 ## `bench_tooling_compare`
 

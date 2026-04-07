@@ -284,6 +284,7 @@ fn main() -> Result<(), corsa::TsgoError> {
 The repo ships two benchmark layers:
 
 - Native Rust benchmark: `vp run -w bench_native`
+- Native profiling benchmark: `vp run -w bench_native_profile`
 - Node binding benchmark: `vp run -w bench_ts`
 - `corsa-oxlint` checker benchmark: `vp test bench --config ./vite.config.ts bench/src/typescript_oxlint.bench.ts`
 - `corsa-oxlint` native-rule benchmark: `vp test bench --config ./vite.config.ts bench/src/typescript_oxlint_rules.bench.ts`
@@ -291,6 +292,7 @@ The repo ships two benchmark layers:
 
 The TS benchmark writes machine-readable output to `.cache/bench_ts.json`.
 The native benchmark writes machine-readable output to `.cache/bench_native.json`.
+The native profiling benchmark writes machine-readable output to `.cache/bench_native_profile.json`.
 The native Rust benchmark uses the real pinned tsgo binary through [`bench_real_tsgo`](./src/bindings/rust/corsa/src/bin/bench_real_tsgo/main.rs).
 
 Latest native measurements are documented in [docs/performance.md](./docs/performance.md).
@@ -341,6 +343,7 @@ vp check
 vp run -w build
 vp run -w bench
 vp run -w bench_native
+vp run -w bench_native_profile
 vp run -w bench_ts
 vp run -w bench_verify
 vp test run --config ./vite.config.ts

@@ -4,6 +4,7 @@
 
 - Native real-tsgo benchmark: `vp run -w bench_native`
 - Native deep benchmark: `vp run -w bench_native_deep`
+- Native profiling benchmark: `vp run -w bench_native_profile`
 - Tooling + orchestration benchmark: `vp run -w bench_tooling_compare`
 - Node binding benchmark: `vp run -w bench_ts`
 - Combined benchmark + budget guard: `vp run -w bench_verify`
@@ -15,6 +16,7 @@ and `vp check`. Those go through Vite+'s `oxfmt` / `oxlint` toolchain. The
 The TS benchmark writes its report to `.cache/bench_ts.json`.
 The native benchmark writes its report to `.cache/bench_native.json`.
 The native deep benchmark writes its report to `.cache/bench_native_deep.json`.
+The native profiling benchmark writes its report to `.cache/bench_native_profile.json`.
 The tooling benchmark writes its report to `.cache/bench_tooling_compare.json`.
 
 The native runner is still the main source of truth for transport-level speed because it measures the Rust client directly against the pinned upstream worker.
@@ -68,8 +70,20 @@ cargo run --release -p corsa --bin bench_real_tsgo -- \
   --json-output .cache/bench_native_deep.json
 ```
 
+For a detailed breakdown of request encode / transport / decode phases on the default fast path, use:
+
+```bash
+cargo run --release -p corsa --bin bench_real_tsgo -- \
+  --run-mode profiling \
+  --mode msgpack \
+  --cold-iterations 5 \
+  --warm-iterations 40 \
+  --json-output .cache/bench_native_profile.json
+```
+
 Warm scenarios perform one untimed warm-up call before sampling.
 The runner now emits sample count, `p99`, standard deviation, coefficient of variation, and per-scenario msgpack-vs-jsonrpc comparison rows in both stdout and JSON output.
+`profiling` mode additionally emits per-method phase rows so you can see whether time is going to request serialization, transport, or response decoding.
 
 Default native scenarios now cover both transport and type-query hot paths:
 
