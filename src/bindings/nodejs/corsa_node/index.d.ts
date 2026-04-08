@@ -55,7 +55,7 @@ export declare class TsgoApiClient {
 export declare class TsgoVirtualDocument {
   /** Creates an `untitled:` document. */
   static untitled(path: string, languageId: string, text: string): TsgoVirtualDocument
-  /** Creates an in-memory `tsgo://` document. */
+  /** Creates an in-memory `corsa://` document. */
   static inMemory(authority: string, path: string, languageId: string, text: string): TsgoVirtualDocument
   /** Returns the document URI. */
   get uri(): string
