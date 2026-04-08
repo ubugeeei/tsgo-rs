@@ -60,7 +60,7 @@ Current focus:
 Pinned upstream at the time of writing:
 
 - Repository: `https://github.com/microsoft/typescript-go.git`
-- Commit: `8a834dad086d6912b091e8b467e98499dab68cd9`
+- Commit: `9c19dee6ab88ae11444837f16efa16a6b3dc9f59`
 - Lock file: [`tsgo_ref.lock.toml`](./tsgo_ref.lock.toml)
 
 ## Workspace Layout

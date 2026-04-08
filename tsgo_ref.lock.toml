@@ -3,8 +3,8 @@ version = 1
 [typescript_go]
 path = "ref/typescript-go"
 repository = "https://github.com/microsoft/typescript-go.git"
-commit = "8a834dad086d6912b091e8b467e98499dab68cd9"
-tree = "0ef0ef445339e451c9216ae5027205b19ce3b3e7"
-committer_date = "2026-03-30T00:13:25Z"
+commit = "9c19dee6ab88ae11444837f16efa16a6b3dc9f59"
+tree = "e1257b20f345c9191c8b12c8e1770618c841129f"
+committer_date = "2026-04-07T21:02:45Z"
 author = "Mateusz Burzyński"
-subject = "Fixed a call hierarchy crash in arrow prop declaration in exported default class (#3296)"
+subject = "Properly recognize all symbol flags on imported reexported symbols in completions code (#3359)"
