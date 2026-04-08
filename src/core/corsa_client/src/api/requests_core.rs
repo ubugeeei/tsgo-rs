@@ -44,6 +44,14 @@ pub(crate) struct SnapshotProjectRequest {
 
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub(crate) struct SnapshotProjectFileRequest {
+    pub snapshot: SnapshotHandle,
+    pub project: ProjectHandle,
+    pub file: DocumentIdentifier,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct ResolveNameRequest {
     pub snapshot: SnapshotHandle,
     pub project: ProjectHandle,

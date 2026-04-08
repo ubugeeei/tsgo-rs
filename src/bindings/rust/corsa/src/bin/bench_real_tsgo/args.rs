@@ -12,11 +12,18 @@ options:
   --tsgo PATH              tsgo executable (default: .cache/tsgo)
   --dataset PATH           tsconfig path to benchmark (repeatable)
   --json-output PATH       write machine-readable benchmark JSON
-  --mode MODE              jsonrpc | msgpack | both (default: both)
+  --profile                enable detailed per-phase profiling output
+  --transport TRANSPORT    jsonrpc | msgpack | both (default: both)
   --cold-iterations N      cold benchmark iterations (default: 5)
   --warm-iterations N      warm benchmark iterations (default: 20)
   --help                   show this message
 ";
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum RunMode {
+    Benchmark,
+    Profiling,
+}
 
 #[derive(Clone, Debug)]
 pub struct Cli {
@@ -24,6 +31,7 @@ pub struct Cli {
     pub tsgo_path: PathBuf,
     pub dataset_paths: SmallVec<[PathBuf; 4]>,
     pub json_output_path: Option<PathBuf>,
+    pub run_mode: RunMode,
     pub modes: SmallVec<[ApiMode; 2]>,
     pub cold_iterations: usize,
     pub warm_iterations: usize,
@@ -34,6 +42,7 @@ pub fn parse() -> Result<Option<Cli>, CompactString> {
     let mut tsgo_path = default_tsgo_path(&root_dir);
     let mut dataset_paths = SmallVec::<[PathBuf; 4]>::new();
     let mut json_output_path = None;
+    let mut run_mode = RunMode::Benchmark;
     let mut modes = both_modes();
     let mut cold_iterations = 5_usize;
     let mut warm_iterations = 20_usize;
@@ -54,8 +63,14 @@ pub fn parse() -> Result<Option<Cli>, CompactString> {
             "--json-output" => {
                 json_output_path = Some(read_path(&mut args, &argument, &root_dir)?);
             }
-            "--mode" => {
-                modes = parse_mode(read_value(&mut args, &argument)?)?;
+            "--profile" => {
+                run_mode = RunMode::Profiling;
+            }
+            "--run-mode" => {
+                run_mode = parse_run_mode(read_value(&mut args, &argument)?)?;
+            }
+            "--transport" | "--mode" => {
+                modes = parse_transport(read_value(&mut args, &argument)?)?;
             }
             "--cold-iterations" => {
                 cold_iterations = parse_usize(read_value(&mut args, &argument)?, &argument)?;
@@ -84,6 +99,7 @@ pub fn parse() -> Result<Option<Cli>, CompactString> {
         tsgo_path,
         dataset_paths,
         json_output_path,
+        run_mode,
         modes,
         cold_iterations,
         warm_iterations,
@@ -103,8 +119,12 @@ fn default_tsgo_path(root_dir: &std::path::Path) -> PathBuf {
         root_dir.join(".cache/tsgo.exe"),
         root_dir.join("ref/typescript-go/.cache/tsgo"),
         root_dir.join("ref/typescript-go/.cache/tsgo.exe"),
+        root_dir.join("origin/typescript-go/.cache/tsgo"),
+        root_dir.join("origin/typescript-go/.cache/tsgo.exe"),
         root_dir.join("ref/typescript-go/built/local/tsgo"),
         root_dir.join("ref/typescript-go/built/local/tsgo.exe"),
+        root_dir.join("origin/typescript-go/built/local/tsgo"),
+        root_dir.join("origin/typescript-go/built/local/tsgo.exe"),
     ];
     for candidate in candidates {
         if candidate.exists() {
@@ -119,16 +139,22 @@ fn default_tsgo_path(root_dir: &std::path::Path) -> PathBuf {
 }
 
 fn default_datasets(root_dir: &std::path::Path) -> SmallVec<[PathBuf; 4]> {
-    let base = root_dir.join("ref/typescript-go");
-    let candidates = [
-        base.join("_packages/ast/tsconfig.json"),
-        base.join("_packages/api/tsconfig.json"),
-        base.join("_extension/tsconfig.json"),
-    ];
     let mut datasets = SmallVec::<[PathBuf; 4]>::new();
-    for path in candidates {
-        if path.exists() {
-            datasets.push(path);
+    for base in [
+        root_dir.join("ref/typescript-go"),
+        root_dir.join("origin/typescript-go"),
+    ] {
+        for path in [
+            base.join("_packages/ast/tsconfig.json"),
+            base.join("_packages/api/tsconfig.json"),
+            base.join("_extension/tsconfig.json"),
+        ] {
+            if path.exists() {
+                datasets.push(path);
+            }
+        }
+        if !datasets.is_empty() {
+            break;
         }
     }
     datasets
@@ -157,7 +183,7 @@ fn read_value(
     Ok(CompactString::from(value.to_string_lossy().as_ref()))
 }
 
-fn parse_mode(value: CompactString) -> Result<SmallVec<[ApiMode; 2]>, CompactString> {
+fn parse_transport(value: CompactString) -> Result<SmallVec<[ApiMode; 2]>, CompactString> {
     match value.as_str() {
         "jsonrpc" => {
             let mut modes = SmallVec::<[ApiMode; 2]>::new();
@@ -174,6 +200,14 @@ fn parse_mode(value: CompactString) -> Result<SmallVec<[ApiMode; 2]>, CompactStr
     }
 }
 
+fn parse_run_mode(value: CompactString) -> Result<RunMode, CompactString> {
+    match value.as_str() {
+        "benchmark" => Ok(RunMode::Benchmark),
+        "profiling" => Ok(RunMode::Profiling),
+        _ => Err(value),
+    }
+}
+
 fn parse_usize(value: CompactString, _flag: &CompactString) -> Result<usize, CompactString> {
     value
         .parse::<usize>()
@@ -182,18 +216,18 @@ fn parse_usize(value: CompactString, _flag: &CompactString) -> Result<usize, Com
 
 #[cfg(test)]
 mod tests {
-    use super::{both_modes, parse_mode, parse_usize};
+    use super::{RunMode, both_modes, parse_run_mode, parse_transport, parse_usize};
     use corsa::api::ApiMode;
 
     #[test]
-    fn parse_mode_supports_both_variants() {
-        assert_eq!(parse_mode("both".into()).unwrap(), both_modes());
+    fn parse_transport_supports_both_variants() {
+        assert_eq!(parse_transport("both".into()).unwrap(), both_modes());
         assert_eq!(
-            parse_mode("jsonrpc".into()).unwrap().as_slice(),
+            parse_transport("jsonrpc".into()).unwrap().as_slice(),
             &[ApiMode::AsyncJsonRpcStdio]
         );
         assert_eq!(
-            parse_mode("msgpack".into()).unwrap().as_slice(),
+            parse_transport("msgpack".into()).unwrap().as_slice(),
             &[ApiMode::SyncMsgpackStdio]
         );
     }
@@ -202,5 +236,18 @@ mod tests {
     fn parse_usize_rejects_invalid_numbers() {
         assert_eq!(parse_usize("42".into(), &"--n".into()).unwrap(), 42);
         assert!(parse_usize("nope".into(), &"--n".into()).is_err());
+    }
+
+    #[test]
+    fn parse_run_mode_supports_profiling() {
+        assert_eq!(
+            parse_run_mode("benchmark".into()).unwrap(),
+            RunMode::Benchmark
+        );
+        assert_eq!(
+            parse_run_mode("profiling".into()).unwrap(),
+            RunMode::Profiling
+        );
+        assert!(parse_run_mode("nope".into()).is_err());
     }
 }

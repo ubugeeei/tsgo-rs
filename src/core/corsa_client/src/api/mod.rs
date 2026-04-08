@@ -28,6 +28,7 @@ mod methods_symbols;
 mod methods_types;
 mod msgpack_codec;
 mod msgpack_worker;
+mod profiling;
 mod project_session;
 mod project_session_capabilities;
 mod project_session_diagnostics;
@@ -73,6 +74,8 @@ pub use encoded::{EncodedPayload, PrintNodeOptions};
 pub use handles::{
     NodeHandle, ProjectHandle, SignatureHandle, SnapshotHandle, SymbolHandle, TypeHandle,
 };
+/// Fine-grained profiling hooks for request encode/transport/decode phases.
+pub use profiling::{ApiProfileEvent, ApiProfilePhase, ApiProfiler, SharedProfiler};
 /// Session wrapper that keeps a snapshot and default project alive.
 pub use project_session::ProjectSession;
 /// Common response payloads returned by the API.

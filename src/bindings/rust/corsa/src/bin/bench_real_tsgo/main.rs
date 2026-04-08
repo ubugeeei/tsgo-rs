@@ -1,6 +1,7 @@
 mod args;
 mod dataset;
 mod measure;
+mod profile;
 mod report;
 mod scenario;
 mod stats;
@@ -33,6 +34,14 @@ async fn run(cli: args::Cli) -> corsa::Result<()> {
     println!("tsgo: {}", cli.tsgo_path.display());
     println!("cold_iterations: {}", cli.cold_iterations);
     println!("warm_iterations: {}", cli.warm_iterations);
+    println!(
+        "profiling: {}",
+        if matches!(cli.run_mode, args::RunMode::Profiling) {
+            "enabled"
+        } else {
+            "disabled"
+        }
+    );
     println!();
     println!("dataset\tfiles\tbytes\tlines\tconfig");
     for dataset in &datasets {
@@ -67,6 +76,30 @@ async fn run(cli: args::Cli) -> corsa::Result<()> {
         );
     }
     println!();
+    if matches!(cli.run_mode, args::RunMode::Profiling) {
+        println!(
+            "mode\tdataset\tscenario\tmethod\tphase\tsamples\tmedian_ms\tp95_ms\tmean_ms\tmin_ms\tmax_ms"
+        );
+        for row in &results {
+            for profile in &row.profile {
+                println!(
+                    "{}\t{}\t{}\t{}\t{}\t{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}",
+                    row.mode,
+                    row.dataset,
+                    row.scenario,
+                    profile.method,
+                    profile.phase,
+                    profile.stats.sample_count(),
+                    profile.stats.median_ms(),
+                    profile.stats.p95_ms(),
+                    profile.stats.mean_ms(),
+                    profile.stats.min_ms(),
+                    profile.stats.max_ms()
+                );
+            }
+        }
+        println!();
+    }
     println!("dataset\tscenario\tmsgpack_median_ms\tjsonrpc_median_ms\tspeedup_x\tp95_ratio");
     for line in report::comparison_lines(&results) {
         println!("{line}");

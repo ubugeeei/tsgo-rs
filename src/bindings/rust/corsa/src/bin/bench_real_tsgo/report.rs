@@ -38,6 +38,18 @@ pub fn write(path: &Path, cli: &Cli, datasets: &[DatasetCase], rows: &[ScenarioR
                 "cvPercent": row.stats.cv_percent(),
                 "minMs": row.stats.min_ms(),
                 "maxMs": row.stats.max_ms(),
+                "profile": row.profile.iter().map(|profile| {
+                    json!({
+                        "method": profile.method.as_str(),
+                        "phase": profile.phase.as_str(),
+                        "sampleCount": profile.stats.sample_count(),
+                        "medianMs": profile.stats.median_ms(),
+                        "p95Ms": profile.stats.p95_ms(),
+                        "meanMs": profile.stats.mean_ms(),
+                        "minMs": profile.stats.min_ms(),
+                        "maxMs": profile.stats.max_ms(),
+                    })
+                }).collect::<Vec<_>>(),
             })
         })
         .collect::<Vec<_>>();
@@ -45,6 +57,10 @@ pub fn write(path: &Path, cli: &Cli, datasets: &[DatasetCase], rows: &[ScenarioR
         path,
         serde_json::to_vec_pretty(&json!({
             "tsgoPath": cli.tsgo_path,
+            "runMode": match cli.run_mode {
+                crate::args::RunMode::Benchmark => "benchmark",
+                crate::args::RunMode::Profiling => "profiling",
+            },
             "coldIterations": cli.cold_iterations,
             "warmIterations": cli.warm_iterations,
             "datasets": datasets,

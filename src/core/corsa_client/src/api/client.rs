@@ -2,7 +2,7 @@ use crate::{Result, TsgoError};
 use corsa_core::fast::CompactString;
 use parking_lot::Mutex;
 use serde::{Serialize, de::DeserializeOwned};
-use serde_json::{Value, json};
+use serde_json::Value;
 use std::{path::Path, sync::Arc};
 
 #[cfg(unix)]
@@ -20,8 +20,10 @@ use super::{
     document::DocumentIdentifier,
     driver::ClientDriver,
     encoded::EncodedPayload,
+    profiling::SharedProfiler,
     requests_core::{
-        ParseConfigFileRequest, ReleaseRequest, SnapshotFileRequest, UpdateSnapshotRequest,
+        ParseConfigFileRequest, ReleaseRequest, SnapshotFileRequest, SnapshotProjectFileRequest,
+        UpdateSnapshotRequest,
     },
     responses::{ConfigResponse, InitializeResponse, ProjectResponse},
     snapshot::ManagedSnapshot,
@@ -61,6 +63,7 @@ pub struct ApiClient {
     capabilities: Arc<Mutex<Option<Arc<CapabilitiesResponse>>>>,
     runtime_capabilities: RuntimeCapabilities,
     allow_unstable_upstream_calls: bool,
+    profiler: Option<SharedProfiler>,
 }
 
 impl ApiClient {
@@ -100,6 +103,7 @@ impl ApiClient {
             capabilities: Arc::new(Mutex::new(None)),
             runtime_capabilities: RuntimeCapabilities::from_spawn_config(&config),
             allow_unstable_upstream_calls: config.allow_unstable_upstream_calls,
+            profiler: config.profiler.clone(),
         })
     }
 
@@ -117,8 +121,11 @@ impl ApiClient {
     /// Repeated calls are cheap: only the first call performs network I/O.
     pub async fn initialize(&self) -> Result<Arc<InitializeResponse>> {
         if self.initialized.lock().is_none() {
-            let value = self.driver.request_json("initialize", Value::Null).await?;
-            let init: Arc<InitializeResponse> = Arc::new(serde_json::from_value(value)?);
+            let init: Arc<InitializeResponse> = Arc::new(
+                self.driver
+                    .request_typed("initialize", &Value::Null, self.profiler.as_ref())
+                    .await?,
+            );
             let mut slot = self.initialized.lock();
             if slot.is_none() {
                 *slot = Some(init.clone());
@@ -177,11 +184,8 @@ impl ApiClient {
     ) -> Result<ConfigResponse> {
         self.initialize().await?;
         let request = ParseConfigFileRequest { file: file.into() };
-        let value = self
-            .driver
-            .request_json("parseConfigFile", serde_json::to_value(request)?)
-            .await?;
-        Ok(serde_json::from_value(value)?)
+        self.request_after_initialize("parseConfigFile", &request)
+            .await
     }
 
     /// Applies file changes and returns a managed snapshot handle.
@@ -200,11 +204,9 @@ impl ApiClient {
             file_changes: params.file_changes,
             overlay_changes: params.overlay_changes,
         };
-        let value = self
-            .driver
-            .request_json("updateSnapshot", serde_json::to_value(request)?)
+        let response: UpdateSnapshotResponse = self
+            .request_after_initialize("updateSnapshot", &request)
             .await?;
-        let response: UpdateSnapshotResponse = serde_json::from_value(value)?;
         Ok(super::snapshot::ManagedSnapshot::new(
             self.clone(),
             response,
@@ -220,19 +222,13 @@ impl ApiClient {
         snapshot: super::SnapshotHandle,
         file: impl Into<DocumentIdentifier>,
     ) -> Result<Option<ProjectResponse>> {
+        self.initialize().await?;
         let request = SnapshotFileRequest {
             snapshot,
             file: file.into(),
         };
-        let value = self
-            .driver
-            .request_json("getDefaultProjectForFile", serde_json::to_value(request)?)
-            .await?;
-        if value.is_null() {
-            Ok(None)
-        } else {
-            Ok(Some(serde_json::from_value(value)?))
-        }
+        self.request_optional_after_initialize("getDefaultProjectForFile", &request)
+            .await
     }
 
     /// Fetches a source file via a binary endpoint.
@@ -245,17 +241,14 @@ impl ApiClient {
         project: super::ProjectHandle,
         file: impl Into<DocumentIdentifier>,
     ) -> Result<Option<EncodedPayload>> {
-        let request = SnapshotFileRequest {
+        self.initialize().await?;
+        let request = SnapshotProjectFileRequest {
             snapshot,
+            project,
             file: file.into(),
         };
-        let request =
-            json!({ "snapshot": request.snapshot, "project": project, "file": request.file });
-        Ok(self
-            .driver
-            .request_binary("getSourceFile", request)
-            .await?
-            .map(EncodedPayload::new))
+        self.request_binary_after_initialize("getSourceFile", &request)
+            .await
     }
 
     /// Closes the client and shuts down the underlying worker process.
@@ -277,7 +270,13 @@ impl ApiClient {
     /// experimenting with new upstream endpoints.
     pub async fn raw_json_request(&self, method: &str, params: Value) -> Result<Value> {
         self.initialize().await?;
-        self.driver.request_json(method, params).await
+        if self.profiler.is_some() {
+            self.driver
+                .request_typed(method, &params, self.profiler.as_ref())
+                .await
+        } else {
+            self.driver.request_json(method, params).await
+        }
     }
 
     /// Sends a raw binary endpoint request after initialization.
@@ -290,19 +289,24 @@ impl ApiClient {
         params: Value,
     ) -> Result<Option<EncodedPayload>> {
         self.initialize().await?;
-        Ok(self
-            .driver
-            .request_binary(method, params)
-            .await?
-            .map(EncodedPayload::new))
+        if self.profiler.is_some() {
+            Ok(self
+                .driver
+                .request_binary_typed(method, &params, self.profiler.as_ref())
+                .await?
+                .map(EncodedPayload::new))
+        } else {
+            Ok(self
+                .driver
+                .request_binary(method, params)
+                .await?
+                .map(EncodedPayload::new))
+        }
     }
 
     pub(crate) async fn release_handle(&self, handle: &str) -> Result<()> {
         let request = ReleaseRequest { handle };
-        let _ = self
-            .driver
-            .request_json("release", serde_json::to_value(request)?)
-            .await?;
+        let _: Value = self.request_after_initialize("release", &request).await?;
         Ok(())
     }
 
@@ -311,10 +315,8 @@ impl ApiClient {
         T: DeserializeOwned,
         P: Serialize,
     {
-        let value = self
-            .raw_json_request(method, serde_json::to_value(params)?)
-            .await?;
-        Ok(serde_json::from_value(value)?)
+        self.initialize().await?;
+        self.request_after_initialize(method, &params).await
     }
 
     pub(crate) async fn call_optional<T, P>(&self, method: &str, params: P) -> Result<Option<T>>
@@ -322,14 +324,9 @@ impl ApiClient {
         T: DeserializeOwned,
         P: Serialize,
     {
-        let value = self
-            .raw_json_request(method, serde_json::to_value(params)?)
-            .await?;
-        if value.is_null() {
-            Ok(None)
-        } else {
-            Ok(Some(serde_json::from_value(value)?))
-        }
+        self.initialize().await?;
+        self.request_optional_after_initialize(method, &params)
+            .await
     }
 
     pub(crate) async fn call_optional_binary<P>(
@@ -340,8 +337,8 @@ impl ApiClient {
     where
         P: Serialize,
     {
-        self.raw_binary_request(method, serde_json::to_value(params)?)
-            .await
+        self.initialize().await?;
+        self.request_binary_after_initialize(method, &params).await
     }
 
     pub(crate) async fn require_overlay_update_capability(&self) -> Result<()> {
@@ -364,6 +361,48 @@ impl ApiClient {
             }
             other => other,
         }
+    }
+
+    async fn request_after_initialize<T, P>(&self, method: &str, params: &P) -> Result<T>
+    where
+        T: DeserializeOwned,
+        P: Serialize + ?Sized,
+    {
+        self.driver
+            .request_typed(method, params, self.profiler.as_ref())
+            .await
+    }
+
+    async fn request_optional_after_initialize<T, P>(
+        &self,
+        method: &str,
+        params: &P,
+    ) -> Result<Option<T>>
+    where
+        T: DeserializeOwned,
+        P: Serialize + ?Sized,
+    {
+        let value: Value = self.request_after_initialize(method, params).await?;
+        if value.is_null() {
+            Ok(None)
+        } else {
+            Ok(Some(serde_json::from_value(value)?))
+        }
+    }
+
+    async fn request_binary_after_initialize<P>(
+        &self,
+        method: &str,
+        params: &P,
+    ) -> Result<Option<EncodedPayload>>
+    where
+        P: Serialize + ?Sized,
+    {
+        Ok(self
+            .driver
+            .request_binary_typed(method, params, self.profiler.as_ref())
+            .await?
+            .map(EncodedPayload::new))
     }
 }
 
@@ -388,6 +427,7 @@ async fn connect_pipe_socket(path: PathBuf) -> Result<ApiClient> {
             capability_endpoint: false,
         },
         allow_unstable_upstream_calls: false,
+        profiler: None,
     })
 }
 
