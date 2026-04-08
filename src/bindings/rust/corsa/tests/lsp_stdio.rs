@@ -6,8 +6,7 @@ use corsa::{
     runtime::block_on,
 };
 use serde_json::{Value, json};
-use std::str::FromStr;
-use std::time::Duration;
+use std::{future::Future, str::FromStr, thread, time::Duration};
 
 struct OverlayStateRequest;
 
@@ -40,9 +39,26 @@ impl lsp_types::notification::Notification for InitializedNotification {
     const METHOD: &'static str = "initialized";
 }
 
+fn run_async_test<F>(future: F)
+where
+    F: Future<Output = ()> + Send + 'static,
+{
+    // The LSP integration path is a little stack-heavier on Linux runners than
+    // on local macOS, so use the same larger test stack we already rely on in
+    // the orchestrator integration suite.
+    let handle = thread::Builder::new()
+        .name("lsp-stdio-test".into())
+        .stack_size(8 * 1024 * 1024)
+        .spawn(move || block_on(future))
+        .unwrap();
+    if let Err(panic) = handle.join() {
+        std::panic::resume_unwind(panic);
+    }
+}
+
 #[test]
 fn lsp_initialize_and_custom_api_session() {
-    block_on(async {
+    run_async_test(async {
         let client = LspClient::spawn(support::lsp_config()).await.unwrap();
         let events = client.subscribe();
         let init = client
@@ -69,7 +85,7 @@ fn lsp_initialize_and_custom_api_session() {
 
 #[test]
 fn lsp_server_requests_are_exposed() {
-    block_on(async {
+    run_async_test(async {
         let client = LspClient::spawn(support::lsp_config()).await.unwrap();
         let events = client.subscribe();
         let _: Value = client
@@ -99,7 +115,7 @@ fn lsp_server_requests_are_exposed() {
 
 #[test]
 fn lsp_overlay_tracks_virtual_documents() {
-    block_on(async {
+    run_async_test(async {
         let client = LspClient::spawn(support::lsp_config()).await.unwrap();
         let overlay = client.overlay();
         let events = client.subscribe();
@@ -144,7 +160,7 @@ fn lsp_overlay_tracks_virtual_documents() {
 
 #[test]
 fn lsp_overlay_rejects_duplicate_open_and_unknown_change() {
-    block_on(async {
+    run_async_test(async {
         let client = LspClient::spawn(support::lsp_config()).await.unwrap();
         let overlay = client.overlay();
         let _: Value = client
@@ -172,7 +188,7 @@ fn lsp_overlay_rejects_duplicate_open_and_unknown_change() {
 
 #[test]
 fn lsp_overlay_close_of_missing_document_is_a_noop() {
-    block_on(async {
+    run_async_test(async {
         let client = LspClient::spawn(support::lsp_config()).await.unwrap();
         let overlay = client.overlay();
         let missing = lsp_types::Uri::from_str("untitled:/virtual/missing.ts").unwrap();
