@@ -49,12 +49,7 @@ function main(): void {
 
   run("cargo", ["build", "-p", "corsa_ffi"], { cwd: workspaceRoot });
 
-  const targets = [
-    buildCTarget(),
-    buildCppTarget(),
-    buildGoTarget(),
-    buildSwiftTarget(),
-  ];
+  const targets = [buildCTarget(), buildCppTarget(), buildGoTarget(), buildSwiftTarget()];
 
   const rows: BenchRow[] = [];
   for (const target of targets) {
@@ -163,7 +158,10 @@ function buildSwiftTarget(): BuiltTarget {
   }).trim();
   return {
     language: "swift",
-    executable: join(binPath, process.platform === "win32" ? "CorsaUtilsBench.exe" : "CorsaUtilsBench"),
+    executable: join(
+      binPath,
+      process.platform === "win32" ? "CorsaUtilsBench.exe" : "CorsaUtilsBench",
+    ),
   };
 }
 
