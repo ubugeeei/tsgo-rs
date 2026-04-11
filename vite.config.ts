@@ -147,6 +147,7 @@ export default defineConfig({
       },
       test_rust: {
         command: "cargo test --workspace",
+        dependsOn: ["verify_ref"],
       },
       test_rust_experimental: {
         command: "cargo test -p corsa --no-default-features --test orchestrator",
