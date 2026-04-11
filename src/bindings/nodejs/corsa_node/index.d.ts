@@ -40,6 +40,10 @@ export declare class TsgoApiClient {
   getSourceFile(snapshot: string, project: string, file: string): Buffer | null
   /** Resolves the intrinsic string type for a project. */
   getStringTypeJson(snapshot: string, project: string): string
+  /** Resolves the checker type visible at a file position. */
+  getTypeAtPositionJson(snapshot: string, project: string, file: string, position: number): string
+  /** Resolves the checker symbol visible at a file position. */
+  getSymbolAtPositionJson(snapshot: string, project: string, file: string, position: number): string
   /** Renders a type back to a string representation. */
   typeToString(snapshot: string, project: string, typeHandle: string, location?: string | undefined | null, flags?: number | undefined | null): string
   /** Sends an arbitrary JSON endpoint request. */

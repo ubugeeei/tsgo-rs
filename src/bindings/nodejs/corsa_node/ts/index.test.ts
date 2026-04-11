@@ -108,6 +108,13 @@ describe("CorsaApiClient", () => {
 
       const stringType = client.getStringType(snapshot.snapshot, project.id);
       expect(stringType.id).toBe("t0000000000000010");
+      expect(
+        client.getTypeAtPosition(snapshot.snapshot, project.id, "/workspace/src/index.ts", 1)?.id,
+      ).toBe("t0000000000000001");
+      expect(
+        client.getSymbolAtPosition(snapshot.snapshot, project.id, "/workspace/src/index.ts", 1)
+          ?.name,
+      ).toBe("value");
       expect(client.typeToString(snapshot.snapshot, project.id, stringType.id)).toBe("type:string");
 
       client.releaseHandle(snapshot.snapshot);

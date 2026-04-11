@@ -108,6 +108,44 @@ impl TsgoApiClient {
         to_json(&response)
     }
 
+    /// Resolves the checker type visible at a file position.
+    #[napi]
+    pub fn get_type_at_position_json(
+        &self,
+        snapshot: String,
+        project: String,
+        file: String,
+        position: u32,
+    ) -> Result<String> {
+        let response = block_on(self.inner.get_type_at_position(
+            SnapshotHandle::from(snapshot.as_str()),
+            ProjectHandle::from(project.as_str()),
+            file,
+            position,
+        ))
+        .map_err(into_napi_error)?;
+        to_json(&response)
+    }
+
+    /// Resolves the checker symbol visible at a file position.
+    #[napi]
+    pub fn get_symbol_at_position_json(
+        &self,
+        snapshot: String,
+        project: String,
+        file: String,
+        position: u32,
+    ) -> Result<String> {
+        let response = block_on(self.inner.get_symbol_at_position(
+            SnapshotHandle::from(snapshot.as_str()),
+            ProjectHandle::from(project.as_str()),
+            file,
+            position,
+        ))
+        .map_err(into_napi_error)?;
+        to_json(&response)
+    }
+
     /// Renders a type back to a string representation.
     #[napi]
     pub fn type_to_string(

@@ -118,6 +118,50 @@ pub const ApiClient = struct {
         return value;
     }
 
+    pub fn getTypeAtPositionJson(
+        self: ApiClient,
+        allocator: std.mem.Allocator,
+        snapshot: []const u8,
+        project: []const u8,
+        file: []const u8,
+        position: u32,
+    ) ![]u8 {
+        const value = try utils.takeString(
+            allocator,
+            c.corsa_tsgo_api_client_get_type_at_position_json(
+                self.handle,
+                utils.toRef(snapshot),
+                utils.toRef(project),
+                utils.toRef(file),
+                position,
+            ),
+        );
+        if (value.len == 0) return error.CorsaFfiError;
+        return value;
+    }
+
+    pub fn getSymbolAtPositionJson(
+        self: ApiClient,
+        allocator: std.mem.Allocator,
+        snapshot: []const u8,
+        project: []const u8,
+        file: []const u8,
+        position: u32,
+    ) ![]u8 {
+        const value = try utils.takeString(
+            allocator,
+            c.corsa_tsgo_api_client_get_symbol_at_position_json(
+                self.handle,
+                utils.toRef(snapshot),
+                utils.toRef(project),
+                utils.toRef(file),
+                position,
+            ),
+        );
+        if (value.len == 0) return error.CorsaFfiError;
+        return value;
+    }
+
     pub fn typeToString(
         self: ApiClient,
         allocator: std.mem.Allocator,

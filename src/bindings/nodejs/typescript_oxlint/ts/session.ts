@@ -48,12 +48,9 @@ export class TsgoProjectSession {
     if (!state.typeByPosition.has(position)) {
       state.typeByPosition.set(
         position,
-        this.client().callJson("getTypeAtPosition", {
-          snapshot: this.#snapshot,
-          project: state.projectId,
-          file: fileName,
-          position,
-        }),
+        this.client().getTypeAtPosition(this.#snapshot!, state.projectId, fileName, position) as
+          | TsgoType
+          | undefined,
       );
     }
     return state.typeByPosition.get(position);
@@ -64,12 +61,9 @@ export class TsgoProjectSession {
     if (!state.symbolByPosition.has(position)) {
       state.symbolByPosition.set(
         position,
-        this.client().callJson("getSymbolAtPosition", {
-          snapshot: this.#snapshot,
-          project: state.projectId,
-          file: fileName,
-          position,
-        }),
+        this.client().getSymbolAtPosition(this.#snapshot!, state.projectId, fileName, position) as
+          | TsgoSymbol
+          | undefined,
       );
     }
     return state.symbolByPosition.get(position);

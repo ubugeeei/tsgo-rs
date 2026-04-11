@@ -64,6 +64,24 @@ private func getStringTypeTsgoApiClientNative(
     _ project: CorsaStrRef
 ) -> CorsaString
 
+@_silgen_name("corsa_tsgo_api_client_get_type_at_position_json")
+private func getTypeAtPositionTsgoApiClientNative(
+    _ value: UnsafeMutableRawPointer?,
+    _ snapshot: CorsaStrRef,
+    _ project: CorsaStrRef,
+    _ file: CorsaStrRef,
+    _ position: UInt32
+) -> CorsaString
+
+@_silgen_name("corsa_tsgo_api_client_get_symbol_at_position_json")
+private func getSymbolAtPositionTsgoApiClientNative(
+    _ value: UnsafeMutableRawPointer?,
+    _ snapshot: CorsaStrRef,
+    _ project: CorsaStrRef,
+    _ file: CorsaStrRef,
+    _ position: UInt32
+) -> CorsaString
+
 @_silgen_name("corsa_tsgo_api_client_type_to_string")
 private func typeToStringTsgoApiClientNative(
     _ value: UnsafeMutableRawPointer?,
@@ -158,6 +176,20 @@ public final class CorsaTsgoApiClient {
         let refs = BorrowedRefs([snapshot, project])
         return try refs.refs.withUnsafeBufferPointer {
             try takeCheckedString(getStringTypeTsgoApiClientNative(handle, $0[0], $0[1]))
+        }
+    }
+
+    public func getTypeAtPositionJSON(snapshot: String, project: String, file: String, position: UInt32) throws -> String {
+        let refs = BorrowedRefs([snapshot, project, file])
+        return try refs.refs.withUnsafeBufferPointer {
+            try takeCheckedString(getTypeAtPositionTsgoApiClientNative(handle, $0[0], $0[1], $0[2], position))
+        }
+    }
+
+    public func getSymbolAtPositionJSON(snapshot: String, project: String, file: String, position: UInt32) throws -> String {
+        let refs = BorrowedRefs([snapshot, project, file])
+        return try refs.refs.withUnsafeBufferPointer {
+            try takeCheckedString(getSymbolAtPositionTsgoApiClientNative(handle, $0[0], $0[1], $0[2], position))
         }
     }
 

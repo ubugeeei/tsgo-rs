@@ -62,6 +62,15 @@ export interface TypeResponse {
   texts: string[];
 }
 
+export interface SymbolResponse {
+  id: string;
+  name: string;
+  flags: number;
+  checkFlags: number;
+  declarations: string[];
+  valueDeclaration?: string;
+}
+
 export interface OverlayUpdate {
   document: DocumentIdentifier;
   text: string;

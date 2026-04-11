@@ -39,18 +39,20 @@ export function createProgram(
 export function createTypeChecker(context: ContextWithParserOptions): TsgoTypeCheckerShape {
   return {
     getTypeAtLocation(node) {
+      const lookupNode = nodeForTypeLookup(node);
       return sessionForContext(context).session.getTypeAtPosition(
-        filenameFor(context, node),
-        toPosition(node),
+        filenameFor(context, lookupNode),
+        toPosition(lookupNode),
       );
     },
     getContextualType(node) {
       return this.getTypeAtLocation(node);
     },
     getSymbolAtLocation(node) {
+      const lookupNode = nodeForTypeLookup(node);
       return sessionForContext(context).session.getSymbolAtPosition(
-        filenameFor(context, node),
-        toPosition(node),
+        filenameFor(context, lookupNode),
+        toPosition(lookupNode),
       );
     },
     getTypeOfSymbol(symbol) {
@@ -88,6 +90,33 @@ export function createTypeChecker(context: ContextWithParserOptions): TsgoTypeCh
       return sessionForContext(context).session.getTypeArguments(type);
     },
   };
+}
+
+function nodeForTypeLookup(node: Node | TsgoNode): Node | TsgoNode {
+  if ("pos" in node) {
+    return node;
+  }
+  switch ((node as { readonly type?: string }).type) {
+    case "ClassDeclaration":
+    case "ClassExpression":
+      return childNode(node, "id") ?? node;
+    case "TSPropertySignature":
+      return childNode(node, "key") ?? node;
+    default:
+      return node;
+  }
+}
+
+function childNode(node: Node, key: string): Node | undefined {
+  const value = (node as unknown as Record<string, unknown>)[key];
+  if (isNode(value)) {
+    return value;
+  }
+  return undefined;
+}
+
+function isNode(value: unknown): value is Node {
+  return typeof value === "object" && value !== null && "type" in value && "range" in value;
 }
 
 function filenameFor(

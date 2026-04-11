@@ -339,6 +339,74 @@ pub unsafe extern "C" fn corsa_tsgo_api_client_get_string_type_json(
 }
 
 #[unsafe(no_mangle)]
+pub unsafe extern "C" fn corsa_tsgo_api_client_get_type_at_position_json(
+    value: *const CorsaTsgoApiClient,
+    snapshot: CorsaStrRef,
+    project: CorsaStrRef,
+    file: CorsaStrRef,
+    position: u32,
+) -> CorsaString {
+    let Some(client) = (unsafe { client_ref(value) }) else {
+        return CorsaString::default();
+    };
+    let Some(snapshot) = read_required_text(snapshot, "snapshot") else {
+        return CorsaString::default();
+    };
+    let Some(project) = read_required_text(project, "project") else {
+        return CorsaString::default();
+    };
+    let Some(file) = read_required_text(file, "file") else {
+        return CorsaString::default();
+    };
+    match block_on(client.inner.get_type_at_position(
+        SnapshotHandle::from(snapshot.as_str()),
+        ProjectHandle::from(project.as_str()),
+        file,
+        position,
+    )) {
+        Ok(response) => take_json(&response),
+        Err(error) => {
+            set_last_error(error);
+            CorsaString::default()
+        }
+    }
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn corsa_tsgo_api_client_get_symbol_at_position_json(
+    value: *const CorsaTsgoApiClient,
+    snapshot: CorsaStrRef,
+    project: CorsaStrRef,
+    file: CorsaStrRef,
+    position: u32,
+) -> CorsaString {
+    let Some(client) = (unsafe { client_ref(value) }) else {
+        return CorsaString::default();
+    };
+    let Some(snapshot) = read_required_text(snapshot, "snapshot") else {
+        return CorsaString::default();
+    };
+    let Some(project) = read_required_text(project, "project") else {
+        return CorsaString::default();
+    };
+    let Some(file) = read_required_text(file, "file") else {
+        return CorsaString::default();
+    };
+    match block_on(client.inner.get_symbol_at_position(
+        SnapshotHandle::from(snapshot.as_str()),
+        ProjectHandle::from(project.as_str()),
+        file,
+        position,
+    )) {
+        Ok(response) => take_json(&response),
+        Err(error) => {
+            set_last_error(error);
+            CorsaString::default()
+        }
+    }
+}
+
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn corsa_tsgo_api_client_type_to_string(
     value: *const CorsaTsgoApiClient,
     snapshot: CorsaStrRef,

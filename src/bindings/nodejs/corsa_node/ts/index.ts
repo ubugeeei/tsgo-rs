@@ -4,6 +4,7 @@ import type {
   ApiClientOptions,
   ConfigResponse,
   InitializeResponse,
+  SymbolResponse,
   TypeTextKind,
   TypeResponse,
   UnsafeTypeFlowInput,
@@ -130,6 +131,32 @@ export class CorsaApiClient {
 
   getStringType(snapshot: string, project: string): TypeResponse {
     return fromJson(this.#inner.getStringTypeJson(snapshot, project));
+  }
+
+  getTypeAtPosition(
+    snapshot: string,
+    project: string,
+    file: string,
+    position: number,
+  ): TypeResponse | undefined {
+    return (
+      fromJson<TypeResponse | null>(
+        this.#inner.getTypeAtPositionJson(snapshot, project, file, position),
+      ) ?? undefined
+    );
+  }
+
+  getSymbolAtPosition(
+    snapshot: string,
+    project: string,
+    file: string,
+    position: number,
+  ): SymbolResponse | undefined {
+    return (
+      fromJson<SymbolResponse | null>(
+        this.#inner.getSymbolAtPositionJson(snapshot, project, file, position),
+      ) ?? undefined
+    );
   }
 
   typeToString(
