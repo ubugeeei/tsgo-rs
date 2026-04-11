@@ -1,13 +1,46 @@
+import type { Rule, RuleMeta, Visitor } from "@oxlint/plugins";
+
 import { getParserServices } from "./parser_services";
 import { decorateRule } from "./plugin";
 import type { ContextWithParserOptions } from "./types";
+
+export type RuleCreatorRule<
+  TOptions extends readonly unknown[] = readonly unknown[],
+  TMessageIds extends string = string,
+> = {
+  readonly name: string;
+  readonly meta: RuleMeta & {
+    readonly messages?: Record<TMessageIds, string>;
+  };
+  readonly defaultOptions?: TOptions;
+  readonly create: (context: ContextWithParserOptions) => Visitor;
+};
+
+export type RuleCreatorCreatedRule<TRule extends RuleCreatorRule> = Omit<
+  TRule,
+  "defaultOptions" | "meta"
+> & {
+  readonly defaultOptions: TRule extends { readonly defaultOptions: infer TOptions }
+    ? TOptions
+    : readonly [];
+  readonly meta: TRule["meta"] & {
+    readonly docs: NonNullable<TRule["meta"]["docs"]> & {
+      readonly url: string;
+    };
+  };
+} & Rule &
+  Record<string, unknown>;
+
+export type RuleCreatorFactory = <TRule extends RuleCreatorRule>(
+  rule: TRule,
+) => RuleCreatorCreatedRule<TRule>;
 
 /**
  * Self-hosted type-aware utilities for Oxlint rules backed by tsgo.
  */
 export const OxlintUtils = Object.freeze({
-  RuleCreator(urlCreator: (ruleName: string) => string) {
-    return (rule: any) => {
+  RuleCreator(urlCreator: (ruleName: string) => string): RuleCreatorFactory {
+    return ((rule) => {
       const docs = rule.meta?.docs;
       return decorateRule({
         ...rule,
@@ -19,8 +52,8 @@ export const OxlintUtils = Object.freeze({
           },
         },
         defaultOptions: rule.defaultOptions ?? [],
-      } as never);
-    };
+      } as unknown as Rule) as RuleCreatorCreatedRule<typeof rule>;
+    }) as RuleCreatorFactory;
   },
   getParserServices(context: ContextWithParserOptions, allowWithoutFullTypeInformation = false) {
     return getParserServices(context, allowWithoutFullTypeInformation);
