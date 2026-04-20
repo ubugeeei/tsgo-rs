@@ -108,6 +108,84 @@ func (value *ApiClient) GetStringTypeJSON(snapshot string, project string) (stri
 	return takeCheckedString(C.corsa_tsgo_api_client_get_string_type_json(value.ptr, snapshotValue.ref, projectValue.ref))
 }
 
+func (value *ApiClient) GetTypeAtPositionJSON(snapshot string, project string, file string, position uint32) (string, error) {
+	snapshotValue := newBorrowedString(snapshot)
+	defer snapshotValue.free()
+	projectValue := newBorrowedString(project)
+	defer projectValue.free()
+	fileValue := newBorrowedString(file)
+	defer fileValue.free()
+	return takeCheckedString(C.corsa_tsgo_api_client_get_type_at_position_json(
+		value.ptr,
+		snapshotValue.ref,
+		projectValue.ref,
+		fileValue.ref,
+		C.uint32_t(position),
+	))
+}
+
+func (value *ApiClient) GetSymbolAtPositionJSON(snapshot string, project string, file string, position uint32) (string, error) {
+	snapshotValue := newBorrowedString(snapshot)
+	defer snapshotValue.free()
+	projectValue := newBorrowedString(project)
+	defer projectValue.free()
+	fileValue := newBorrowedString(file)
+	defer fileValue.free()
+	return takeCheckedString(C.corsa_tsgo_api_client_get_symbol_at_position_json(
+		value.ptr,
+		snapshotValue.ref,
+		projectValue.ref,
+		fileValue.ref,
+		C.uint32_t(position),
+	))
+}
+
+func (value *ApiClient) GetTypeArgumentsJSON(snapshot string, project string, typeHandle string, objectFlags uint32) (string, error) {
+	snapshotValue := newBorrowedString(snapshot)
+	defer snapshotValue.free()
+	projectValue := newBorrowedString(project)
+	defer projectValue.free()
+	typeValue := newBorrowedString(typeHandle)
+	defer typeValue.free()
+	return takeCheckedString(C.corsa_tsgo_api_client_get_type_arguments_json(
+		value.ptr,
+		snapshotValue.ref,
+		projectValue.ref,
+		typeValue.ref,
+		C.uint32_t(objectFlags),
+	))
+}
+
+func (value *ApiClient) GetTypeOfSymbolJSON(snapshot string, project string, symbol string) (string, error) {
+	snapshotValue := newBorrowedString(snapshot)
+	defer snapshotValue.free()
+	projectValue := newBorrowedString(project)
+	defer projectValue.free()
+	symbolValue := newBorrowedString(symbol)
+	defer symbolValue.free()
+	return takeCheckedString(C.corsa_tsgo_api_client_get_type_of_symbol_json(
+		value.ptr,
+		snapshotValue.ref,
+		projectValue.ref,
+		symbolValue.ref,
+	))
+}
+
+func (value *ApiClient) GetDeclaredTypeOfSymbolJSON(snapshot string, project string, symbol string) (string, error) {
+	snapshotValue := newBorrowedString(snapshot)
+	defer snapshotValue.free()
+	projectValue := newBorrowedString(project)
+	defer projectValue.free()
+	symbolValue := newBorrowedString(symbol)
+	defer symbolValue.free()
+	return takeCheckedString(C.corsa_tsgo_api_client_get_declared_type_of_symbol_json(
+		value.ptr,
+		snapshotValue.ref,
+		projectValue.ref,
+		symbolValue.ref,
+	))
+}
+
 func (value *ApiClient) TypeToString(snapshot string, project string, typeHandle string, location *string, flags *int32) (string, error) {
 	snapshotValue := newBorrowedString(snapshot)
 	defer snapshotValue.free()

@@ -1,0 +1,150 @@
+name: GitHub Release
+
+on:
+  workflow_run:
+    workflows:
+      - Publish npm
+      - Publish Rust
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to publish
+        required: true
+        type: string
+      confirm:
+        description: Type `github-release` to continue
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: github-release-${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  github-release:
+    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'push' && startsWith(github.event.workflow_run.head_branch, 'v') && github.event.workflow_run.conclusion == 'success') || (github.event_name == 'workflow_dispatch' && inputs.confirm == 'github-release') }}
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release commit
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || inputs.tag }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Resolve release context
+        id: release
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        shell: bash
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_run" ]]; then
+            tag="$WORKFLOW_RUN_HEAD_BRANCH"
+            sha="$WORKFLOW_RUN_HEAD_SHA"
+          else
+            tag="$INPUT_TAG"
+            sha="$(git rev-list -n 1 "$tag")"
+          fi
+
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Expected a release tag like v1.2.3, received $tag"
+            exit 1
+          fi
+          if [[ -z "$sha" ]]; then
+            echo "::error::Unable to resolve release commit for $tag"
+            exit 1
+          fi
+
+          {
+            echo "tag=$tag"
+            echo "sha=$sha"
+          } >> "$GITHUB_OUTPUT"
+          echo "RELEASE_TAG=$tag" >> "$GITHUB_ENV"
+
+      - name: Validate release tag
+        run: node --strip-types ./scripts/assert_release_tag.ts
+
+      - name: Wait for publish workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ steps.release.outputs.sha }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        shell: bash
+        run: |
+          workflows=("Publish npm" "Publish Rust")
+
+          for attempt in $(seq 1 80); do
+            pending=()
+
+            for workflow in "${workflows[@]}"; do
+              run_json="$(gh run list \
+                --repo "$GITHUB_REPOSITORY" \
+                --workflow "$workflow" \
+                --branch "$RELEASE_TAG" \
+                --event push \
+                --json conclusion,headSha,status,url,workflowName \
+                --limit 20)"
+              run_row="$(jq -c --arg sha "$RELEASE_SHA" 'map(select(.headSha == $sha)) | first // empty' <<< "$run_json")"
+
+              if [[ -z "$run_row" ]]; then
+                echo "$workflow: waiting for run on $RELEASE_TAG ($RELEASE_SHA)"
+                pending+=("$workflow")
+                continue
+              fi
+
+              status="$(jq -r '.status' <<< "$run_row")"
+              conclusion="$(jq -r '.conclusion // ""' <<< "$run_row")"
+              url="$(jq -r '.url' <<< "$run_row")"
+              echo "$workflow: status=$status conclusion=${conclusion:-pending} url=$url"
+
+              if [[ "$status" != "completed" ]]; then
+                pending+=("$workflow")
+                continue
+              fi
+              if [[ "$conclusion" != "success" ]]; then
+                echo "::error::$workflow finished with conclusion=$conclusion"
+                exit 1
+              fi
+            done
+
+            if [[ "${#pending[@]}" -eq 0 ]]; then
+              exit 0
+            fi
+
+            echo "Waiting for publish workflows: ${pending[*]} (attempt $attempt/80)"
+            sleep 30
+          done
+
+          echo "::error::Timed out waiting for publish workflows"
+          exit 1
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        shell: bash
+        run: |
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "GitHub Release $RELEASE_TAG already exists"
+            exit 0
+          fi
+
+          gh release create "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "$RELEASE_TAG" \
+            --generate-notes

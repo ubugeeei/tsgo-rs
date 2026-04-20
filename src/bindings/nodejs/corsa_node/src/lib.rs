@@ -5,6 +5,7 @@
 
 mod api_client;
 mod document;
+mod native_lint;
 mod orchestrator;
 mod rule_predicates;
 mod util;

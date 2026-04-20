@@ -107,6 +107,7 @@ export interface TsgoTypeCheckerShape {
   getReturnTypeOfSignature(signature: TsgoSignature): TsgoType | undefined;
   getTypePredicateOfSignature(signature: TsgoSignature): TsgoTypePredicate | undefined;
   getBaseTypes(type: TsgoType): readonly TsgoType[];
+  getImplementedTypes(node: Node | TsgoNode): readonly TsgoType[];
   getTypeArguments(type: TsgoType): readonly TsgoType[];
 }
 

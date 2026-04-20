@@ -1,0 +1,226 @@
+import { nativeLintRuleMetas, runNativeLintRule } from "@corsa-bind/napi";
+import type {
+  NativeLintDiagnostic,
+  NativeLintNode,
+  NativeLintRange,
+  NativeLintRuleMeta,
+} from "@corsa-bind/napi";
+
+import { createNativeRule } from "./rule_creator";
+import { propertyNamesOfNode, typeTextsAtNode } from "./type_utils";
+import type { ContextWithParserOptions } from "../types";
+
+type RangedNode = {
+  readonly type: string;
+  readonly range: readonly [number, number];
+};
+
+const MAX_NATIVE_NODE_DEPTH = 4;
+const nativeRuleMetasByName = new Map(nativeLintRuleMetas().map((meta) => [meta.name, meta]));
+
+export function createRustNativeRule(ruleName: string) {
+  const meta = nativeRuleMeta(ruleName);
+  return createNativeRule(
+    ruleName,
+    {
+      docs: {
+        description: meta.docsDescription,
+      },
+      hasSuggestions: meta.hasSuggestions,
+      messages: meta.messages,
+    },
+    (context) =>
+      Object.fromEntries(
+        meta.listeners.map((listener) => [
+          listener,
+          (node: RangedNode) => {
+            reportNativeDiagnostics(
+              context,
+              node,
+              runNativeLintRule(ruleName, toNativeNode(context, node, meta.requiresTypeTexts)),
+            );
+          },
+        ]),
+      ),
+  );
+}
+
+export function toNativeNode(
+  context: ContextWithParserOptions,
+  node: RangedNode,
+  includeTypeTexts = true,
+  maxDepth = MAX_NATIVE_NODE_DEPTH,
+): NativeLintNode {
+  const fields: Record<string, unknown> = {};
+  const children: Record<string, NativeLintNode> = {};
+  const childLists: Record<string, NativeLintNode[]> = {};
+
+  for (const [key, value] of Object.entries(node)) {
+    if (isSkippedField(key)) {
+      continue;
+    }
+    if (isNativeChildNode(value)) {
+      if (maxDepth > 0) {
+        children[key] = toNativeNode(context, value, includeTypeTexts, maxDepth - 1);
+      }
+      continue;
+    }
+    if (Array.isArray(value)) {
+      if (maxDepth > 0 && value.every(isNativeChildNode)) {
+        childLists[key] = value.map((child) =>
+          toNativeNode(context, child, includeTypeTexts, maxDepth - 1),
+        );
+      } else if (value.every(isJsonPrimitive)) {
+        fields[key] = value;
+      }
+      continue;
+    }
+    if (isPrimitiveRecord(value)) {
+      fields[key] = value;
+      continue;
+    }
+    if (isJsonPrimitive(value)) {
+      fields[key] = value;
+    }
+  }
+
+  const nativeNode: NativeLintNode = {
+    kind: node.type,
+    range: nativeRange(node.range),
+  };
+  if (includeTypeTexts) {
+    nativeNode.typeTexts = typeTextsAtNode(context, node);
+    nativeNode.propertyNames = propertyNamesOfNode(context, node);
+  }
+  if (Object.keys(fields).length > 0) {
+    nativeNode.fields = fields;
+  }
+  if (Object.keys(children).length > 0) {
+    nativeNode.children = children;
+  }
+  if (Object.keys(childLists).length > 0) {
+    nativeNode.childLists = childLists;
+  }
+  return nativeNode;
+}
+
+export function reportNativeDiagnostics(
+  context: ContextWithParserOptions,
+  node: RangedNode,
+  diagnostics: readonly NativeLintDiagnostic[],
+): void {
+  for (const diagnostic of diagnostics) {
+    context.report({
+      node: reportNodeForRange(node, diagnostic.range),
+      messageId: diagnostic.messageId,
+      ...(diagnostic.suggestions?.length
+        ? {
+            suggest: diagnostic.suggestions.map((suggestion) => ({
+              messageId: suggestion.messageId,
+              fix: (fixer: any) =>
+                suggestion.fixes.map((fix) =>
+                  fixer.replaceTextRange(oxlintRange(fix.range), fix.replacementText),
+                ),
+            })),
+          }
+        : {}),
+    } as never);
+  }
+}
+
+function reportNodeForRange(root: RangedNode, range: NativeLintRange): RangedNode {
+  return findNodeByRange(root, range) ?? root;
+}
+
+function findNodeByRange(
+  value: unknown,
+  range: NativeLintRange,
+  seen = new Set<object>(),
+): RangedNode | undefined {
+  if (typeof value !== "object" || value === null || seen.has(value)) {
+    return undefined;
+  }
+  seen.add(value);
+
+  if (isNativeChildNode(value) && sameRange(value.range, range)) {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const match = findNodeByRange(item, range, seen);
+      if (match) {
+        return match;
+      }
+    }
+    return undefined;
+  }
+
+  for (const [key, child] of Object.entries(value)) {
+    if (isSkippedField(key)) {
+      continue;
+    }
+    const match = findNodeByRange(child, range, seen);
+    if (match) {
+      return match;
+    }
+  }
+  return undefined;
+}
+
+function nativeRuleMeta(ruleName: string): NativeLintRuleMeta {
+  const meta = nativeRuleMetasByName.get(ruleName);
+  if (!meta) {
+    throw new Error(`corsa-oxlint native Rust rule is not registered: ${ruleName}`);
+  }
+  return meta;
+}
+
+function nativeRange(range: readonly [number, number]): NativeLintRange {
+  return { start: range[0], end: range[1] };
+}
+
+function oxlintRange(range: NativeLintRange): [number, number] {
+  return [range.start, range.end];
+}
+
+function sameRange(range: readonly [number, number], expected: NativeLintRange): boolean {
+  return range[0] === expected.start && range[1] === expected.end;
+}
+
+function isNativeChildNode(value: unknown): value is RangedNode {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as { type?: unknown }).type === "string" &&
+    isRange((value as { range?: unknown }).range)
+  );
+}
+
+function isRange(value: unknown): value is readonly [number, number] {
+  return (
+    Array.isArray(value) &&
+    value.length === 2 &&
+    typeof value[0] === "number" &&
+    typeof value[1] === "number"
+  );
+}
+
+function isJsonPrimitive(value: unknown): value is string | number | boolean | null {
+  return value === null || ["boolean", "number", "string"].includes(typeof value);
+}
+
+function isPrimitiveRecord(
+  value: unknown,
+): value is Record<string, string | number | boolean | null> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.values(value).every(isJsonPrimitive)
+  );
+}
+
+function isSkippedField(key: string): boolean {
+  return key === "type" || key === "range" || key === "loc" || key === "parent";
+}

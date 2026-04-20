@@ -4,6 +4,10 @@ import type {
   ApiClientOptions,
   ConfigResponse,
   InitializeResponse,
+  NativeLintDiagnostic,
+  NativeLintNode,
+  NativeLintRuleMeta,
+  SymbolResponse,
   TypeTextKind,
   TypeResponse,
   UnsafeTypeFlowInput,
@@ -35,6 +39,14 @@ export function isUnsafeAssignment(input: UnsafeTypeFlowInput): boolean {
 
 export function isUnsafeReturn(input: UnsafeTypeFlowInput): boolean {
   return binding.isUnsafeReturn(toJson(input));
+}
+
+export function runNativeLintRule(ruleName: string, node: NativeLintNode): NativeLintDiagnostic[] {
+  return fromJson(binding.runNativeLintRule(ruleName, toJson(node)));
+}
+
+export function nativeLintRuleMetas(): NativeLintRuleMeta[] {
+  return fromJson(binding.nativeLintRuleMetasJson());
 }
 
 export function classifyTypeText(text?: string): TypeTextKind {
@@ -130,6 +142,60 @@ export class CorsaApiClient {
 
   getStringType(snapshot: string, project: string): TypeResponse {
     return fromJson(this.#inner.getStringTypeJson(snapshot, project));
+  }
+
+  getTypeAtPosition(
+    snapshot: string,
+    project: string,
+    file: string,
+    position: number,
+  ): TypeResponse | undefined {
+    return (
+      fromJson<TypeResponse | null>(
+        this.#inner.getTypeAtPositionJson(snapshot, project, file, position),
+      ) ?? undefined
+    );
+  }
+
+  getSymbolAtPosition(
+    snapshot: string,
+    project: string,
+    file: string,
+    position: number,
+  ): SymbolResponse | undefined {
+    return (
+      fromJson<SymbolResponse | null>(
+        this.#inner.getSymbolAtPositionJson(snapshot, project, file, position),
+      ) ?? undefined
+    );
+  }
+
+  getTypeArguments(
+    snapshot: string,
+    project: string,
+    typeHandle: string,
+    objectFlags?: number,
+  ): TypeResponse[] {
+    return fromJson(this.#inner.getTypeArgumentsJson(snapshot, project, typeHandle, objectFlags));
+  }
+
+  getTypeOfSymbol(snapshot: string, project: string, symbol: string): TypeResponse | undefined {
+    return (
+      fromJson<TypeResponse | null>(this.#inner.getTypeOfSymbolJson(snapshot, project, symbol)) ??
+      undefined
+    );
+  }
+
+  getDeclaredTypeOfSymbol(
+    snapshot: string,
+    project: string,
+    symbol: string,
+  ): TypeResponse | undefined {
+    return (
+      fromJson<TypeResponse | null>(
+        this.#inner.getDeclaredTypeOfSymbolJson(snapshot, project, symbol),
+      ) ?? undefined
+    );
   }
 
   typeToString(

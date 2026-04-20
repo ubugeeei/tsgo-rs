@@ -69,6 +69,67 @@ class tsgo_api_client {
         handle_, utils::to_ref(snapshot), utils::to_ref(project)));
   }
 
+  std::string get_type_at_position_json(
+      std::string_view snapshot,
+      std::string_view project,
+      std::string_view file,
+      std::uint32_t position) const {
+    return utils::take_string(corsa_tsgo_api_client_get_type_at_position_json(
+        handle_,
+        utils::to_ref(snapshot),
+        utils::to_ref(project),
+        utils::to_ref(file),
+        position));
+  }
+
+  std::string get_symbol_at_position_json(
+      std::string_view snapshot,
+      std::string_view project,
+      std::string_view file,
+      std::uint32_t position) const {
+    return utils::take_string(corsa_tsgo_api_client_get_symbol_at_position_json(
+        handle_,
+        utils::to_ref(snapshot),
+        utils::to_ref(project),
+        utils::to_ref(file),
+        position));
+  }
+
+  std::string get_type_arguments_json(
+      std::string_view snapshot,
+      std::string_view project,
+      std::string_view type_handle,
+      std::uint32_t object_flags = 0) const {
+    return utils::take_string(corsa_tsgo_api_client_get_type_arguments_json(
+        handle_,
+        utils::to_ref(snapshot),
+        utils::to_ref(project),
+        utils::to_ref(type_handle),
+        object_flags));
+  }
+
+  std::string get_type_of_symbol_json(
+      std::string_view snapshot,
+      std::string_view project,
+      std::string_view symbol) const {
+    return utils::take_string(corsa_tsgo_api_client_get_type_of_symbol_json(
+        handle_,
+        utils::to_ref(snapshot),
+        utils::to_ref(project),
+        utils::to_ref(symbol)));
+  }
+
+  std::string get_declared_type_of_symbol_json(
+      std::string_view snapshot,
+      std::string_view project,
+      std::string_view symbol) const {
+    return utils::take_string(corsa_tsgo_api_client_get_declared_type_of_symbol_json(
+        handle_,
+        utils::to_ref(snapshot),
+        utils::to_ref(project),
+        utils::to_ref(symbol)));
+  }
+
   std::string type_to_string(
       std::string_view snapshot,
       std::string_view project,

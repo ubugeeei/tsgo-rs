@@ -99,6 +99,8 @@ vp run -w release minor
 
 Pushing the tag triggers both publish workflows. Rust and npm publish from the
 tagged commit through GitHub Actions trusted publishing.
+After both publish workflows complete successfully, the `GitHub Release`
+workflow creates a GitHub Release for the tag with generated release notes.
 
 ## Dry Run
 
@@ -278,6 +280,7 @@ Workflows:
 - `Release Dry Run`: validates publishable artifacts without publishing them
 - `Publish Rust`: tag-triggered trusted publish path, plus one-time token bootstrap mode
 - `Publish npm`: tag-triggered trusted publish path, plus one-time token bootstrap mode
+- `GitHub Release`: waits for both tag-triggered publish workflows and creates generated release notes
 - `Supply Chain`: runs dependency policy checks
 
 The publish workflows are intentionally separate from the dry run so that

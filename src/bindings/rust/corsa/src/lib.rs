@@ -5,6 +5,7 @@
 //!
 //! - [`api`] for the tsgo API bindings
 //! - [`jsonrpc`] for stdio JSON-RPC framing and transport
+//! - [`lint`] for Rust-authored rule primitives behind Oxlint JS plugins
 //! - [`lsp`] for LSP clients and virtual-document overlays
 //! - [`orchestrator`] for local orchestration plus optional experimental
 //!   distributed helpers
@@ -51,6 +52,11 @@ pub mod fast {
 /// Re-exports JSON-RPC transport primitives.
 pub mod jsonrpc {
     pub use corsa_jsonrpc::*;
+}
+
+/// Re-exports Rust-authored lint rule primitives.
+pub mod lint {
+    pub use corsa_core::lint::*;
 }
 
 /// Re-exports LSP clients, overlays, and virtual document helpers.

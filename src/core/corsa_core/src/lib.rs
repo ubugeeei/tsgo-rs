@@ -11,6 +11,8 @@
 mod error;
 /// Compact string/collection aliases used to keep hot paths allocation-light.
 pub mod fast;
+/// Rust-authored lint rule primitives and built-in type-aware rules.
+pub mod lint;
 mod observability;
 mod process;
 mod rpc;

@@ -2,7 +2,8 @@ use std::sync::Mutex;
 
 use corsa::{
     api::{
-        ApiClient, ManagedSnapshot, ProjectHandle, SnapshotHandle, TypeHandle, UpdateSnapshotParams,
+        ApiClient, ManagedSnapshot, ProjectHandle, SnapshotHandle, SymbolHandle, TypeHandle,
+        UpdateSnapshotParams,
     },
     fast::{CompactString, FastMap},
     runtime::block_on,
@@ -14,6 +15,8 @@ use serde::Serialize;
 use crate::util::{
     SpawnOptions, build_spawn_config, into_napi_error, parse_json, parse_optional_json, to_json,
 };
+
+const OBJECT_FLAGS_REFERENCE: u32 = 1 << 2;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -103,6 +106,99 @@ impl TsgoApiClient {
         let response = block_on(self.inner.get_string_type(
             SnapshotHandle::from(snapshot.as_str()),
             ProjectHandle::from(project.as_str()),
+        ))
+        .map_err(into_napi_error)?;
+        to_json(&response)
+    }
+
+    /// Resolves the checker type visible at a file position.
+    #[napi]
+    pub fn get_type_at_position_json(
+        &self,
+        snapshot: String,
+        project: String,
+        file: String,
+        position: u32,
+    ) -> Result<String> {
+        let response = block_on(self.inner.get_type_at_position(
+            SnapshotHandle::from(snapshot.as_str()),
+            ProjectHandle::from(project.as_str()),
+            file,
+            position,
+        ))
+        .map_err(into_napi_error)?;
+        to_json(&response)
+    }
+
+    /// Resolves the checker symbol visible at a file position.
+    #[napi]
+    pub fn get_symbol_at_position_json(
+        &self,
+        snapshot: String,
+        project: String,
+        file: String,
+        position: u32,
+    ) -> Result<String> {
+        let response = block_on(self.inner.get_symbol_at_position(
+            SnapshotHandle::from(snapshot.as_str()),
+            ProjectHandle::from(project.as_str()),
+            file,
+            position,
+        ))
+        .map_err(into_napi_error)?;
+        to_json(&response)
+    }
+
+    /// Resolves type arguments for type-reference objects and returns [] otherwise.
+    #[napi]
+    pub fn get_type_arguments_json(
+        &self,
+        snapshot: String,
+        project: String,
+        type_handle: String,
+        object_flags: Option<u32>,
+    ) -> Result<String> {
+        if object_flags.unwrap_or_default() & OBJECT_FLAGS_REFERENCE == 0 {
+            return to_json(&Vec::<corsa::api::TypeResponse>::new());
+        }
+        let response = block_on(self.inner.get_type_arguments(
+            SnapshotHandle::from(snapshot.as_str()),
+            ProjectHandle::from(project.as_str()),
+            TypeHandle::from(type_handle.as_str()),
+        ))
+        .map_err(into_napi_error)?;
+        to_json(&response)
+    }
+
+    /// Resolves the apparent checker type of a symbol.
+    #[napi]
+    pub fn get_type_of_symbol_json(
+        &self,
+        snapshot: String,
+        project: String,
+        symbol: String,
+    ) -> Result<String> {
+        let response = block_on(self.inner.get_type_of_symbol(
+            SnapshotHandle::from(snapshot.as_str()),
+            ProjectHandle::from(project.as_str()),
+            SymbolHandle::from(symbol.as_str()),
+        ))
+        .map_err(into_napi_error)?;
+        to_json(&response)
+    }
+
+    /// Resolves the declared checker type of a symbol.
+    #[napi]
+    pub fn get_declared_type_of_symbol_json(
+        &self,
+        snapshot: String,
+        project: String,
+        symbol: String,
+    ) -> Result<String> {
+        let response = block_on(self.inner.get_declared_type_of_symbol(
+            SnapshotHandle::from(snapshot.as_str()),
+            ProjectHandle::from(project.as_str()),
+            SymbolHandle::from(symbol.as_str()),
         ))
         .map_err(into_napi_error)?;
         to_json(&response)

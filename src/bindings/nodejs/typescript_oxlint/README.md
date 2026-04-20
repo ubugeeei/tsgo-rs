@@ -140,6 +140,25 @@ The remaining upstream rules stay listed in `pendingNativeRuleNames`, and
 `native_rules.test.ts` fails if implemented + pending drift away from the
 tracked upstream rule list.
 
+## Rust-Authored Rule Lane
+
+General-purpose built-in rules can be implemented as Rust rules and still ship
+as Oxlint JS plugin rules. The bridge is:
+
+1. Oxlint visits the ESTree node in JS.
+2. `corsa-oxlint` collects compact node facts and type texts.
+3. `@corsa-bind/napi` calls `corsa::lint::RustLintRule`.
+4. Rust returns Oxlint-shaped diagnostics, suggestions, and fixes.
+5. The JS rule reports them through `context.report()`.
+
+The first rules on this path are `await-thenable`, `no-array-delete`,
+`no-for-in-array`, `no-implied-eval`, `no-mixed-enums`,
+`no-unsafe-unary-minus`, `only-throw-error`, `prefer-find`,
+`prefer-includes`, `prefer-regexp-exec`, and
+`use-unknown-in-catch-callback-variable`. Custom project-specific rules can
+still be authored in JS/TS with `OxlintUtils.RuleCreator()`, while hot,
+shared, tsgolint-parity rules can move into Rust incrementally.
+
 ## Runtime Safety Controls
 
 The underlying `@corsa-bind/napi` client now exposes a few production-oriented

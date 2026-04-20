@@ -62,6 +62,15 @@ export interface TypeResponse {
   texts: string[];
 }
 
+export interface SymbolResponse {
+  id: string;
+  name: string;
+  flags: number;
+  checkFlags: number;
+  declarations: string[];
+  valueDeclaration?: string;
+}
+
 export interface OverlayUpdate {
   document: DocumentIdentifier;
   text: string;
@@ -126,6 +135,50 @@ export interface SnapshotDiagnosticsResponse {
 export interface UnsafeTypeFlowInput {
   sourceTypeTexts: readonly string[];
   targetTypeTexts?: readonly string[];
+}
+
+export interface NativeLintRange {
+  start: number;
+  end: number;
+}
+
+export interface NativeLintNode {
+  kind: string;
+  range: NativeLintRange;
+  text?: string;
+  typeTexts?: readonly string[];
+  propertyNames?: readonly string[];
+  fields?: Record<string, unknown>;
+  children?: Record<string, NativeLintNode>;
+  childLists?: Record<string, readonly NativeLintNode[]>;
+}
+
+export interface NativeLintFix {
+  range: NativeLintRange;
+  replacementText: string;
+}
+
+export interface NativeLintSuggestion {
+  messageId: string;
+  message: string;
+  fixes: readonly NativeLintFix[];
+}
+
+export interface NativeLintDiagnostic {
+  ruleName: string;
+  messageId: string;
+  message: string;
+  range: NativeLintRange;
+  suggestions?: readonly NativeLintSuggestion[];
+}
+
+export interface NativeLintRuleMeta {
+  name: string;
+  docsDescription: string;
+  messages: Record<string, string>;
+  hasSuggestions: boolean;
+  listeners: readonly string[];
+  requiresTypeTexts: boolean;
 }
 
 export type TypeTextKind =

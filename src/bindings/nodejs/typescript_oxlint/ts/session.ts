@@ -48,12 +48,9 @@ export class TsgoProjectSession {
     if (!state.typeByPosition.has(position)) {
       state.typeByPosition.set(
         position,
-        this.client().callJson("getTypeAtPosition", {
-          snapshot: this.#snapshot,
-          project: state.projectId,
-          file: fileName,
-          position,
-        }),
+        this.client().getTypeAtPosition(this.#snapshot!, state.projectId, fileName, position) as
+          | TsgoType
+          | undefined,
       );
     }
     return state.typeByPosition.get(position);
@@ -64,31 +61,24 @@ export class TsgoProjectSession {
     if (!state.symbolByPosition.has(position)) {
       state.symbolByPosition.set(
         position,
-        this.client().callJson("getSymbolAtPosition", {
-          snapshot: this.#snapshot,
-          project: state.projectId,
-          file: fileName,
-          position,
-        }),
+        this.client().getSymbolAtPosition(this.#snapshot!, state.projectId, fileName, position) as
+          | TsgoSymbol
+          | undefined,
       );
     }
     return state.symbolByPosition.get(position);
   }
 
   getTypeOfSymbol(symbol: TsgoSymbol): TsgoType | undefined {
-    return this.client().callJson("getTypeOfSymbol", {
-      snapshot: this.#snapshot,
-      project: this.projectId(),
-      symbol: symbol.id,
-    });
+    return this.client().getTypeOfSymbol(this.#snapshot!, this.projectId(), symbol.id) as
+      | TsgoType
+      | undefined;
   }
 
   getDeclaredTypeOfSymbol(symbol: TsgoSymbol): TsgoType | undefined {
-    return this.client().callJson("getDeclaredTypeOfSymbol", {
-      snapshot: this.#snapshot,
-      project: this.projectId(),
-      symbol: symbol.id,
-    });
+    return this.client().getDeclaredTypeOfSymbol(this.#snapshot!, this.projectId(), symbol.id) as
+      | TsgoType
+      | undefined;
   }
 
   typeToString(type: TsgoType, flags?: number): string {
@@ -149,13 +139,12 @@ export class TsgoProjectSession {
   }
 
   getTypeArguments(type: TsgoType): readonly TsgoType[] {
-    return (
-      this.client().callJson("getTypeArguments", {
-        snapshot: this.#snapshot,
-        project: this.projectId(),
-        type: type.id,
-      }) ?? []
-    );
+    return this.client().getTypeArguments(
+      this.#snapshot!,
+      this.projectId(),
+      type.id,
+      type.objectFlags,
+    ) as unknown as readonly TsgoType[];
   }
 
   private client(): TsgoApiClient {

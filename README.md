@@ -254,6 +254,22 @@ The rule framework is self-hosted and does not depend on third-party
 TypeScript lint helper packages. Upstream `tsgolint/internal/rules` is now
 used as a parity target and drift oracle rather than as a runtime bridge.
 
+The intended rule architecture has two lanes:
+
+- user-defined type-aware rules keep the `typescript-eslint`-style JS/TS
+  authoring model through `OxlintUtils.RuleCreator()` and parser services
+- common built-in rules can move onto the Rust hot path through
+  `corsa::lint::RustLintRule`, then surface back through the same
+  `corsa-oxlint/rules` Oxlint JS plugin shape
+
+This keeps the public integration point aligned with Oxlint's JS plugin API
+while leaving room for Rust-authored rule crates, in the spirit of swc-style
+Rust extension points. The first Rust-authored builtin rules include
+`await-thenable`, `no-array-delete`, `no-for-in-array`, `no-implied-eval`,
+`no-mixed-enums`, `no-unsafe-unary-minus`, `only-throw-error`,
+`prefer-find`, `prefer-includes`, `prefer-regexp-exec`, and
+`use-unknown-in-catch-callback-variable`.
+
 ## Example
 
 ```rust

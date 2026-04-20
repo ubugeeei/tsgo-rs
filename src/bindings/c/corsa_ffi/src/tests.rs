@@ -1,7 +1,18 @@
+use std::path::PathBuf;
+
 use crate::{
-    api_client::corsa_tsgo_api_client_spawn,
+    api_client::{
+        corsa_tsgo_api_client_close, corsa_tsgo_api_client_free,
+        corsa_tsgo_api_client_get_declared_type_of_symbol_json,
+        corsa_tsgo_api_client_get_string_type_json,
+        corsa_tsgo_api_client_get_symbol_at_position_json,
+        corsa_tsgo_api_client_get_type_arguments_json,
+        corsa_tsgo_api_client_get_type_at_position_json,
+        corsa_tsgo_api_client_get_type_of_symbol_json, corsa_tsgo_api_client_spawn,
+        corsa_tsgo_api_client_update_snapshot_json,
+    },
     error::corsa_error_message_take,
-    types::{CorsaStrRef, corsa_utils_string_free, corsa_utils_string_list_free},
+    types::{CorsaStrRef, CorsaString, corsa_utils_string_free, corsa_utils_string_list_free},
     utils::{
         corsa_utils_classify_type_text, corsa_utils_has_unsafe_any_flow,
         corsa_utils_is_error_like_type_texts, corsa_utils_split_type_text,
@@ -19,20 +30,45 @@ fn text_ref(text: &str) -> CorsaStrRef {
     }
 }
 
-#[test]
-fn classifies_type_texts_over_ffi() {
-    let result = unsafe { corsa_utils_classify_type_text(text_ref("Promise<string> | null")) };
+fn take_string(value: CorsaString) -> String {
+    if value.ptr.is_null() {
+        return String::new();
+    }
     let text = unsafe {
         std::str::from_utf8(std::slice::from_raw_parts(
-            result.ptr.cast::<u8>(),
-            result.len,
+            value.ptr.cast::<u8>(),
+            value.len,
         ))
         .unwrap()
         .to_owned()
     };
     unsafe {
-        corsa_utils_string_free(result);
+        corsa_utils_string_free(value);
     }
+    text
+}
+
+fn workspace_root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .ancestors()
+        .nth(4)
+        .unwrap()
+        .to_owned()
+}
+
+fn mock_tsgo_binary() -> Option<PathBuf> {
+    let binary = workspace_root().join(if cfg!(windows) {
+        "target/debug/mock_tsgo.exe"
+    } else {
+        "target/debug/mock_tsgo"
+    });
+    binary.exists().then_some(binary)
+}
+
+#[test]
+fn classifies_type_texts_over_ffi() {
+    let result = unsafe { corsa_utils_classify_type_text(text_ref("Promise<string> | null")) };
+    let text = take_string(result);
     assert_eq!(text, "nullish");
 }
 
@@ -152,4 +188,198 @@ fn reports_api_client_spawn_errors() {
         corsa_utils_string_free(error);
     }
     assert!(!message.is_empty());
+}
+
+#[test]
+fn resolves_checker_positions_over_ffi() {
+    let Some(binary) = mock_tsgo_binary() else {
+        return;
+    };
+    let options = serde_json::json!({
+        "executable": binary.display().to_string(),
+        "cwd": workspace_root().display().to_string(),
+        "mode": "jsonrpc",
+    })
+    .to_string();
+    let client = unsafe { corsa_tsgo_api_client_spawn(text_ref(&options)) };
+    assert!(!client.is_null());
+
+    let snapshot_json = take_string(unsafe {
+        corsa_tsgo_api_client_update_snapshot_json(
+            client,
+            text_ref(r#"{"openProject":"/workspace/tsconfig.json"}"#),
+        )
+    });
+    let snapshot: serde_json::Value = serde_json::from_str(&snapshot_json).unwrap();
+    let snapshot_id = snapshot["snapshot"].as_str().unwrap();
+    let project_id = snapshot["projects"][0]["id"].as_str().unwrap();
+
+    let type_json = take_string(unsafe {
+        corsa_tsgo_api_client_get_type_at_position_json(
+            client,
+            text_ref(snapshot_id),
+            text_ref(project_id),
+            text_ref("/workspace/src/index.ts"),
+            1,
+        )
+    });
+    assert_eq!(
+        serde_json::from_str::<serde_json::Value>(&type_json).unwrap()["id"],
+        "t0000000000000001"
+    );
+
+    let symbol_json = take_string(unsafe {
+        corsa_tsgo_api_client_get_symbol_at_position_json(
+            client,
+            text_ref(snapshot_id),
+            text_ref(project_id),
+            text_ref("/workspace/src/index.ts"),
+            1,
+        )
+    });
+    assert_eq!(
+        serde_json::from_str::<serde_json::Value>(&symbol_json).unwrap()["name"],
+        "value"
+    );
+
+    assert!(unsafe { corsa_tsgo_api_client_close(client) });
+    unsafe {
+        corsa_tsgo_api_client_free(client);
+    }
+}
+
+#[test]
+fn resolves_type_arguments_over_ffi() {
+    let Some(binary) = mock_tsgo_binary() else {
+        return;
+    };
+    let options = serde_json::json!({
+        "executable": binary.display().to_string(),
+        "cwd": workspace_root().display().to_string(),
+        "mode": "jsonrpc",
+    })
+    .to_string();
+    let client = unsafe { corsa_tsgo_api_client_spawn(text_ref(&options)) };
+    assert!(!client.is_null());
+
+    let snapshot_json = take_string(unsafe {
+        corsa_tsgo_api_client_update_snapshot_json(
+            client,
+            text_ref(r#"{"openProject":"/workspace/tsconfig.json"}"#),
+        )
+    });
+    let snapshot: serde_json::Value = serde_json::from_str(&snapshot_json).unwrap();
+    let snapshot_id = snapshot["snapshot"].as_str().unwrap();
+    let project_id = snapshot["projects"][0]["id"].as_str().unwrap();
+
+    let string_type_json = take_string(unsafe {
+        corsa_tsgo_api_client_get_string_type_json(
+            client,
+            text_ref(snapshot_id),
+            text_ref(project_id),
+        )
+    });
+    let string_type: serde_json::Value = serde_json::from_str(&string_type_json).unwrap();
+    let type_id = string_type["id"].as_str().unwrap().to_owned();
+    let object_flags = string_type["objectFlags"].as_u64().unwrap() as u32;
+
+    let non_reference_json = take_string(unsafe {
+        corsa_tsgo_api_client_get_type_arguments_json(
+            client,
+            text_ref(snapshot_id),
+            text_ref(project_id),
+            text_ref(type_id.as_str()),
+            object_flags,
+        )
+    });
+    assert_eq!(
+        serde_json::from_str::<serde_json::Value>(&non_reference_json).unwrap(),
+        serde_json::json!([])
+    );
+
+    let reference_json = take_string(unsafe {
+        corsa_tsgo_api_client_get_type_arguments_json(
+            client,
+            text_ref(snapshot_id),
+            text_ref(project_id),
+            text_ref(type_id.as_str()),
+            1 << 2,
+        )
+    });
+    let reference_arguments: serde_json::Value = serde_json::from_str(&reference_json).unwrap();
+    assert_eq!(reference_arguments[0]["id"], "t0000000000000001");
+
+    assert!(unsafe { corsa_tsgo_api_client_close(client) });
+    unsafe {
+        corsa_tsgo_api_client_free(client);
+    }
+}
+
+#[test]
+fn resolves_symbol_type_methods_over_ffi() {
+    let Some(binary) = mock_tsgo_binary() else {
+        return;
+    };
+    let options = serde_json::json!({
+        "executable": binary.display().to_string(),
+        "cwd": workspace_root().display().to_string(),
+        "mode": "jsonrpc",
+    })
+    .to_string();
+    let client = unsafe { corsa_tsgo_api_client_spawn(text_ref(&options)) };
+    assert!(!client.is_null());
+
+    let snapshot_json = take_string(unsafe {
+        corsa_tsgo_api_client_update_snapshot_json(
+            client,
+            text_ref(r#"{"openProject":"/workspace/tsconfig.json"}"#),
+        )
+    });
+    let snapshot: serde_json::Value = serde_json::from_str(&snapshot_json).unwrap();
+    let snapshot_id = snapshot["snapshot"].as_str().unwrap();
+    let project_id = snapshot["projects"][0]["id"].as_str().unwrap();
+
+    let symbol_json = take_string(unsafe {
+        corsa_tsgo_api_client_get_symbol_at_position_json(
+            client,
+            text_ref(snapshot_id),
+            text_ref(project_id),
+            text_ref("/workspace/src/index.ts"),
+            1,
+        )
+    });
+    let symbol: serde_json::Value = serde_json::from_str(&symbol_json).unwrap();
+    assert_eq!(symbol["name"], "value");
+    let symbol_id = symbol["id"].as_str().unwrap().to_owned();
+
+    let symbol_type_json = take_string(unsafe {
+        corsa_tsgo_api_client_get_type_of_symbol_json(
+            client,
+            text_ref(snapshot_id),
+            text_ref(project_id),
+            text_ref(symbol_id.as_str()),
+        )
+    });
+    assert_eq!(
+        serde_json::from_str::<serde_json::Value>(&symbol_type_json).unwrap()["id"],
+        "t0000000000000001"
+    );
+
+    let declared_type_json = take_string(unsafe {
+        corsa_tsgo_api_client_get_declared_type_of_symbol_json(
+            client,
+            text_ref(snapshot_id),
+            text_ref(project_id),
+            text_ref(symbol_id.as_str()),
+        )
+    });
+    assert_eq!(
+        serde_json::from_str::<serde_json::Value>(&declared_type_json).unwrap()["id"],
+        "t0000000000000001"
+    );
+
+    assert!(unsafe { corsa_tsgo_api_client_close(client) });
+    unsafe {
+        corsa_tsgo_api_client_free(client);
+    }
 }
