@@ -4,6 +4,7 @@ use crate::lint::helpers::{
     member_property_name,
 };
 
+/// Rule that prefers `.find()` over filtering and reading the first result.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct PreferFindRule;
 

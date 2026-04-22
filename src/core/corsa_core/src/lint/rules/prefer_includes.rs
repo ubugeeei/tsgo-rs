@@ -1,6 +1,7 @@
 use super::super::{LintNode, RuleContext, RuleMessage, RustLintRule};
 use crate::lint::helpers::{is_comparable_index_search, is_negative_one_literal, is_zero_literal};
 
+/// Rule that prefers `.includes()` over index search comparisons.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct PreferIncludesRule;
 

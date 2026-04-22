@@ -8,14 +8,23 @@ use super::split::{split_top_level_owned, split_type_text_owned};
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum TypeTextKind {
+    /// Type text is exactly `any`.
     Any,
+    /// Type text represents `bigint` or a bigint literal.
     Bigint,
+    /// Type text represents `boolean`, `true`, or `false`.
     Boolean,
+    /// Type text is or contains `null` or `undefined`.
     Nullish,
+    /// Type text represents `number` or a numeric literal.
     Number,
+    /// Type text appears to represent a `RegExp`.
     Regexp,
+    /// Type text represents `string` or a string literal.
     String,
+    /// Type text is exactly `unknown` or `never`.
     Unknown,
+    /// Type text did not match a known coarse bucket.
     Other,
 }
 
@@ -74,26 +83,32 @@ pub fn split_type_text(text: &str) -> Vec<String> {
     split_type_text_owned(text)
 }
 
+/// Returns whether any rendered type text is string-like.
 pub fn is_string_like_type_texts<T: AsRef<str>>(type_texts: &[T]) -> bool {
     matches_kind(type_texts, TypeTextKind::String)
 }
 
+/// Returns whether any rendered type text is number-like.
 pub fn is_number_like_type_texts<T: AsRef<str>>(type_texts: &[T]) -> bool {
     matches_kind(type_texts, TypeTextKind::Number)
 }
 
+/// Returns whether any rendered type text is bigint-like.
 pub fn is_bigint_like_type_texts<T: AsRef<str>>(type_texts: &[T]) -> bool {
     matches_kind(type_texts, TypeTextKind::Bigint)
 }
 
+/// Returns whether any rendered type text is `any`.
 pub fn is_any_like_type_texts<T: AsRef<str>>(type_texts: &[T]) -> bool {
     matches_kind(type_texts, TypeTextKind::Any)
 }
 
+/// Returns whether any rendered type text is `unknown` or `never`.
 pub fn is_unknown_like_type_texts<T: AsRef<str>>(type_texts: &[T]) -> bool {
     matches_kind(type_texts, TypeTextKind::Unknown)
 }
 
+/// Returns whether any rendered type text has an array-like shape.
 pub fn is_array_like_type_texts<T: AsRef<str>>(type_texts: &[T]) -> bool {
     type_texts.iter().any(|text| {
         let text = text.as_ref().trim();
@@ -104,6 +119,7 @@ pub fn is_array_like_type_texts<T: AsRef<str>>(type_texts: &[T]) -> bool {
     })
 }
 
+/// Returns whether type text or known properties suggest a thenable value.
 pub fn is_promise_like_type_texts<T: AsRef<str>, P: AsRef<str>>(
     type_texts: &[T],
     property_names: &[P],
@@ -114,6 +130,7 @@ pub fn is_promise_like_type_texts<T: AsRef<str>, P: AsRef<str>>(
     }) || property_names.iter().any(|name| name.as_ref() == "then")
 }
 
+/// Returns whether type text or known properties suggest an Error-like value.
 pub fn is_error_like_type_texts<T: AsRef<str>, P: AsRef<str>>(
     type_texts: &[T],
     property_names: &[P],

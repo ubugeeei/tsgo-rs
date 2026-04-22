@@ -7,19 +7,24 @@ use serde_json::Value;
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TextRange {
+    /// Inclusive byte offset where the range starts.
     pub start: u32,
+    /// Exclusive byte offset where the range ends.
     pub end: u32,
 }
 
 impl TextRange {
+    /// Creates a range from inclusive `start` and exclusive `end` offsets.
     pub const fn new(start: u32, end: u32) -> Self {
         Self { start, end }
     }
 
+    /// Returns `true` when the range contains no bytes.
     pub const fn is_empty(self) -> bool {
         self.start == self.end
     }
 
+    /// Returns `true` when `start` does not exceed `end`.
     pub const fn is_valid(self) -> bool {
         self.start <= self.end
     }
@@ -30,43 +35,57 @@ impl TextRange {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LintNode {
+    /// ESTree or TypeScript-ESTree node kind.
     pub kind: String,
+    /// Source byte range occupied by the node.
     pub range: TextRange,
+    /// Optional source text for the node when the host already has it cheaply.
     #[serde(default)]
     pub text: Option<String>,
+    /// TypeScript-rendered type texts associated with the node.
     #[serde(default)]
     pub type_texts: Vec<String>,
+    /// Property names visible on the node's type.
     #[serde(default)]
     pub property_names: Vec<String>,
+    /// Scalar node fields keyed by host-specific field name.
     #[serde(default)]
     pub fields: BTreeMap<String, Value>,
+    /// Single child nodes keyed by field name.
     #[serde(default)]
     pub children: BTreeMap<String, LintNode>,
+    /// Child node lists keyed by field name.
     #[serde(default)]
     pub child_lists: BTreeMap<String, Vec<LintNode>>,
 }
 
 impl LintNode {
+    /// Returns a named child node.
     pub fn child(&self, key: &str) -> Option<&Self> {
         self.children.get(key)
     }
 
+    /// Returns a named list of child nodes.
     pub fn child_list(&self, key: &str) -> Option<&[Self]> {
         self.child_lists.get(key).map(Vec::as_slice)
     }
 
+    /// Returns a named scalar field as a string.
     pub fn field_str(&self, key: &str) -> Option<&str> {
         self.fields.get(key).and_then(Value::as_str)
     }
 
+    /// Returns a named scalar field as a boolean.
     pub fn field_bool(&self, key: &str) -> Option<bool> {
         self.fields.get(key).and_then(Value::as_bool)
     }
 
+    /// Returns a named scalar field as an `f64`.
     pub fn field_f64(&self, key: &str) -> Option<f64> {
         self.fields.get(key).and_then(Value::as_f64)
     }
 
+    /// Returns a named scalar field as a string, accepting primitive values.
     pub fn field_stringish(&self, key: &str) -> Option<String> {
         self.fields.get(key).and_then(|value| match value {
             Value::String(value) => Some(value.clone()),
@@ -77,14 +96,18 @@ impl LintNode {
     }
 }
 
+/// Text edit that can repair or rewrite a lint diagnostic range.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LintFix {
+    /// Source byte range replaced by this fix.
     pub range: TextRange,
+    /// Text inserted in place of [`Self::range`].
     pub replacement_text: String,
 }
 
 impl LintFix {
+    /// Creates a fix that replaces `range` with `replacement_text`.
     pub fn replace_range(range: TextRange, replacement_text: impl Into<String>) -> Self {
         Self {
             range,
@@ -92,43 +115,64 @@ impl LintFix {
         }
     }
 
+    /// Creates a fix that removes `range`.
     pub fn remove_range(range: TextRange) -> Self {
         Self::replace_range(range, "")
     }
 }
 
+/// User-facing suggestion attached to a lint diagnostic.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LintSuggestion {
+    /// Message ID describing the suggested change.
     pub message_id: String,
+    /// Rendered message text for the suggestion.
     pub message: String,
+    /// Ordered fixes that implement the suggestion.
     pub fixes: Vec<LintFix>,
 }
 
+/// Serializable lint diagnostic returned to the host adapter.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LintDiagnostic {
+    /// Stable rule name that produced the diagnostic.
     pub rule_name: String,
+    /// Stable rule-local message identifier.
     pub message_id: String,
+    /// Rendered user-facing diagnostic message.
     pub message: String,
+    /// Source byte range reported by the rule.
     pub range: TextRange,
+    /// Optional suggestions for automated repair.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub suggestions: Vec<LintSuggestion>,
 }
 
+/// Static message catalog entry for a Rust-authored lint rule.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct RuleMessage {
+    /// Stable rule-local message identifier.
     pub id: &'static str,
+    /// User-facing fallback message text.
     pub description: &'static str,
 }
 
+/// Serializable metadata that describes one Rust-authored lint rule.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RuleMeta {
+    /// Stable rule name.
     pub name: String,
+    /// Short documentation sentence for generated rule docs.
     pub docs_description: String,
+    /// Message catalog keyed by message ID.
     pub messages: BTreeMap<String, String>,
+    /// Whether the rule can emit suggestions.
     pub has_suggestions: bool,
+    /// AST node kinds the rule listens to.
     pub listeners: Vec<String>,
+    /// Whether the host should include rendered TypeScript type text.
     pub requires_type_texts: bool,
 }

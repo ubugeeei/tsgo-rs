@@ -1,6 +1,7 @@
 use super::super::{LintNode, RuleContext, RuleMessage, RustLintRule};
 use crate::lint::helpers::{is_number_or_bigint_literal, is_unary_minus_type_safe};
 
+/// Type-aware rule that rejects unary minus on non-number-like values.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct NoUnsafeUnaryMinusRule;
 

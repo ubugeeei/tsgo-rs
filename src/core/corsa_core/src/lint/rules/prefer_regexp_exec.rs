@@ -1,6 +1,7 @@
 use super::super::{LintNode, RuleContext, RuleMessage, RustLintRule};
 use crate::lint::helpers::{callee_property_name, first_child_list_item, regex_flags};
 
+/// Rule that prefers `RegExp#exec` for non-global regular-expression matches.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct PreferRegexpExecRule;
 

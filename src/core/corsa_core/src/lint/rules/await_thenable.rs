@@ -1,6 +1,7 @@
 use super::super::{LintNode, RuleContext, RuleMessage, RustLintRule};
 use crate::lint::helpers::{is_obviously_promise_like, is_promise_like_node};
 
+/// Type-aware rule that rejects `await` on values without a thenable shape.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct AwaitThenableRule;
 

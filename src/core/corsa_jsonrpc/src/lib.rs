@@ -9,6 +9,7 @@
 //! request/response channel, or for [`RawMessage`] and [`RequestId`] when you
 //! need to work at the protocol boundary directly.
 
+/// Re-exports structured operational events used by transport configs.
 pub mod observability {
     pub use corsa_core::{SharedObserver, TsgoEvent, TsgoObserver};
 }

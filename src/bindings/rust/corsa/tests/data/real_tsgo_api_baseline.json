@@ -1,10 +1,10 @@
 {
   "currentDirectory": ".",
-  "fileCount": 33,
+  "fileCount": 37,
   "firstFile": "ref/typescript-go/_packages/api/src/fs.ts",
   "lastFile": "ref/typescript-go/_packages/api/src/sync/types.ts",
   "projectCount": 1,
-  "rootFiles": 33,
+  "rootFiles": 37,
   "configFileName": "ref/typescript-go/_packages/api/tsconfig.json",
   "primaryFile": "ref/typescript-go/_packages/api/src/fs.ts",
   "stringTypeFlags": 32,

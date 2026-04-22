@@ -92,6 +92,12 @@ pub struct ApiOrchestratorStats {
     pub cached_result_count: usize,
 }
 
+/// Local worker-pool orchestrator with snapshot and result caches.
+///
+/// `ApiOrchestrator` is cheap to clone and intended to be shared between
+/// higher-level workflows. It lazily creates [`ApiClient`] fleets by
+/// [`ApiProfile`], leases workers round-robin, and bounds its caches according
+/// to [`ApiOrchestratorConfig`].
 pub struct ApiOrchestrator {
     config: ApiOrchestratorConfig,
     fleets: RwLock<FastMap<CompactString, Arc<ClientFleet>>>,

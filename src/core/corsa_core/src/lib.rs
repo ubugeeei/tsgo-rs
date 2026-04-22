@@ -16,6 +16,7 @@ pub mod lint;
 mod observability;
 mod process;
 mod rpc;
+/// Shared pure helpers for type-text classification and unsafe-flow checks.
 pub mod utils;
 
 pub use error::{Result, TsgoError};

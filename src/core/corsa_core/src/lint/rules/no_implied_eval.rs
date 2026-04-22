@@ -5,6 +5,7 @@ use crate::lint::helpers::{
 };
 use crate::utils::is_string_like_type_texts;
 
+/// Type-aware rule that rejects string-based dynamic code execution APIs.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct NoImpliedEvalRule;
 

@@ -1,6 +1,7 @@
 use super::super::{LintNode, RuleContext, RuleMessage, RustLintRule};
 use crate::lint::helpers::{callee_property_name, child_list, has_unknown_type_annotation};
 
+/// Rule that requires Promise catch callback variables to be typed `unknown`.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct UseUnknownInCatchCallbackVariableRule;
 

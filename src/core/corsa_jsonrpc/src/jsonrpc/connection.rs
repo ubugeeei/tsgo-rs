@@ -23,6 +23,10 @@ use super::{
     message::{MessageKind, RawMessage, RpcResponseError},
 };
 
+/// Locally registered callback for a JSON-RPC method.
+///
+/// The handler receives raw JSON parameters and returns either raw JSON result
+/// data or a JSON-RPC error payload.
 pub type RpcHandler =
     Arc<dyn Fn(Value) -> std::result::Result<Value, RpcResponseError> + Send + Sync + 'static>;
 /// Handler map keyed by JSON-RPC method name.

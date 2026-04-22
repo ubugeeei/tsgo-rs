@@ -1,6 +1,7 @@
 use super::super::{LintNode, RuleContext, RuleMessage, RustLintRule};
 use crate::utils::is_array_like_type_texts;
 
+/// Type-aware rule that rejects `for-in` loops over array-like values.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct NoForInArrayRule;
 

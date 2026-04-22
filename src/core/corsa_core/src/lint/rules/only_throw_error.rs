@@ -1,6 +1,7 @@
 use super::super::{LintNode, RuleContext, RuleMessage, RustLintRule};
 use crate::lint::helpers::is_error_like_node;
 
+/// Type-aware rule that requires thrown values to be Error-like.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct OnlyThrowErrorRule;
 

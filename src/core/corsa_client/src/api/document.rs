@@ -21,7 +21,10 @@ pub enum DocumentIdentifier {
     /// Plain file path form used by most filesystem-backed requests.
     FileName(CompactString),
     /// URI form used by LSP-style or virtual-document workflows.
-    Uri { uri: CompactString },
+    Uri {
+        /// URI string sent to the `tsgo` endpoint.
+        uri: CompactString,
+    },
 }
 
 impl DocumentIdentifier {

@@ -11,26 +11,47 @@ use std::{sync::Arc, time::Duration};
 pub enum TsgoEvent {
     /// A JSON-RPC request exceeded its configured timeout.
     JsonRpcRequestTimedOut {
+        /// JSON-RPC method name that timed out.
         method: CompactString,
+        /// Configured request timeout that was exceeded.
         timeout: Duration,
     },
     /// The JSON-RPC writer queue rejected a message because it was full.
     JsonRpcOutboundQueueFull,
     /// Pending JSON-RPC requests were failed because the transport broke.
-    JsonRpcPendingRequestsFailed { error: CompactString, count: usize },
+    JsonRpcPendingRequestsFailed {
+        /// Transport error propagated to pending callers.
+        error: CompactString,
+        /// Number of pending requests failed together.
+        count: usize,
+    },
     /// A sync msgpack request exceeded its configured timeout.
     MsgpackRequestTimedOut {
+        /// Msgpack API method name that timed out.
         method: CompactString,
+        /// Configured request timeout that was exceeded.
         timeout: Duration,
     },
     /// The msgpack worker queue rejected a request because it was full.
-    MsgpackWorkerQueueFull { method: CompactString },
+    MsgpackWorkerQueueFull {
+        /// Msgpack API method that could not be queued.
+        method: CompactString,
+    },
     /// The msgpack worker process was explicitly terminated.
-    MsgpackWorkerTerminated { reason: CompactString },
+    MsgpackWorkerTerminated {
+        /// Human-readable termination reason.
+        reason: CompactString,
+    },
     /// A cached snapshot was evicted to stay within configured limits.
-    OrchestratorSnapshotEvicted { key: CompactString },
+    OrchestratorSnapshotEvicted {
+        /// Caller-provided snapshot cache key that was evicted.
+        key: CompactString,
+    },
     /// A cached result was evicted to stay within configured limits.
-    OrchestratorResultEvicted { key: CompactString },
+    OrchestratorResultEvicted {
+        /// Caller-provided result cache key that was evicted.
+        key: CompactString,
+    },
 }
 
 /// Sink for structured operational events emitted by the workspace.

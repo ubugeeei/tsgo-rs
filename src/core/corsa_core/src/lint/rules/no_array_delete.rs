@@ -3,6 +3,7 @@ use super::super::{
 };
 use crate::utils::is_array_like_type_texts;
 
+/// Type-aware rule that rejects `delete` against array-like elements.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct NoArrayDeleteRule;
 

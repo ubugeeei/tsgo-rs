@@ -1,6 +1,7 @@
 use super::super::{LintNode, RuleContext, RuleMessage, RustLintRule};
 use crate::lint::helpers::{EnumMemberKind, enum_member_kind, enum_members_of};
 
+/// Rule that rejects TypeScript enums mixing string and numeric members.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct NoMixedEnumsRule;
 
