@@ -152,6 +152,7 @@ fn default_datasets(root_dir: &std::path::Path) -> SmallVec<[PathBuf; 4]> {
     let base = root_dir.join("ref/typescript-go");
     let candidates = [
         base.join("_packages/ast/tsconfig.json"),
+        base.join("_packages/native-preview/tsconfig.json"),
         base.join("_packages/api/tsconfig.json"),
         base.join("_extension/tsconfig.json"),
     ];

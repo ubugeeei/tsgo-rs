@@ -158,6 +158,7 @@ fn default_datasets(root_dir: &std::path::Path) -> SmallVec<[PathBuf; 4]> {
     ] {
         for path in [
             base.join("_packages/ast/tsconfig.json"),
+            base.join("_packages/native-preview/tsconfig.json"),
             base.join("_packages/api/tsconfig.json"),
             base.join("_extension/tsconfig.json"),
         ] {
